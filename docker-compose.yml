@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   contracts:
-    container_name: "contracts"
+    container_name: "copernic-space_contracts-deploy"
     build:
       context: .
       target: deploy

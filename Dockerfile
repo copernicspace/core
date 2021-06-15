@@ -1,4 +1,3 @@
-# base stage with node and essentials
 FROM node:15.14.0-alpine3.10 as deploy
 WORKDIR /app
 RUN apk add --no-cache python gcc g++ make git

@@ -13,7 +13,7 @@
     "lint": "eslint \"./**/*{.ts,.tsx}\" && solhint contracts/**/*.sol"
   },
   "engines": {
-    "node": ">=v14.16.1",
+    "node": ">=v15.14.0",
     "yarn": ">=v1.22.5"
   },
   "devDependencies": {

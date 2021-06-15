@@ -1,0 +1,26 @@
+# node
+node_modules
+
+
+# ctags
+tags
+
+# solium 
+.soliumignore
+.soliumrc.json 
+
+#jetbrains
+.idea
+contracts.iml
+
+# vsc
+.vscode
+
+# hardhat artifacts
+artifacts
+
+# hardhat cache
+cache
+
+# typechain
+typechain

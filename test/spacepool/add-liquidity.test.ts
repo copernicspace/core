@@ -73,8 +73,8 @@ describe('[add-liquidity.test.ts] Space pool add liquidity test suite', () => {
 		await spacePool.connect(user).addLiquidity(amount)
 		const actual = await spacePool.connect(user).getMyLiquidity()
 		expect(actual).to.be.eq(expectedAmount)
-
 	})
+
 	it('assert PoL token balance', async () =>
 		expect(await polToken.balanceOf(user.address)).to.be.eq(expectedAmount))
 })

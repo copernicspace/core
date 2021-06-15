@@ -4,7 +4,7 @@
   "description": "contracts and ts lib for copernic space",
   "private": true,
   "scripts": {
-    "test": "hardhat test test/**/**/*.ts",
+    "test": "hardhat test",
     "dev": "hardhat run scripts/deploy.ts --network localhost",
     "lint:ts": "eslint \"./**/*{.ts,.tsx}\"",
     "lint:sol": "solhint -f table contracts/**/*.sol",

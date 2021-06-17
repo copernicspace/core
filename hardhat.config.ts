@@ -1,6 +1,7 @@
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@typechain/hardhat'
+import 'hardhat-tracer'
 import * as Mocha from 'mocha'
 
 const config = {

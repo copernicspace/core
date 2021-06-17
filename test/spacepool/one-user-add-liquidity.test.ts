@@ -6,7 +6,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ContractReceipt } from 'ethers'
 import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
 
-describe('[add-liquidity.test.ts] Space pool add liquidity test suite', () => {
+describe('[one-user-add-liquidity.test.ts]', () => {
 	let spacePool: SpacePool
 	let liquidityToken: ERC20Mock
 	let polToken: ERC20Mock
@@ -29,7 +29,7 @@ describe('[add-liquidity.test.ts] Space pool add liquidity test suite', () => {
 	})
 
 	it('is zero liquidity balance on the user', async () =>
-		expect(await spacePool.getMyLiquidity()).to.be.eq('0'))
+		expect(await spacePool.connect(user).getMyLiquidity()).to.be.eq('0'))
 
 	it('reverts with error if not approved', async () =>
 		await expect(

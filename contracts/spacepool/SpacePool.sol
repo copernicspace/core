@@ -17,12 +17,16 @@ contract SpacePool is AccessControl {
 	// LPs shares
 	mapping(address => uint256) private liquidity;
 
+	// return of investment rate
+	uint256 private roiRate;
+
 	event AddedLiquidity(address indexed liquidityProvider, uint256 amount);
 	event ExtractLiquidity(
 		address indexed from,
 		address indexed to,
 		uint256 indexed amount
 	);
+	event NewRoIRate(uint256 indexed newRoI, address indexed operator);
 
 	constructor(address _liquidityToken, address _polToken) {
 		liquidityToken = _liquidityToken;
@@ -79,5 +83,15 @@ contract SpacePool is AccessControl {
 
 		// step 3: emit event
 		emit ExtractLiquidity(msg.sender, to, amount);
+	}
+
+	function setRoIRate(uint256 _roiRate) external {
+		require(
+			hasRole(LIQUIDITY_OPERATOR, msg.sender),
+			'Caller can set RoI rate'
+		);
+
+		roiRate = _roiRate;
+		emit NewRoIRate(roiRate, msg.sender);
 	}
 }

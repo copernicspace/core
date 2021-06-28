@@ -39,13 +39,13 @@ describe('[extract-liquidity.test.ts]', () => {
 			.withArgs(liqOperRole, userLiqOper.address, deployer.address)
 	})
 
-	it('reverts if caller is not liq operator', async () =>
+	it('reverts if caller is not liquidity operator', async () =>
 		await expect(
 			spacePool.connect(user)
 				.extractLiquidity(parseUnits('1000000', 18), userLiqOper.address))
 			.to.be.revertedWith('Caller is not a liquidity operator'))
 
-	it('reverts if requested with  unavailable liquidity amount', async () =>
+	it('reverts if requested with unavailable liquidity amount', async () =>
 		await expect(
 			spacePool.connect(userLiqOper)
 				.extractLiquidity(parseUnits('1000000', 18), userLiqOper.address))
@@ -57,6 +57,5 @@ describe('[extract-liquidity.test.ts]', () => {
 				.connect(userLiqOper)
 				.extractLiquidity(parseUnits('50', 18), userLiqOper.address))
 			.to.changeTokenBalance(liquidityToken, userLiqOper, parseUnits('50', 18))
-
 	})
 })

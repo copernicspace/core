@@ -39,7 +39,7 @@ describe('[one-user-add-liquidity.test.ts]', () => {
 
 	const liquidityAmount = ethers.utils.parseUnits('50', 18)
 	let approveTxr: ContractReceipt
-	before('approve space pool contract to use user liquidity token', async () =>
+	it('approve space pool contract to use user liquidity token', async () =>
 		approveTxr = await liquidityToken
 			.connect(user)
 			.approve(spacePool.address, liquidityAmount)
@@ -49,7 +49,7 @@ describe('[one-user-add-liquidity.test.ts]', () => {
 		expect(approveTxr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS))
 
 	let addLiquidityTxr: ContractReceipt
-	before('add liquidity from user', async () =>
+	it('add liquidity from user', async () =>
 		addLiquidityTxr = await spacePool
 			.connect(user)
 			.addLiquidity(liquidityAmount)

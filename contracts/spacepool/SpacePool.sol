@@ -14,8 +14,9 @@ contract SpacePool is AccessControl {
 	// address of proof of liquidity token
 	address private polToken;
 
+	uint256 public nonce;
 	// LPs shares
-	mapping(address => uint256) private liquidity;
+	mapping(uint256 => mapping(address => uint256)) private liquidity;
 
 	// return of investment rate
 	uint256 private roiRate;
@@ -52,7 +53,7 @@ contract SpacePool is AccessControl {
 		IERC20(liquidityToken).transferFrom(msg.sender, address(this), amount);
 
 		// step 1: add LP share
-		liquidity[msg.sender] += amount;
+		liquidity[nonce][msg.sender] += amount;
 
 		// step 2: mint PoL token back to user, 1:1 ratio
 		ERC20Mock(polToken).mintTo(msg.sender, amount);
@@ -62,7 +63,7 @@ contract SpacePool is AccessControl {
 	}
 
 	function getMyLiquidity() external view returns (uint256) {
-		return liquidity[msg.sender];
+		return liquidity[nonce][msg.sender];
 	}
 
 	function extractLiquidity(uint256 amount, address to) external {
@@ -88,7 +89,7 @@ contract SpacePool is AccessControl {
 	function setRoIRate(uint256 _roiRate) external {
 		require(
 			hasRole(LIQUIDITY_OPERATOR, msg.sender),
-			'Caller can set RoI rate'
+			'Caller can not set RoI rate'
 		);
 
 		roiRate = _roiRate;

@@ -1,20 +1,19 @@
-import { ethers, waffle } from 'hardhat'
-import { spacePoolFixture } from './space-pool.fixture'
-import { ERC20Mock, SpacePool } from '../../typechain'
-import { expect } from 'chai'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { ContractReceipt } from 'ethers'
-import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
+import {ethers, waffle} from 'hardhat'
+import {spacePoolFixture} from './space-pool.fixture'
+import {ERC20Mock, SpacePool} from '../../typechain'
+import {expect} from 'chai'
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers'
+import {TX_RECEIPT_STATUS} from '../../constants/tx-receipt-status'
+import exp from 'constants'
+import {loadPlugin} from 'ts-generator/dist/plugins/loadPlugin'
 
 describe('[one-user-add-liquidity.test.ts]', () => {
 	let spacePool: SpacePool
 	let liquidityToken: ERC20Mock
-	let polToken: ERC20Mock
 
 	before('load space pool deploy fixture', async () => {
 		({
 			liquidityToken,
-			polToken,
 			spacePool
 		} = await waffle.loadFixture(spacePoolFixture))
 	})
@@ -31,39 +30,42 @@ describe('[one-user-add-liquidity.test.ts]', () => {
 	it('is zero liquidity balance on the user', async () =>
 		expect(await spacePool.connect(user).getMyLiquidity()).to.be.eq('0'))
 
-	it('reverts with error if not approved', async () =>
+	it('reverts with error if not approved, on \'addLiquidity\' tx', async () =>
 		await expect(
-			spacePool.connect(user)
-				.addLiquidity(ethers.utils.parseUnits('50', 18)))
+			spacePool.connect(user).addLiquidity(ethers.utils.parseUnits('50', 18)))
 			.to.be.revertedWith('ERC20: transfer amount exceeds allowance'))
 
 	const liquidityAmount = ethers.utils.parseUnits('50', 18)
-	let approveTxr: ContractReceipt
-	it('approve space pool contract to use user liquidity token', async () =>
-		approveTxr = await liquidityToken
+	it('approves space pool contract to use user\'s liquidity token', async () => {
+		const approveTxr = await liquidityToken
 			.connect(user)
 			.approve(spacePool.address, liquidityAmount)
-			.then(tx => tx.wait()))
+			.then(tx => tx.wait())
+		expect(approveTxr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
+	})
 
-	it('successfully approved to spend liq tokens', async () =>
-		expect(approveTxr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS))
-
-	let addLiquidityTxr: ContractReceipt
-	it('add liquidity from user', async () =>
-		addLiquidityTxr = await spacePool
+	it('adds liquidity from user', async () => {
+		const addLiquidityTxr = await spacePool
 			.connect(user)
 			.addLiquidity(liquidityAmount)
-			.then(tx => tx.wait()))
-
-	it('OK tx status for add liquidity', async () =>
-		expect(addLiquidityTxr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS))
+			.then(tx => tx.wait())
+		expect(addLiquidityTxr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
+	})
 
 	it('has correct liquidity share for user A', async () =>
-		expect(await spacePool.connect(user).getMyLiquidity())
-			.to.be.eq(liquidityAmount))
+		expect(await spacePool.connect(user).getMyLiquidity()).to.be.eq(liquidityAmount))
 
-	it('has correct balance of PoL token', async () =>
-		expect(await polToken.balanceOf(user.address)).to.be.eq(liquidityAmount))
+	it('has minted correct LP NFT for user', async () => {
+		const lpnfts = await spacePool.connect(user).getMyPositions()
+		expect(lpnfts).to.have.length(1)
+		const lpnft = lpnfts[0]
+		expect(lpnft).to.have.property('timestamp')
+		expect(lpnft).to.have.property('amount')
+		expect(lpnft).to.have.property('poolEpoch')
+	})
+
+	// it('has correct balance of PoL token', async () =>
+	// 	expect(await polToken.balanceOf(user.address)).to.be.eq(liquidityAmount))
 
 
 	const expectedAmount = ethers.utils.parseUnits('75', 18)
@@ -75,6 +77,6 @@ describe('[one-user-add-liquidity.test.ts]', () => {
 		expect(actual).to.be.eq(expectedAmount)
 	})
 
-	it('assert PoL token balance', async () =>
-		expect(await polToken.balanceOf(user.address)).to.be.eq(expectedAmount))
+	// it('assert PoL token balance', async () =>
+	// 	expect(await polToken.balanceOf(user.address)).to.be.eq(expectedAmount))
 })

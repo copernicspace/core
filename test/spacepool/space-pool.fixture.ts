@@ -1,11 +1,10 @@
 import { ethers, waffle } from 'hardhat'
 import { ERC20Mock, SpacePool } from '../../typechain'
-import { Fixture, loadFixture } from 'ethereum-waffle'
+import { Fixture } from 'ethereum-waffle'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
 interface SpacePoolFixture {
 	liquidityToken: ERC20Mock;
-	polToken: ERC20Mock;
 	spacePool: SpacePool;
 }
 
@@ -17,17 +16,12 @@ export const spacePoolFixture: Fixture<SpacePoolFixture> = async function():
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract as ERC20Mock)
 
-	const polToken: ERC20Mock = await ethers.getContractFactory('ERC20Mock')
-		.then(factory => factory.deploy())
-		.then(contract => contract.deployed())
-		.then(deployedContract => deployedContract as ERC20Mock)
-
 	const spacePool = await ethers.getContractFactory('SpacePool')
-		.then(factory => factory.deploy(liquidityToken.address, polToken.address))
+		.then(factory => factory.deploy(liquidityToken.address))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract as SpacePool)
 
-	return { liquidityToken, polToken, spacePool }
+	return { liquidityToken, spacePool }
 }
 
 export const spacePoolWithLiquidityFixture: Fixture<SpacePoolFixture> =
@@ -39,7 +33,6 @@ export const spacePoolWithLiquidityFixture: Fixture<SpacePoolFixture> =
 
 		const {
 			liquidityToken,
-			polToken,
 			spacePool
 		} = await waffle.loadFixture(spacePoolFixture)
 
@@ -51,5 +44,5 @@ export const spacePoolWithLiquidityFixture: Fixture<SpacePoolFixture> =
 		await liquidityToken.connect(user).approve(spacePool.address, amount)
 		await spacePool.connect(user).addLiquidity(amount)
 
-		return { liquidityToken, polToken, spacePool }
+		return { liquidityToken, spacePool }
 	}

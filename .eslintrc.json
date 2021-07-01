@@ -17,11 +17,11 @@
     "prettier"
   ],
   "rules": {
+    "indent": ["error", "tab"],
     "max-len": [
       "error",
       {
-        "code": 80,
-        "tabWidth": 2
+        "code": 120
       }
     ],
     "linebreak-style": [

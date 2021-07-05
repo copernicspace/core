@@ -18,4 +18,8 @@ describe('[set-new-roi-rate.test.ts]', () => {
 		await expect(spacePool.setRoIRate('100'))
 			.to.be.revertedWith('Caller can not set RoI rate')
 	)
+
+	it('sets RoI from operator user', async () => {
+
+	})
 })

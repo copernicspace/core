@@ -1,13 +1,12 @@
-import {ethers, waffle} from 'hardhat'
-import {spacePoolFixture} from './space-pool.fixture'
-import {ERC20Mock, SpacePool} from '../../typechain'
-import {expect} from 'chai'
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers'
+import { ethers, waffle } from 'hardhat'
+import { spacePoolFixture } from './space-pool.fixture'
+import { ERC20Mock, SpacePool } from '../../typechain'
+import { expect } from 'chai'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
 describe('[many-users-add-liquidity.test.ts]', () => {
 	let spacePool: SpacePool
 	let liquidityToken: ERC20Mock
-	let polToken: ERC20Mock
 
 	before('load space pool deploy fixture', async () => {
 		({

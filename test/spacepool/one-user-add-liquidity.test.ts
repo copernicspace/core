@@ -1,11 +1,9 @@
-import {ethers, waffle} from 'hardhat'
-import {spacePoolFixture} from './space-pool.fixture'
-import {ERC20Mock, SpacePool} from '../../typechain'
-import {expect} from 'chai'
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers'
-import {TX_RECEIPT_STATUS} from '../../constants/tx-receipt-status'
-import exp from 'constants'
-import {loadPlugin} from 'ts-generator/dist/plugins/loadPlugin'
+import { ethers, waffle } from 'hardhat'
+import { spacePoolFixture } from './space-pool.fixture'
+import { ERC20Mock, SpacePool } from '../../typechain'
+import { expect } from 'chai'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
 
 describe('[one-user-add-liquidity.test.ts]', () => {
 	let spacePool: SpacePool
@@ -64,10 +62,6 @@ describe('[one-user-add-liquidity.test.ts]', () => {
 		expect(lpnft).to.have.property('poolEpoch')
 	})
 
-	// it('has correct balance of PoL token', async () =>
-	// 	expect(await polToken.balanceOf(user.address)).to.be.eq(liquidityAmount))
-
-
 	const expectedAmount = ethers.utils.parseUnits('75', 18)
 	it('adds more liquidity from user', async () => {
 		const amount = ethers.utils.parseUnits('25', 18)
@@ -76,7 +70,4 @@ describe('[one-user-add-liquidity.test.ts]', () => {
 		const actual = await spacePool.connect(user).getMyLiquidity()
 		expect(actual).to.be.eq(expectedAmount)
 	})
-
-	// it('assert PoL token balance', async () =>
-	// 	expect(await polToken.balanceOf(user.address)).to.be.eq(expectedAmount))
 })

@@ -1,9 +1,9 @@
-import {ERC20Mock, SpacePool} from '../../typechain'
-import {ethers, waffle} from 'hardhat'
-import {spacePoolWithLiquidityFixture} from './space-pool.fixture'
-import {expect} from 'chai'
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers'
-import {parseUnits} from 'ethers/lib/utils'
+import { ERC20Mock, SpacePool } from '../../typechain'
+import { ethers, waffle } from 'hardhat'
+import { spacePoolWithLiquidityFixture } from './space-pool.fixture'
+import { expect } from 'chai'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { parseUnits } from 'ethers/lib/utils'
 
 describe('[extract-liquidity.test.ts]', () => {
 	let spacePool: SpacePool
@@ -58,5 +58,8 @@ describe('[extract-liquidity.test.ts]', () => {
 				liquidityToken,
 				userLiqOper,
 				parseUnits('50', 18))
+
+		expect(await spacePool.getCurrentEpoch()).to.be.eq('1')
+		expect(await liquidityToken.balanceOf(spacePool.address)).to.be.eq(parseUnits('50', 18))
 	})
 })

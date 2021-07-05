@@ -113,15 +113,18 @@ contract SpacePool is AccessControl, ERC1155 {
 		return liquidity[speNonce][msg.sender];
 	}
 
-	function extractLiquidity(address to) external {
+	function extractLiquidity(address to, uint256 amount) external {
 		// step 0: verify msg.sender has access to liquidity
 		require(
 			hasRole(LIQUIDITY_OPERATOR, msg.sender),
 			'Caller is not a liquidity operator'
 		);
 
-		// step 1: get balance of liq token
-		uint256 amount = IERC20(liquidityToken).balanceOf(address(this));
+		// step 1: verify amount is <= pool's amount
+		require(
+			IERC20(liquidityToken).balanceOf(address(this)) >= amount,
+			'There is not enough liquidity'
+		);
 
 		// step 2: extract liquidity
 		IERC20(liquidityToken).transfer(to, amount);

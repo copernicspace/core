@@ -75,8 +75,12 @@ describe('[many-users-add-liquidity.test.ts]', () => {
 		expect(await spacePool.connect(userA).getMyLiquidity())
 			.to.be.eq(userALiquidityAmount)
 
-		expect(await polToken.balanceOf(userA.address))
-			.to.be.eq(userALiquidityAmount)
+		const lpnfts = await spacePool.connect(userA).getMyPositions()
+		expect(lpnfts).to.have.length(1)
+		const lpnft = lpnfts[0]
+		expect(lpnft).to.have.property('timestamp')
+		expect(lpnft).to.have.property('amount')
+		expect(lpnft).to.have.property('poolEpoch')
 	})
 
 
@@ -88,8 +92,12 @@ describe('[many-users-add-liquidity.test.ts]', () => {
 		expect(await spacePool.connect(userB).getMyLiquidity())
 			.to.be.eq(userBLiquidityAmount)
 
-		expect(await polToken.balanceOf(userB.address))
-			.to.be.eq(userBLiquidityAmount)
+		const lpnfts = await spacePool.connect(userB).getMyPositions()
+		expect(lpnfts).to.have.length(1)
+		const lpnft = lpnfts[0]
+		expect(lpnft).to.have.property('timestamp')
+		expect(lpnft).to.have.property('amount').and.to.be.eq(userBLiquidityAmount)
+		expect(lpnft).to.have.property('poolEpoch').eq('0')
 	})
 
 	it('adds liquidity from userC', async () => {
@@ -100,8 +108,12 @@ describe('[many-users-add-liquidity.test.ts]', () => {
 		expect(await spacePool.connect(userC).getMyLiquidity())
 			.to.be.eq(userCLiquidityAmount)
 
-		expect(await polToken.balanceOf(userC.address))
-			.to.be.eq(userCLiquidityAmount)
+		const lpnfts = await spacePool.connect(userC).getMyPositions()
+		expect(lpnfts).to.have.length(1)
+		const lpnft = lpnfts[0]
+		expect(lpnft).to.have.property('timestamp')
+		expect(lpnft).to.have.property('amount').and.to.be.eq(userCLiquidityAmount)
+		expect(lpnft).to.have.property('poolEpoch').eq('0')
 	})
 
 	it('adds liquidity from userD', async () => {
@@ -112,8 +124,12 @@ describe('[many-users-add-liquidity.test.ts]', () => {
 		expect(await spacePool.connect(userD).getMyLiquidity())
 			.to.be.eq(userDLiquidityAmount)
 
-		expect(await polToken.balanceOf(userD.address))
-			.to.be.eq(userDLiquidityAmount)
+		const lpnfts = await spacePool.connect(userD).getMyPositions()
+		expect(lpnfts).to.have.length(1)
+		const lpnft = lpnfts[0]
+		expect(lpnft).to.have.property('timestamp')
+		expect(lpnft).to.have.property('amount').and.to.be.eq(userDLiquidityAmount)
+		expect(lpnft).to.have.property('poolEpoch').eq('0')
 	})
 
 })

@@ -40,20 +40,20 @@ describe('[extract-liquidity.test.ts]', () => {
 	it('reverts if caller is not liquidity operator', async () =>
 		await expect(
 			spacePool.connect(user)
-				.extractLiquidity(userLiqOper.address))
+				.extractLiquidity(userLiqOper.address, parseUnits('1000000', 18)))
 			.to.be.revertedWith('Caller is not a liquidity operator'))
 
 	it('reverts if requested with unavailable liquidity amount', async () =>
 		await expect(
 			spacePool.connect(userLiqOper)
-				.extractLiquidity(userLiqOper.address))
+				.extractLiquidity(userLiqOper.address, parseUnits('1000000', 18)))
 			.to.be.revertedWith('There is not enough liquidity'))
 
 	it('successfully extracted liquidity', async () => {
 		await expect(() =>
 			spacePool
 				.connect(userLiqOper)
-				.extractLiquidity(userLiqOper.address))
+				.extractLiquidity(userLiqOper.address, parseUnits('50', 18)))
 			.to.changeTokenBalance(
 				liquidityToken,
 				userLiqOper,

@@ -7,6 +7,6 @@
     "resolveJsonModule": true,
     "downlevelIteration": true,
   },
-  "include": ["./tasks, ./scripts", "./test"],
+  "include": ["./tasks/**/*, ./scripts/**/*", "./test/**/*", "./typechain/**/*", "**/*.ts"],
   "files": ["./hardhat.config.ts"]
 }

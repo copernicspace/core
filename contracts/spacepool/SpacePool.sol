@@ -12,8 +12,7 @@ contract SpacePool is AccessControl, ERC1155 {
 		uint256 poolEpoch;
 	}
 
-	bytes32 public constant LIQUIDITY_OPERATOR =
-		keccak256('LIQUIDITY_OPERATOR');
+	bytes32 public constant LIQUIDITY_OPERATOR = keccak256('LIQUIDITY_OPERATOR');
 	// address of the ERC20 token to serve as liquidity value on the space pool
 	address private liquidityToken;
 
@@ -38,16 +37,8 @@ contract SpacePool is AccessControl, ERC1155 {
 	// return of investment rate
 	uint256 private roiRate;
 
-	event AddedLiquidity(
-		address indexed liquidityProvider,
-		uint256 amount,
-		uint256 lpNftId
-	);
-	event ExtractLiquidity(
-		uint256 indexed epoch,
-		address indexed to,
-		uint256 indexed amount
-	);
+	event AddedLiquidity(address indexed liquidityProvider, uint256 amount, uint256 lpNftId);
+	event ExtractLiquidity(uint256 indexed epoch, address indexed to, uint256 indexed amount);
 	event NewRoIRate(uint256 indexed newRoI, address indexed operator);
 	event Claim(address indexed liquidityProvider, uint256 indexed amount);
 
@@ -56,21 +47,12 @@ contract SpacePool is AccessControl, ERC1155 {
 		_setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 	}
 
-	function supportsInterface(bytes4 interfaceId)
-		public
-		view
-		virtual
-		override(ERC1155, AccessControl)
-		returns (bool)
-	{
+	function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, AccessControl) returns (bool) {
 		return super.supportsInterface(interfaceId);
 	}
 
 	function addLiquidityOperator(address operator) external {
-		require(
-			hasRole(DEFAULT_ADMIN_ROLE, msg.sender),
-			'Only admin can add liquidity operator'
-		);
+		require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), 'Only admin can add liquidity operator');
 
 		grantRole(LIQUIDITY_OPERATOR, operator);
 	}
@@ -93,13 +75,7 @@ contract SpacePool is AccessControl, ERC1155 {
 		_mint(msg.sender, lpnftId, 1, '');
 
 		// step 4: set nft metadata
-		positions[msg.sender].push(
-			LPPosition({
-				timestamp: block.timestamp,
-				amount: amount,
-				poolEpoch: speNonce
-			})
-		);
+		positions[msg.sender].push(LPPosition({timestamp: block.timestamp, amount: amount, poolEpoch: speNonce}));
 
 		// step 5: emit event
 		emit AddedLiquidity(msg.sender, amount, lpnftId);
@@ -115,16 +91,10 @@ contract SpacePool is AccessControl, ERC1155 {
 
 	function extractLiquidity(address to, uint256 amount) external {
 		// step 0: verify msg.sender has access to liquidity
-		require(
-			hasRole(LIQUIDITY_OPERATOR, msg.sender),
-			'Caller is not a liquidity operator'
-		);
+		require(hasRole(LIQUIDITY_OPERATOR, msg.sender), 'Caller is not a liquidity operator');
 
 		// step 1: verify amount is <= pool's amount
-		require(
-			IERC20(liquidityToken).balanceOf(address(this)) >= amount,
-			'There is not enough liquidity'
-		);
+		require(IERC20(liquidityToken).balanceOf(address(this)) >= amount, 'There is not enough liquidity');
 
 		// step 2: extract liquidity
 		IERC20(liquidityToken).transfer(to, amount);
@@ -137,12 +107,13 @@ contract SpacePool is AccessControl, ERC1155 {
 	}
 
 	function setRoIRate(uint256 _roiRate) external {
-		require(
-			hasRole(LIQUIDITY_OPERATOR, msg.sender),
-			'Caller can not set RoI rate'
-		);
+		require(hasRole(LIQUIDITY_OPERATOR, msg.sender), 'Caller can not set RoI rate');
 
 		roiRate = _roiRate;
 		emit NewRoIRate(roiRate, msg.sender);
+	}
+
+	function getCurrentEpoch() external view returns (uint256) {
+		return speNonce;
 	}
 }

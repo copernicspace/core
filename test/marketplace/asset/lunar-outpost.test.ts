@@ -157,10 +157,9 @@ describe('[lunar-outpost.test.ts] Lunar Outpost Use Case Test', () => {
 			.then((deployedContract) => deployedContract as ERC20Mock)
 	})
 	// create sell offer
-	let sellPrice = 5000
+	const sellPrice = 5000
 	let sellTxr
 	before('create sell offer', async() => {
-		sellTxr = await marketContract.connect(tokenCreator).sell(rootID, sellPrice, money)
+		sellTxr = await marketContract.connect(tokenCreator).sell(rootID, sellPrice, money.address)
 	})
-
 })

@@ -29,4 +29,4 @@ start node
 > yarn hardhat node
 
 deploy space pool contract
-> yarn hardhat sp:dev
+> yarn hardhat sp:dev --network localhost

@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "test": "hardhat compile && hardhat test",
-    "dev": "hardhat run scripts/deploy.ts --network localhost",
     "lint:ts": "eslint \"./**/*{.ts,.tsx}\"",
     "lint:sol": "solhint -f table contracts/**/*.sol",
     "fix:ts": "eslint \"./**/*{.ts,.tsx}\" --fix",

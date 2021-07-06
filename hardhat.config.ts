@@ -3,6 +3,7 @@ import '@nomiclabs/hardhat-waffle'
 import '@typechain/hardhat'
 import 'hardhat-tracer'
 import * as Mocha from 'mocha'
+import './tasks'
 
 const config = {
 	solidity: {

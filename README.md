@@ -24,20 +24,9 @@ versions:
 >  yarn test
 
 ## dev env
-Start ganache based network and deploy contracts;
 
-### ganache
-note: is stateless
+start node 
+> yarn hardhat node
 
->docker run --name copernic-ganache-dev --rm -d -p 8545:8545 trufflesuite/ganache-cli:latest --deterministic
-
-note: access logs via:
-> docker logs -f copernic-ganache-dev
-
-### deploy contracts
-> yarn dev
-
-### docker deploy contracts
-
-> docker-compose up
-
+deploy space pool contract
+> yarn hardhat sp:dev

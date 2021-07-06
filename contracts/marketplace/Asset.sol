@@ -249,6 +249,10 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 	mapping(uint256 => bool) private divisibilityRules;
 	mapping(uint256 => uint256) private divisionParentIDs;
 	mapping(uint256 => uint256) private weightMap;
+	mapping(uint256 => uint256) private minStepSizeMap;
+
+	// Minimal Step Size defaults to zero
+	// if Minimal Step Size == 0 then all step sizes are allowed
 
 	function makeDivisible(uint256 _id) public override onlyAssetOwner(_id) {
 		divisibilityRules[_id] = true;
@@ -284,6 +288,23 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		weightMap[_id] = _weight;
 	}
 
+	function getMinStepSize(uint256 _id)
+		public
+		view
+		override
+		returns (uint256 minStepSize) 
+	{
+		return minStepSizeMap[_id];
+	}
+
+	function setMinStepSize(uint256 _id, uint256 _stepSize)
+		public
+		override
+		onlyAssetOwner(_id)
+	{
+		minStepSizeMap[_id] = _stepSize;
+	}
+
 	function divisionOf(uint256 _id)
 		public
 		view
@@ -309,6 +330,20 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		require(
 			divisibilityRules[_id] == true,
 			'Asset has divisibility disabled'
+		);
+		// require that step size is >= minimal step size
+		require(
+			minStepSizeMap[_id] == 0 || _stepSize >= minStepSizeMap[_id],
+			'Required step size is less than set minimal step size'
+		);
+		// require that step num is positive (non-zero)
+		require(
+			_stepNum > 0,
+			'Step number must be positive (non-zero)'
+		);
+		require(
+			_stepSize > 0,
+			'Step size must be positive (non-zero)'
 		);
 
 		uint256[] memory _ids = new uint256[](_stepNum);

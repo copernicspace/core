@@ -17,5 +17,9 @@ interface Divisible {
 
 	function setWeight(uint256 _id, uint256 _weight) external;
 
+	function getMinStepSize(uint256 _id) external view returns (uint256 minStepSize);
+
+	function setMinStepSize(uint256 _id, uint256 _stepSize) external; 
+
 	function isDivisible(uint256 _id) external view returns (bool _isDivisible);
 }

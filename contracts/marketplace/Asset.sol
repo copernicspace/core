@@ -381,4 +381,122 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		// return ids of minted tokens
 		return _ids;
 	}
+	/*
+		BatchDivideInto(...):
+
+		Works by passing in two arrays, one representing desired weights into which
+		the asset will be divided, and one representing the number of to-be-created assets
+		that will have said specified weight
+
+		numSizes = [5, 17, 3]
+		stepSizes = [100, 200, 300]
+		
+		divides into:
+		5 assets with weight 100
+		17 assets with weight 200
+		3 assets with weight 300
+		etc.
+	*/
+
+	function batchDivideInto(
+		uint256 _id,
+		uint256[] memory listOfNumSizes,
+		uint256[] memory listOfStepSizes
+	) public override onlyAssetOwner(_id) returns (uint256[] memory mintedIDs) {
+		// check that arrays have equal length
+		require(listOfNumSizes.length == listOfStepSizes.length, 'Arrays must be of equal size');
+		// check that arrays have equal size and are not empty
+		require(listOfNumSizes.length != 0 && listOfStepSizes.length != 0, 'Arrays must not be empty');
+		// require that step size * step num is <= asset's weight
+		for(uint256 i = 0; i < listOfNumSizes.length; i++) {
+			require(
+				listOfNumSizes[i] * listOfStepSizes[i] <= weightMap[_id],
+				'Required weight exceeds asset weight'
+			);	
+		}
+		// require that asset is allowed to be divisible
+		require(
+			divisibilityRules[_id] == true,
+			'Asset has divisibility disabled'
+		);
+		// require that step size is >= minimal step size
+		for(uint256 i = 0; i < listOfNumSizes.length; i++) {
+			require(
+				minStepSizeMap[_id] == 0 || listOfStepSizes[i] >= minStepSizeMap[_id],
+				'Required step size is less than set minimal step size'
+			);
+		}
+		// require that step num is positive (non-zero)
+		for(uint256 i = 0; i < listOfNumSizes.length; i++) {
+			require(
+				listOfNumSizes[i] > 0,
+				'Step number must be positive (non-zero)'
+			);
+		}
+		// require that step size is positive (non-zero)
+		for(uint256 i = 0; i < listOfNumSizes.length; i++) {
+			require(
+				listOfStepSizes[i] > 0,
+				'Step size must be positive (non-zero)'
+			);
+		}
+		// calculate total divisions num
+		uint256 totalDivNum = 0;
+		for(uint256 i = 0; i < listOfNumSizes.length; i++) {
+			totalDivNum += listOfNumSizes[i];
+		}
+		
+		uint256[] memory _ids = new uint256[](totalDivNum);
+
+		// step 1: generate and save ids for new assets
+		for (uint256 i = 0; i < totalDivNum; i++) {
+			_ids[i] = generateNewId();
+		}
+		uint256 idIncrement = 0;
+		// step 2: batch mint new tokens
+		// for each of the num sizes:
+		for(uint256 i = 0; i < listOfNumSizes.length; i++) {
+			// fill a loop with size 1 to use mintBatch
+			uint256[] memory _sizes = new uint256[](listOfNumSizes[i]);
+			uint256[] memory _pickedIDs = new uint256[](listOfNumSizes[i]);		// can lower it to listOfNumSizes[i]
+			for (uint256 j = 0; j < listOfNumSizes[i]; j++) {
+				_sizes[j] = 1;
+			}
+			// create a list of new IDs for specified num/step size
+			for (uint256 l = 0; l < listOfNumSizes[i]; l++) {
+				_pickedIDs[l] = _ids[idIncrement + l];
+			}
+			// mint tokens
+			_mintBatch(msg.sender, _pickedIDs, _sizes, '');
+			// set correct weights
+			for (uint256 m = 0; m < listOfNumSizes[i]; m++) {
+				weightMap[_pickedIDs[m]] = listOfStepSizes[i];
+			}
+			// increment ID helper
+			idIncrement += listOfNumSizes[i];
+			
+		}
+
+		//step 4: set tokens' division parent IDs
+		for (uint256 i = 0; i < totalDivNum; i++) {
+			divisionParentIDs[_ids[i]] = _id;
+		}
+		// step 5: remove the weight from original asset
+		uint256 totalRemovedWeight = 0;
+		for(uint256 j = 0; j < listOfNumSizes.length; j++) {
+			totalRemovedWeight += listOfNumSizes[j] * listOfStepSizes[j];
+		}
+		weightMap[_id] -= totalRemovedWeight;
+
+		// step 6: correctly map created tokens to their parent
+		for (uint256 i = 0; i < totalDivNum; i++) {
+			parentIds[_ids[i]] = _id;
+		}
+
+		// emit an event with values
+		emit Divide(_ids);
+
+		// return ids of minted tokens
+		return _ids;
+	}
 }

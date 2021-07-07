@@ -7,6 +7,12 @@ interface Divisible {
 		uint256 _stepSize
 	) external returns (uint256[] memory mintedIDs);
 
+	function batchDivideInto(
+		uint256 _id,
+		uint256[] memory listOfNumSizes,
+		uint256[] memory listOfStepSizes
+	) external returns (uint256[] memory mintedIDs);
+
 	function divisionOf(uint256 _id) external view returns (uint256 divID);
 
 	function makeDivisible(uint256 _id) external;
@@ -22,4 +28,5 @@ interface Divisible {
 	function setMinStepSize(uint256 _id, uint256 _stepSize) external; 
 
 	function isDivisible(uint256 _id) external view returns (bool _isDivisible);
+	
 }

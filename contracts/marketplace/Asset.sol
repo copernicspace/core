@@ -407,13 +407,15 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		require(listOfNumSizes.length == listOfStepSizes.length, 'Arrays must be of equal size');
 		// check that arrays have equal size and are not empty
 		require(listOfNumSizes.length != 0 && listOfStepSizes.length != 0, 'Arrays must not be empty');
-		// require that step size * step num is <= asset's weight
+		// require that step size[] * step num[] is <= asset's weight
+		uint256 totalRemovedWeight = 0;
 		for(uint256 i = 0; i < listOfNumSizes.length; i++) {
-			require(
-				listOfNumSizes[i] * listOfStepSizes[i] <= weightMap[_id],
-				'Required weight exceeds asset weight'
-			);	
+			totalRemovedWeight += listOfNumSizes[i] * listOfStepSizes[i];
 		}
+		require(
+			totalRemovedWeight <= weightMap[_id],
+			'Required weight exceeds asset weight'
+		);
 		// require that asset is allowed to be divisible
 		require(
 			divisibilityRules[_id] == true,
@@ -482,10 +484,6 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 			divisionParentIDs[_ids[i]] = _id;
 		}
 		// step 5: remove the weight from original asset
-		uint256 totalRemovedWeight = 0;
-		for(uint256 j = 0; j < listOfNumSizes.length; j++) {
-			totalRemovedWeight += listOfNumSizes[j] * listOfStepSizes[j];
-		}
 		weightMap[_id] -= totalRemovedWeight;
 
 		// step 6: correctly map created tokens to their parent

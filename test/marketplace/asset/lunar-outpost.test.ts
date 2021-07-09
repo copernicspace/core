@@ -6,6 +6,7 @@ import { expect } from 'chai'
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { getAssetID } from '../../helpers/new-asset-id.helper'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { getSellID } from '../../helpers/sell-id.helper'
 
 describe('[lunar-outpost.test.ts] Lunar Outpost Use Case Test', () => {
 
@@ -13,9 +14,9 @@ describe('[lunar-outpost.test.ts] Lunar Outpost Use Case Test', () => {
 		Contract Factory set-up
 	*/
 
-    let deployer, tokenCreator: SignerWithAddress
+    let deployer, tokenCreator, tokenBuyer: SignerWithAddress
     before('get signers from hh node', async () =>
-		[deployer, tokenCreator] = await ethers.getSigners())
+		[deployer, tokenCreator, tokenBuyer] = await ethers.getSigners())
     
     let assetContract: Asset
     before('deploy asset contract', async () =>
@@ -81,37 +82,32 @@ describe('[lunar-outpost.test.ts] Lunar Outpost Use Case Test', () => {
 
 	// check if minimal step size & num restriction applies
 	it('restricts asset division with minimal step size', async() => {
-		await expect(assetContract.connect(tokenCreator).stepDivideInto(rootID, 10, 50)).to.be.revertedWith('Required step size is less than set minimal step size')
-		await expect(assetContract.connect(tokenCreator).stepDivideInto(rootID, 0, 100)).to.be.revertedWith('Step number must be positive (non-zero)')
+		await expect(assetContract.connect(tokenCreator).batchDivideInto(rootID, ['10', '15'], ['50', '30'])).to.be.revertedWith('Required step size is less than set minimal step size')
+		await expect(assetContract.connect(tokenCreator).batchDivideInto(rootID, ['0', '5'], ['100', '500'])).to.be.revertedWith('Step number must be positive (non-zero)')
 	})
 
 	// step 3: divide into 5 tokens of sizes [200, 200, 500, 500, 1000] and modify original token to have residual weight [1100]
-	let mintedIDs1, mintedIDs2, mintedIDs3
+	let mintedIDs
 	it('correctly divides asset', async() => {
-		const txr1 = await assetContract.connect(tokenCreator).stepDivideInto(rootID, 2, 200).then(tx => tx.wait())
-		const txr2 = await assetContract.connect(tokenCreator).stepDivideInto(rootID, 2, 500).then(tx => tx.wait())
-		const txr3 = await assetContract.connect(tokenCreator).stepDivideInto(rootID, 1, 1000).then(tx => tx.wait())
 
-		const divide1 = txr1.events.filter(events => events.event === 'Divide').pop()
-		const divide2 = txr2.events.filter(events => events.event === 'Divide').pop()
-		const divide3 = txr3.events.filter(events => events.event === 'Divide').pop()
-
-		mintedIDs1 = divide1.args.listOfIDs
-		mintedIDs2 = divide2.args.listOfIDs
-		mintedIDs3 = divide3.args.listOfIDs
+		const txr = await assetContract.connect(tokenCreator).batchDivideInto(rootID, ['2','2','1'], ['200','500', '1000']).then(tx => tx.wait())
+		const divide = txr.events.filter(events => events.event === 'Divide').pop()
+		mintedIDs = divide.args.listOfIDs
 
 	})
 
 	// check if division correct
 	it('sets correct weight of newly created assets', async () => {
-		for (const id_ of mintedIDs1) {
-			expect(await assetContract.getWeight(id_)).to.be.eq('200')
-		}
-		for (const id_ of mintedIDs2) {
-			expect(await assetContract.getWeight(id_)).to.be.eq('500')
-		}
-		for (const id_ of mintedIDs3) {
-			expect(await assetContract.getWeight(id_)).to.be.eq('1000')
+
+		console.log(mintedIDs)
+		for(var i=0; i<mintedIDs.length; i++) {
+			if(i < 2) {
+				expect(await assetContract.getWeight(mintedIDs[i])).to.be.eq('200')
+			} else if (i < 4) {
+				expect(await assetContract.getWeight(mintedIDs[i])).to.be.eq('500')
+			} else {
+				expect(await assetContract.getWeight(mintedIDs[i])).to.be.eq('1000')
+			}
 		}
 	})
 
@@ -130,7 +126,7 @@ describe('[lunar-outpost.test.ts] Lunar Outpost Use Case Test', () => {
 
 	it('correctly sets newly created tokens parent to the original asset',
 		async () => {
-			for (const id_ of mintedIDs1 && mintedIDs2 && mintedIDs3) {
+			for (const id_ of mintedIDs) {
 				expect(await assetContract.divisionOf(id_)).to.be.eq(rootID)
 			}
 		})
@@ -144,11 +140,14 @@ describe('[lunar-outpost.test.ts] Lunar Outpost Use Case Test', () => {
 			.then((factory) => factory.connect(deployer).deploy(assetContract.address))
 			.then((contract) => contract.deployed())
 			.then((deployedContract) => deployedContract as Market)
+
+		await assetContract.connect(tokenCreator).setApprovalForAll(marketContract.address, true)
 	})
 	before('approve market', async() => {
 		await assetContract.connect(deployer).setApprovalForAll(marketContract.address, true)
 	})
-	let money
+	let money: ERC20Mock
+	const sellPrice = 100000
 	before('prepare mock money', async() => {
 		money = await ethers
 			.getContractFactory('ERC20Mock')
@@ -156,10 +155,75 @@ describe('[lunar-outpost.test.ts] Lunar Outpost Use Case Test', () => {
 			.then((contract) => contract.deployed())
 			.then((deployedContract) => deployedContract as ERC20Mock)
 	})
-	// create sell offer
-	const sellPrice = 5000
-	let sellTxr
-	before('create sell offer', async() => {
-		sellTxr = await marketContract.connect(tokenCreator).sell(rootID, sellPrice, money.address)
+	before('transfer money', async() => {
+		await money.transfer(tokenBuyer.address, sellPrice*3)
 	})
+	// create sell offer
+	let sellTxr1, sellTxr2
+	let assetForSale1
+	let assetForSale2 
+	it('carried out sell transaction successfully', async () => {
+		// create sell offers
+		assetForSale1 = await mintedIDs[0] // asset of weight 200
+		assetForSale2 = await mintedIDs[2] // asset of weight 500
+		sellTxr1 = await marketContract.connect(tokenCreator).sell(assetForSale1, sellPrice, money.address).then(tx => tx.wait())
+		sellTxr2 = await marketContract.connect(tokenCreator).sell(assetForSale2, sellPrice, money.address).then(tx => tx.wait())
+
+		// check if smart offers added correctly
+		const sell1 = sellTxr1.events.filter(events => events.event === 'NewSmartOffer').pop()
+		expect(sell1.args.seller).to.be.eq(tokenCreator.address)
+		expect(sell1.args.what).to.be.eq(assetForSale1)
+		expect(sell1.args.price).to.be.eq(sellPrice)
+		expect(sell1.args.sellID).to.be.eq('0')
+		expect(sell1.args).to.have.property('money', money.address)
+
+		const sell2 = sellTxr2.events.filter(events => events.event === 'NewSmartOffer').pop()
+		expect(sell2.args.seller).to.be.eq(tokenCreator.address)
+		expect(sell2.args.what).to.be.eq(assetForSale2)
+		expect(sell2.args.price).to.be.eq(sellPrice)
+		expect(sell2.args.sellID).to.be.eq('1')
+		expect(sell2.args).to.have.property('money', money.address)
+	})
+	it('sets correct balance of seller after smart offer created', async () => {
+		expect(await assetContract.balanceOf(tokenCreator.address, assetForSale1)).to.be.eq('1')
+		expect(await assetContract.balanceOf(tokenCreator.address, assetForSale2)).to.be.eq('1')
+	})	
+	it('carries out buy transaction successfully', async () => {
+		let approveTrx = await money.connect(tokenBuyer).approve(
+			marketContract.address,
+			sellPrice*3
+		).then(tx => tx.wait())
+
+		const approve1 = approveTrx.events.filter(events => events.event === 'Approval').pop()
+		
+		expect(approve1.args.owner).to.be.eq(tokenBuyer.address)
+		expect(approve1.args.spender).to.be.eq(marketContract.address)
+		expect(approve1.args.value).to.be.eq(sellPrice*3)
+
+		const buyTxr1 = await marketContract.connect(tokenBuyer).buy('0').then(tx => tx.wait())
+		const sellID1 = await getSellID(buyTxr1)
+
+		expect(sellID1).to.be.eq(0)
+
+		const buyTxr2 = await marketContract.connect(tokenBuyer).buy('1').then(tx => tx.wait())
+		const sellID2 = await getSellID(buyTxr2)
+
+		expect(sellID2).to.be.eq(1)
+
+		expect(
+			await assetContract.balanceOf(tokenCreator.address, assetForSale1)
+		).to.be.eq('0')
+		expect(
+			await assetContract.balanceOf(tokenBuyer.address, assetForSale1)
+		).to.be.eq('1')
+
+		expect(
+			await assetContract.balanceOf(tokenCreator.address, assetForSale2)
+		).to.be.eq('0')
+		expect(
+			await assetContract.balanceOf(tokenBuyer.address, assetForSale2)
+		).to.be.eq('1')
+
+	})
+
 })

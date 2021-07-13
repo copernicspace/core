@@ -28,6 +28,7 @@ describe('[divisibility.test.ts] Divisibility feature test suite', () => {
 
 	let rootAssetTxr: ContractReceipt
 	// step 1: create a divisible token with weight 100
+	// used ID for token: 1
 	before('create root asset and get ID of new token', async () =>
 		(rootAssetTxr = await assetContract
 			.connect(userA)
@@ -77,6 +78,7 @@ describe('[divisibility.test.ts] Divisibility feature test suite', () => {
 			.to.be.revertedWith('Asset has divisibility disabled'))
 
 	let childAssetTxr: ContractReceipt
+	// used ID for child: 2
 	before('create new child asset and get ID of new token', async () =>
 		(childAssetTxr = await assetContract
 			.connect(userB)
@@ -84,13 +86,17 @@ describe('[divisibility.test.ts] Divisibility feature test suite', () => {
 			.then((tx) => tx.wait())))
 
 	let childID: BigNumber
-	before('extract new child asset ID from tx receipt event', async () =>
-		(childID = getAssetID(childAssetTxr)))
+	before('extract new child asset ID from tx receipt event', async () => {
+		(childID = getAssetID(childAssetTxr))
+		expect(childID).to.be.eq('2')
+	})
+		
 
 	it('new child asset has correct weight', async () =>
 		expect(await assetContract.getWeight(childID)).to.be.eq('500'))
 
 	let mintedIDs
+	// used IDs for divided assets: 3, 4, 5
 	it('successfully divides asset with division set to true', async () => {
 		await assetContract.connect(userB).makeDivisible(childID)
 		const txr = await assetContract
@@ -100,6 +106,7 @@ describe('[divisibility.test.ts] Divisibility feature test suite', () => {
 
 		const divide = txr.events.filter(events => events.event === 'Divide').pop()
 		mintedIDs = divide.args.listOfIDs
+		console.log(mintedIDs)
 	})
 
 	it('sets correct residual weight in original asset contract', async () => {
@@ -143,4 +150,65 @@ describe('[divisibility.test.ts] Divisibility feature test suite', () => {
 				expect(await assetContract.divisionOf(id_)).to.be.eq(childID)
 			}
 		})
+
+	it('correctly set new step size', async() => {
+		// set bigger weight for testing
+		await assetContract.connect(userA).setWeight(rootID, 2000)
+		expect(await assetContract.getWeight(rootID)).to.be.eq('2000')
+		// toggle divisibility
+		await assetContract.connect(userA).makeDivisible(rootID)
+		expect(await assetContract.isDivisible(rootID)).to.be.true
+
+		await assetContract.connect(userA).setMinStepSize(rootID, 100)
+		expect(await assetContract.getMinStepSize(rootID)).to.be.eq('100')
+	})
+
+	// check if minimal step size & num restriction applies
+	it('restricts asset division with minimal step size', async() => {
+		await expect(assetContract.connect(userA).batchDivideInto(rootID, ['10', '15'], ['50', '30'])).to.be.revertedWith('Required step size is less than set minimal step size')
+		await expect(assetContract.connect(userA).batchDivideInto(rootID, ['0', '5'], ['100', '200'])).to.be.revertedWith('Step number must be positive (non-zero)')
+	})
+
+	let joinedBackToken: BigNumber
+	it('correctly joins tokens back', async() => {
+		const txJoin = await assetContract.connect(userB).joinBack(mintedIDs[2]).then(tx => tx.wait())
+		joinedBackToken = txJoin.events.filter(events => events.event === 'joinBackEvent').pop().args._idOfUpdatedAsset
+		expect(await assetContract.getWeight(joinedBackToken)).to.be.eq(500 - 2*75)
+		expect(await assetContract.getWeight(mintedIDs[2])).to.be.eq('0')
+
+		for(var i=0; i<2; i++) {
+			expect(await assetContract.getWeight(mintedIDs[i])).to.be.eq('75')
+		}
+	})
+
+	it('only allows owner to join back tokens', async() => {
+		await expect(assetContract.connect(userA).joinBack(mintedIDs[2])).to.be.revertedWith('Not owner')
+	})
+
+	it('does not allow shell tokens to be joined back', async() => {
+		await expect(assetContract.connect(userB).joinBack(mintedIDs[2])).to.be.revertedWith('Cannot proceed: token disabled')
+	})
+
+	// testing if asset enabled/disabled rule applies
+	// to batchDivided tokens
+	let createTx, batchDivTx, joinBackTx, joinBackID, newMintIDs
+	it('does not allow shell tokens to be joined back after Batch Divide', async() => {
+		createTx = await assetContract.connect(userB).createRoot(true, true, '5000').then(tx => tx.wait())
+		expect(await getAssetID(createTx)).to.be.eq('6')
+
+		batchDivTx = await assetContract.connect(userB).batchDivideInto(6, ['2', '5'], ['1000', '500']).then(tx => tx.wait())
+		newMintIDs = await batchDivTx.events.filter(events => events.event === 'Divide').pop()
+		console.log(newMintIDs.args.listOfIDs)
+		
+		// joining token back:
+		joinBackTx = await assetContract.connect(userB).joinBack(13).then(tx => tx.wait())
+
+		// checking if joined back successfully
+		joinBackID = joinBackTx.events.filter(events => events.event === 'joinBackEvent').pop().args._idOfUpdatedAsset
+		expect(await assetContract.getWeight(joinBackID)).to.be.eq(5000 - (2*1000 + 4*500))
+		expect(await assetContract.getWeight('13')).to.be.eq('0')
+
+		// checking if shell token restriction applies
+		await expect(assetContract.connect(userB).joinBack('13')).to.be.revertedWith('Cannot proceed: token disabled')
+	})
 })

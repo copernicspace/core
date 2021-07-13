@@ -44,6 +44,8 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		if (_weight != 0) {
 			setWeight(id, _weight);
 		}
+		// step 6: set to active
+		enableToken(id);
 	}
 
 	/**
@@ -54,7 +56,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		bool _isPublic,
 		bool _isDivisible,
 		uint256 _weight
-	) public parentAllowed(_pid) {
+	) public parentAllowed(_pid) isEnabled(_pid) {
 		// step 1: get id of new asset from nonce
 		uint256 id = generateNewId();
 		// step 2: mint new token
@@ -75,9 +77,11 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		}
 		// step 5: set weight
 		setWeight(id, _weight);
+		// step 6: set to active
+		enableToken(id);
 	}
 
-	function send(address _to, uint256 _id) public {
+	function send(address _to, uint256 _id) public isEnabled(_id) {
 		safeTransferFrom(msg.sender, _to, _id, 1, '');
 	}
 
@@ -85,7 +89,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		address _from,
 		address _to,
 		uint256 _id
-	) public {
+	) public isEnabled(_id) {
 		safeTransferFrom(_from, _to, _id, 1, '');
 	}
 
@@ -177,6 +181,18 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		_;
 	}
 
+	modifier onlyAssetOwnerMultipleIDs(uint256[] memory _ids) {
+		for(uint256 i = 0; i < _ids.length; i++) {
+			require(balanceOf(msg.sender, _ids[i]) > 0, 'Not owner');
+			_;
+		}
+	}
+
+	modifier isEnabled(uint256 _id) {
+		require(activeTokenMap[_id], 'Cannot proceed: token disabled');
+		_;
+	}
+
 	function isPublic(uint256 id) public view override returns (bool) {
 		return derivationRules[id][address(0)] == true;
 	}
@@ -212,6 +228,8 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		setParent(id, _pid);
 		// step 4: set expiration date
 		setExpiration(id, _expirationDate);
+		// step 5: set to active
+		enableToken(id);
 
 		return id;
 	}
@@ -251,8 +269,22 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 	mapping(uint256 => uint256) private weightMap;
 	mapping(uint256 => uint256) private minStepSizeMap;
 
+	// based on this mapping tokens can be
+	// set to active/disabled
+	// which allows to enable/disable features
+	// for tokens
+	mapping(uint256 => bool) private activeTokenMap;
+
 	// Minimal Step Size defaults to zero
 	// if Minimal Step Size == 0 then all step sizes are allowed
+
+	function enableToken(uint256 _id) public override onlyAssetOwner(_id) {
+		activeTokenMap[_id] = true;
+	}
+
+	function disableToken(uint256 _id) public override onlyAssetOwner(_id) {
+		activeTokenMap[_id] = false;
+	}
 
 	function makeDivisible(uint256 _id) public override onlyAssetOwner(_id) {
 		divisibilityRules[_id] = true;
@@ -320,7 +352,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		uint256 _id,
 		uint256 _stepNum,
 		uint256 _stepSize
-	) public override onlyAssetOwner(_id) returns (uint256[] memory mintedIDs) {
+	) public override onlyAssetOwner(_id) isEnabled(_id) returns (uint256[] memory mintedIDs) {
 		// require that step size * step num is <= asset's weight
 		require(
 			_stepSize * _stepNum <= weightMap[_id],
@@ -372,7 +404,12 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 
 		// step 6: correctly map created tokens to their parent
 		for (uint256 i = 0; i < _stepNum; i++) {
-			parentIds[_ids[i]] = _id;
+			divisionParentIDs[_ids[i]] = _id;
+		}
+
+		// step 7: enable tokens
+		for (uint256 i = 0; i < _stepNum; i++) {
+			enableToken(_ids[i]);
 		}
 
 		// emit an event with values
@@ -402,7 +439,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		uint256 _id,
 		uint256[] memory listOfNumSizes,
 		uint256[] memory listOfStepSizes
-	) public override onlyAssetOwner(_id) returns (uint256[] memory mintedIDs) {
+	) public override onlyAssetOwner(_id) isEnabled(_id) returns (uint256[] memory mintedIDs) {
 		// check that arrays have equal length
 		require(listOfNumSizes.length == listOfStepSizes.length, 'Arrays must be of equal size');
 		// check that arrays have equal size and are not empty
@@ -474,6 +511,10 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 			for (uint256 m = 0; m < listOfNumSizes[i]; m++) {
 				weightMap[_pickedIDs[m]] = listOfStepSizes[i];
 			}
+			// enable tokens
+			for (uint256 m = 0; m < listOfNumSizes[i]; m++) {
+				enableToken(_pickedIDs[m]);
+			}
 			// increment ID helper
 			idIncrement += listOfNumSizes[i];
 			
@@ -488,7 +529,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 
 		// step 6: correctly map created tokens to their parent
 		for (uint256 i = 0; i < totalDivNum; i++) {
-			parentIds[_ids[i]] = _id;
+			divisionParentIDs[_ids[i]] = _id;
 		}
 
 		// emit an event with values
@@ -496,5 +537,28 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 
 		// return ids of minted tokens
 		return _ids;
+	}
+
+	event joinBackEvent (uint256 _idOfUpdatedAsset);
+
+	function joinBack(
+		uint256 _idToJoinBack
+	) public override onlyAssetOwner(_idToJoinBack) isEnabled(_idToJoinBack) returns (
+		uint256 joinedToID) 
+	{	
+		// the asset to be joined back must have positive weight attached
+		require(weightMap[_idToJoinBack] > 0, 'Weight of joined-back asset cannot be 0');
+		// the asset to be joined back must be a division of another asset
+		require(divisionOf(_idToJoinBack) != 0, 'Asset is not a division of another');
+		// add the asset's weight to the parent asset's weight pool
+		weightMap[divisionParentIDs[_idToJoinBack]] += weightMap[_idToJoinBack];
+		// set the aset's weight to 0
+		weightMap[_idToJoinBack] = 0;
+		// set the token to disabled
+		disableToken(_idToJoinBack);
+		// emit event
+		emit joinBackEvent(divisionParentIDs[_idToJoinBack]);
+		// return correct parent id
+		return(divisionParentIDs[_idToJoinBack]);
 	}
 }

@@ -211,4 +211,9 @@ describe('[divisibility.test.ts] Divisibility feature test suite', () => {
 		// checking if shell token restriction applies
 		await expect(assetContract.connect(userB).joinBack('13')).to.be.revertedWith('Cannot proceed: token disabled')
 	})
+
+	it('does not allow tokens that are not a division to be joined back', async() => {
+		// use child asset's ID: 2
+		await expect(assetContract.connect(userB).joinBack('2')).to.be.revertedWith('Asset is not a division of another')
+	})
 })

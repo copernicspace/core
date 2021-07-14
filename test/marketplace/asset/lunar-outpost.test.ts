@@ -225,5 +225,9 @@ describe('[lunar-outpost.test.ts] Lunar Outpost Use Case Test', () => {
 		).to.be.eq('1')
 
 	})
+	it('correctly transfers money after buy transaction', async() => {
+		expect(await money.balanceOf(tokenBuyer.address)).to.be.eq(300000 - 2*sellPrice) // token buyer had 300.000 money and then spent 2*100.000
+        expect(await money.balanceOf(tokenCreator.address)).to.be.eq(sellPrice*2)
+	})
 
 })

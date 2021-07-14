@@ -28,24 +28,24 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		uint256 id = generateNewId();
 		// step 2: mint new token
 		_mint(msg.sender, id, 1, '');
-		// step 3: set derivation rules
+		// step 3: set to active
+		enableToken(id);
+		// step 4: set derivation rules
 		if (_isPublic) {
 			makePublic(id);
 		} else {
 			makePrivate(id);
 		}
-		// step 4: set divisibility rules
+		// step 5: set divisibility rules
 		if (_isDivisible) {
 			makeDivisible(id);
 		} else {
 			makeNotDivisible(id);
 		}
-		// step 5: set weight
-		if (_weight != 0) {
+		// step 6: set weight
+		if (_isDivisible && _weight != 0) {
 			setWeight(id, _weight);
 		}
-		// step 6: set to active
-		enableToken(id);
 	}
 
 	/**
@@ -61,24 +61,26 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		uint256 id = generateNewId();
 		// step 2: mint new token
 		_mint(msg.sender, id, 1, '');
-		// step 3: set parent id
+		// step 3: set to active
+		enableToken(id);
+		// step 4: set parent id
 		setParent(id, _pid);
-		// step 4: set parent derivation access
+		// step 5: set parent derivation access
 		if (_isPublic) {
 			makePublic(id);
 		} else {
 			makePrivate(id);
 		}
-		// step 5: set divisibility rules
+		// step 6: set divisibility rules
 		if (_isDivisible) {
 			makeDivisible(id);
 		} else {
 			makeNotDivisible(id);
 		}
-		// step 5: set weight
-		setWeight(id, _weight);
-		// step 6: set to active
-		enableToken(id);
+		// step 7: set weight
+		if (_isDivisible && _weight != 0) {
+			setWeight(id, _weight);
+		}
 	}
 
 	function send(address _to, uint256 _id) public isEnabled(_id) {
@@ -123,6 +125,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		public
 		override
 		onlyAssetOwner(_id)
+		isEnabled(_id)
 	{
 		derivationRules[_id][_address] = true;
 	}
@@ -131,6 +134,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		public
 		override
 		onlyAssetOwner(_id)
+		isEnabled(_id)
 	{
 		for (uint256 i = 0; i < _addresses.length; i++) {
 			allow(_addresses[i], _id);
@@ -141,6 +145,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		public
 		override
 		onlyAssetOwner(_id)
+		isEnabled(_id)
 	{
 		derivationRules[_id][_address] = false;
 	}
@@ -149,6 +154,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		public
 		override
 		onlyAssetOwner(_id)
+		isEnabled(_id)
 	{
 		for (uint256 i = 0; i < _addresses.length; i++) {
 			disallow(_addresses[i], _id);
@@ -219,7 +225,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		uint256 _pid,
 		address _to,
 		uint256 _expirationDate
-	) public override parentAllowed(_pid) returns (uint256) {
+	) public override parentAllowed(_pid) isEnabled(_pid) returns (uint256) {
 		// step 1: get id of new asset from nonce
 		uint256 id = generateNewLicenceId();
 		// step 2: mint new token
@@ -241,7 +247,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		return _id & LICENCE_BIT == LICENCE_BIT;
 	}
 
-	function setExpiration(uint256 _id, uint256 expirationDate) internal {
+	function setExpiration(uint256 _id, uint256 expirationDate) isEnabled(_id) internal {
 		// pass expirationDate zero to set lifetime licence
 		expirationDates[_id] = expirationDate;
 	}
@@ -278,6 +284,8 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 	// Minimal Step Size defaults to zero
 	// if Minimal Step Size == 0 then all step sizes are allowed
 
+	// used for the isEnabled(...) modifier 
+	// allows activating/disabling tokens
 	function enableToken(uint256 _id) public override onlyAssetOwner(_id) {
 		activeTokenMap[_id] = true;
 	}
@@ -286,11 +294,11 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		activeTokenMap[_id] = false;
 	}
 
-	function makeDivisible(uint256 _id) public override onlyAssetOwner(_id) {
+	function makeDivisible(uint256 _id) public override onlyAssetOwner(_id) isEnabled(_id) {
 		divisibilityRules[_id] = true;
 	}
 
-	function makeNotDivisible(uint256 _id) public override onlyAssetOwner(_id) {
+	function makeNotDivisible(uint256 _id) public override onlyAssetOwner(_id) isEnabled(_id) {
 		divisibilityRules[_id] = false;
 	}
 
@@ -316,6 +324,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		public
 		override
 		onlyAssetOwner(_id)
+		isEnabled(_id)
 	{
 		weightMap[_id] = _weight;
 	}
@@ -333,6 +342,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		public
 		override
 		onlyAssetOwner(_id)
+		isEnabled(_id)
 	{
 		minStepSizeMap[_id] = _stepSize;
 	}

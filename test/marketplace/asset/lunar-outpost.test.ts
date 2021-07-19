@@ -156,7 +156,7 @@ describe('[lunar-outpost.test.ts] Lunar Outpost Use Case Test', () => {
 			.then((deployedContract) => deployedContract as ERC20Mock)
 	})
 	before('transfer money', async() => {
-		await money.transfer(tokenBuyer.address, sellPrice*3)
+		await money.mintTo(tokenBuyer.address, 300000)
 	})
 	// create sell offer
 	let sellTxr1, sellTxr2

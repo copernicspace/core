@@ -25,7 +25,7 @@ interface Divisible {
 
 	function getMinStepSize(uint256 _id) external view returns (uint256 minStepSize);
 
-	function setMinStepSize(uint256 _id, uint256 _stepSize) external; 
+	function setMinStepSize(uint256 _id, uint256 _stepSize) external;
 
 	function isDivisible(uint256 _id) external view returns (bool _isDivisible);
 
@@ -34,5 +34,4 @@ interface Divisible {
 	function enableToken(uint256 _id) external;
 
 	function disableToken(uint256 _id) external;
-	
 }

@@ -1,7 +1,6 @@
 import { task } from 'hardhat/config'
 import { SP_DEPLOY_TASK } from './deploy.task'
 import { ERC20MOCK_DEPLOY_TASK } from '../erc20mock/deploy.task'
-import { ERC20Mock, SpacePool } from '../../typechain'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 
 const TASK = {
@@ -14,11 +13,11 @@ export default task(TASK.NAME, TASK.DESC)
 		async (args, hre) => {
 			// step 0: deploy erc20mock as money
 			console.log('Deploying smart contract ...\n')
-			const money: ERC20Mock = await hre.run(ERC20MOCK_DEPLOY_TASK.NAME)
+			const money = await hre.run(ERC20MOCK_DEPLOY_TASK.NAME)
 			console.log(`\tDeployed ${ERC20MOCK_DEPLOY_TASK.CONTRACT_NAME} contract\t address:${money.address}`)
 
 			// step 1: run space pool deploy task
-			const spacePool: SpacePool = await hre.run(SP_DEPLOY_TASK.NAME, { money: money.address })
+			const spacePool = await hre.run(SP_DEPLOY_TASK.NAME, { money: money.address })
 			console.log(`\tDeployed ${SP_DEPLOY_TASK.CONTRACT_NAME} contract\t address:${spacePool.address}`)
 
 			// step 2: add second wallet from deterministic hh wallet as liquidity operator

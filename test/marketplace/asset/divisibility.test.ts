@@ -117,7 +117,6 @@ describe('[divisibility.test.ts] Divisibility feature test suite', () => {
 		// so the sum of weights distributed from the original asset
 		// and the residual weight left on the original asset
 		// stays the same, equal to the original asset's weight
-		rootID = getAssetID(rootAssetTxr)
 		const residualWeight = await assetContract.getWeight(childID)
 		expect(residualWeight).to.be.eq(500 - 3 * 75)
 	})

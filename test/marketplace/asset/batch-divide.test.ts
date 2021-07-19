@@ -80,69 +80,69 @@ describe('[batch-divide.test.ts] Divisibility feature test suite', () => {
 	it('disallows assets with division set to false to be divided', async () =>
 		await expect(assetContract.connect(userA).stepDivideInto(rootID, 10, 5))
 			.to.be.revertedWith('Asset has divisibility disabled'))
-    
-    let mintedIDs
 
-    // use batchDivide(...)
-    it('successfully divides asset with division set to true', async () => {
-        await assetContract.connect(userA).makeDivisible(rootID)
-        const txr = await assetContract
-            .connect(userA)
-            .batchDivideInto(rootID, ["3", "4"], ["300", "200"])
-            .then(tx => tx.wait())
+	let mintedIDs
 
-        const divide = txr.events.filter(events => events.event === 'Divide').pop()
-        mintedIDs = divide.args.listOfIDs
-        console.log(mintedIDs)
+	// use batchDivide(...)
+	it('successfully divides asset with division set to true', async () => {
+		await assetContract.connect(userA).makeDivisible(rootID)
+		const txr = await assetContract
+			.connect(userA)
+			.batchDivideInto(rootID, ['3', '4'], ['300', '200'])
+			.then(tx => tx.wait())
 
-        // check the weights
-        for(var i=mintedIDs[0]; i<= mintedIDs[6]; i++) {
-            console.log("id: " + i + ", weight: " + await assetContract.getWeight(BigNumber.from(i)))
-        }
-        
-    })
+		const divide = txr.events.filter(events => events.event === 'Divide').pop()
+		mintedIDs = divide.args.listOfIDs
+		console.log(mintedIDs)
 
-    it('sets correct residual weight in original asset contract', async () => {
-        // the weight from the original asset is taken and given to the
-        // created divided assets
-        // so the sum of weights distributed from the original asset
-        // and the residual weight left on the original asset
-        // stays the same, equal to the original asset's weight
-        rootID = getAssetID(rootAssetTxr)
-        const residualWeight = await assetContract.getWeight(rootID)
-        expect(residualWeight).to.be.eq(2000 - (3*300 + 4*200))
-    })
+		// check the weights
+		for (let i = mintedIDs[0]; i <= mintedIDs[6]; i++) {
+			console.log('id: ' + i + ', weight: ' + await assetContract.getWeight(BigNumber.from(i)))
+		}
 
-    it('asserts that total shared weight remains the same', async () => {
-        let weightSum: BigNumber
-        let currentWeight: BigNumber
-        weightSum = BigNumber.from('0')
+	})
 
-        // add up the weight of tokens created when asset was divided
-        for (const id_ of mintedIDs) {
-            currentWeight = BigNumber.from(await assetContract.getWeight(id_))
-            weightSum = weightSum.add(currentWeight)
-        }
+	it('sets correct residual weight in original asset contract', async () => {
+		// the weight from the original asset is taken and given to the
+		// created divided assets
+		// so the sum of weights distributed from the original asset
+		// and the residual weight left on the original asset
+		// stays the same, equal to the original asset's weight
+		rootID = getAssetID(rootAssetTxr)
+		const residualWeight = await assetContract.getWeight(rootID)
+		expect(residualWeight).to.be.eq(2000 - (3 * 300 + 4 * 200))
+	})
 
-        // add to that the residual weight of the asset
-        const childWeight = BigNumber.from(await assetContract.getWeight(rootID))
-        weightSum = weightSum.add(childWeight)
-        expect(weightSum).to.be.eq('2000')
-    })
+	it('asserts that total shared weight remains the same', async () => {
+		let weightSum: BigNumber
+		let currentWeight: BigNumber
+		weightSum = BigNumber.from('0')
 
-    it('sets correct weight of newly created assets', async () => {
-        for(var i=mintedIDs[0]; i<= mintedIDs[2]; i++) {
-            expect(await assetContract.getWeight(i)).to.be.eq('300')
-        }
-        for(var i=mintedIDs[3]; i<= mintedIDs[6]; i++) {
-            expect(await assetContract.getWeight(i)).to.be.eq('200')
-        }
-    })
+		// add up the weight of tokens created when asset was divided
+		for (const id_ of mintedIDs) {
+			currentWeight = BigNumber.from(await assetContract.getWeight(id_))
+			weightSum = weightSum.add(currentWeight)
+		}
 
-    it('correctly sets newly created tokens parent to the original asset',
-        async () => {
-            for (const id_ of mintedIDs) {
-                expect(await assetContract.divisionOf(id_)).to.be.eq(rootID)
-            }
-    })
+		// add to that the residual weight of the asset
+		const childWeight = BigNumber.from(await assetContract.getWeight(rootID))
+		weightSum = weightSum.add(childWeight)
+		expect(weightSum).to.be.eq('2000')
+	})
+
+	it('sets correct weight of newly created assets', async () => {
+		for (var i = mintedIDs[0]; i <= mintedIDs[2]; i++) {
+			expect(await assetContract.getWeight(i)).to.be.eq('300')
+		}
+		for (var i = mintedIDs[3]; i <= mintedIDs[6]; i++) {
+			expect(await assetContract.getWeight(i)).to.be.eq('200')
+		}
+	})
+
+	it('correctly sets newly created tokens parent to the original asset',
+		async () => {
+			for (const id_ of mintedIDs) {
+				expect(await assetContract.divisionOf(id_)).to.be.eq(rootID)
+			}
+		})
 })

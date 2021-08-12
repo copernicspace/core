@@ -11,5 +11,11 @@
         "explicitTypes": "always"
       }
     }
-  ]
+  ],
+  "semi": false,
+  "trailingComma": "none",
+  "singleQuote": true,
+  "printWidth": 120,
+  "useTabs": true,
+  "arrowParens": "avoid"
 }

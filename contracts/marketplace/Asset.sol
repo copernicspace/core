@@ -33,6 +33,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 			makePublic(id);
 		} else {
 			makePrivate(id);
+			allow(msg.sender, id);
 		}
 		// step 4: set divisibility rules
 		if (_isDivisible) {
@@ -65,6 +66,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		if (_isPublic) {
 			makePublic(id);
 		} else {
+			allow(msg.sender, id);
 			makePrivate(id);
 		}
 		// step 5: set divisibility rules

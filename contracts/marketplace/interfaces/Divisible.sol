@@ -1,7 +1,7 @@
 pragma solidity 0.8.4;
 
 interface Divisible {
-	function stepDivideInto(
+	function divideInto(
 		uint256 _id,
 		uint256 _stepNum,
 		uint256 _stepSize

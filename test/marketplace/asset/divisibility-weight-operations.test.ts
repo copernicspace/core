@@ -9,9 +9,9 @@ import { divisibilityFixtureWithWeight } from './divisibility.fixture'
     General test set for weight-oriented operations on divisible tokens
 */
 
-describe('[divisibility-WeightOperations.test.ts]', () => {
+describe('[divisibility-weight-operations.test.ts]', () => {
 	let assetContract: Asset
-	let deployer: SignerWithAddress, rootUser: SignerWithAddress
+	let deployer: SignerWithAddress, rootUser: SignerWithAddress, _placeholderUser: SignerWithAddress
 	let rootID: BigNumber
 	before(
 		'load divisibility deploy fixture',
@@ -20,7 +20,11 @@ describe('[divisibility-WeightOperations.test.ts]', () => {
 	)
 
 	let nonRootUser: SignerWithAddress
-	before('init signers', async () => ([nonRootUser] = await ethers.getSigners()))
+	before('init signers', async () => ([_placeholderUser, nonRootUser] = await ethers.getSigners()))
+
+	it('has correct new root asset ID', async () => expect(rootID).to.be.equal('1'))
+
+	it('has correct weight', async () => expect(await assetContract.getWeight(rootID)).to.be.eq('5000'))
 
 	it('allows owners to set new weight of asset', async () => {
 		await assetContract.connect(rootUser).setWeight(rootID, 200)

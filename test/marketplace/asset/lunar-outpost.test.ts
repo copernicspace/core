@@ -82,7 +82,7 @@ describe('[lunar-outpost.test.ts] Lunar Outpost Use Case Test', () => {
 
 	// check if minimal step size & num restriction applies
 	it('restricts asset division with minimal step size', async () => {
-		await expect(assetContract.connect(tokenCreator).batchDivideInto(rootID, ['10', '15'], ['50', '30'])).to.be.revertedWith('Required step size is less than set minimal step size')
+		await expect(assetContract.connect(tokenCreator).batchDivideInto(rootID, ['10', '15'], ['50', '30'])).to.be.revertedWith('Required step size is not a viable multiple of minimal step size')
 		await expect(assetContract.connect(tokenCreator).batchDivideInto(rootID, ['0', '5'], ['100', '500'])).to.be.revertedWith('Step number must be positive (non-zero)')
 	})
 

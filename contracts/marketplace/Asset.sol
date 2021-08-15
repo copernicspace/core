@@ -300,7 +300,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 
 	event Divide(uint256[] listOfIDs);
 
-	function stepDivideInto(
+	function divideInto(
 		uint256 _id,
 		uint256 _stepNum,
 		uint256 _stepSize
@@ -311,8 +311,9 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		require(divisibilityRules[_id] == true, 'Asset has divisibility disabled');
 		// require that step size is >= minimal step size
 		require(
-			minStepSizeMap[_id] == 0 || _stepSize >= minStepSizeMap[_id],
-			'Required step size is less than set minimal step size'
+			minStepSizeMap[_id] == 0 || 
+			(minStepSizeMap[_id] !=0 && _stepSize >= minStepSizeMap[_id] && _stepSize % minStepSizeMap[_id] == 0),
+			'Required step size is not a viable multiple of minimal step size'
 		);
 		// require that step num is positive (non-zero)
 		require(_stepNum > 0, 'Step number must be positive (non-zero)');
@@ -393,13 +394,6 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		require(totalRemovedWeight <= weightMap[_id], 'Required weight exceeds asset weight');
 		// require that asset is allowed to be divisible
 		require(divisibilityRules[_id] == true, 'Asset has divisibility disabled');
-		// require that step size is >= minimal step size
-		for (uint256 i = 0; i < listOfNumSizes.length; i++) {
-			require(
-				minStepSizeMap[_id] == 0 || listOfStepSizes[i] >= minStepSizeMap[_id],
-				'Required step size is less than set minimal step size'
-			);
-		}
 		// require that step num is positive (non-zero)
 		for (uint256 i = 0; i < listOfNumSizes.length; i++) {
 			require(listOfNumSizes[i] > 0, 'Step number must be positive (non-zero)');
@@ -407,6 +401,14 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		// require that step size is positive (non-zero)
 		for (uint256 i = 0; i < listOfNumSizes.length; i++) {
 			require(listOfStepSizes[i] > 0, 'Step size must be positive (non-zero)');
+		}
+		// require that step size is >= minimal step size
+		for (uint256 i = 0; i < listOfNumSizes.length; i++) {
+			require(
+				minStepSizeMap[_id] == 0 || 
+				(minStepSizeMap[_id] !=0 && listOfStepSizes[i] >= minStepSizeMap[_id] && listOfStepSizes[i] % minStepSizeMap[_id] == 0),
+				'Required step size is not a viable multiple of minimal step size'
+			);
 		}
 		// calculate total divisions num
 		uint256 totalDivNum = 0;

@@ -39,7 +39,7 @@ export const divisibilityFixtureWithWeight: Fixture<DivisibilityFixtureWithWeigh
 		// create a divisible token with weight 5000
 		const rootAssetTxr: ContractReceipt = await assetContract
 			.connect(rootUser)
-			.createRoot(true, true, 100)
+			.createRoot(true, true, 5000)
 			.then((tx) => tx.wait())
 
 		const rootID: BigNumber = getAssetID(rootAssetTxr)

@@ -43,9 +43,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 			makeNotDivisible(id);
 		}
 		// step 6: set weight
-		if (_isDivisible && _weight != 0) {
-			setWeight(id, _weight);
-		}
+		setWeight(id, _weight);
 	}
 
 	/**
@@ -78,9 +76,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 			makeNotDivisible(id);
 		}
 		// step 7: set weight
-		if (_isDivisible && _weight != 0) {
-			setWeight(id, _weight);
-		}
+		setWeight(id, _weight);
 	}
 
 	function send(address _to, uint256 _id) public isEnabled(_id) {
@@ -167,13 +163,6 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 	modifier onlyAssetOwner(uint256 _id) {
 		require(balanceOf(msg.sender, _id) > 0, 'Not owner');
 		_;
-	}
-
-	modifier onlyAssetOwnerMultipleIDs(uint256[] memory _ids) {
-		for (uint256 i = 0; i < _ids.length; i++) {
-			require(balanceOf(msg.sender, _ids[i]) > 0, 'Not owner');
-			_;
-		}
 	}
 
 	modifier isEnabled(uint256 _id) {
@@ -266,11 +255,11 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		activeTokenMap[_id] = false;
 	}
 
-	function makeDivisible(uint256 _id) public override onlyAssetOwner(_id) isEnabled(_id) {
+	function makeDivisible(uint256 _id) private isEnabled(_id) {
 		divisibilityRules[_id] = true;
 	}
 
-	function makeNotDivisible(uint256 _id) public override onlyAssetOwner(_id) isEnabled(_id) {
+	function makeNotDivisible(uint256 _id) private isEnabled(_id) {
 		divisibilityRules[_id] = false;
 	}
 
@@ -282,7 +271,7 @@ contract Asset is ERC1155, Parentable, Licencable, Divisible {
 		return weightMap[_id];
 	}
 
-	function setWeight(uint256 _id, uint256 _weight) public override onlyAssetOwner(_id) isEnabled(_id) {
+	function setWeight(uint256 _id, uint256 _weight) private isEnabled(_id) {
 		weightMap[_id] = _weight;
 	}
 

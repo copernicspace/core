@@ -24,11 +24,10 @@ describe('[divisibility-joinback.test.ts]', () => {
 
     before('divide asset', async() => {
         // IDs: 2, 3, 4, 5, 6
-        await assetContract.connect(rootUser).makeDivisible(rootID)
-            const txr = await assetContract
-                .connect(rootUser)
-                .divideInto(rootID, 5, 100)
-                .then(tx => tx.wait())
+		const txr = await assetContract
+			.connect(rootUser)
+			.divideInto(rootID, 5, 100)
+			.then(tx => tx.wait())
         const divide = txr.events.filter(events => events.event === 'Divide').pop()
         mintedIDs = divide.args.listOfIDs
     })

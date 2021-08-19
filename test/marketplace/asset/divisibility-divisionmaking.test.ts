@@ -33,7 +33,6 @@ describe('[divisibility-divisionmaking.test.ts]', () => {
     */
 
 	it('[simple] successfully divides asset with division set to true', async () => {
-		await assetContract.connect(rootUser).makeDivisible(rootID)
 		const txr = await assetContract
 			.connect(rootUser)
 			.divideInto(rootID, 5, 100)
@@ -99,7 +98,6 @@ describe('[divisibility-divisionmaking.test.ts]', () => {
 	// use batchDivide(...)
 	let mintedIDsBatch: BigNumber[]
 	it('[batch] successfully batch divides asset with division set to true', async () => {
-		await assetContract.connect(rootUser).makeDivisible(rootID)
 		const txr = await assetContract
 			.connect(rootUser)
 			.batchDivideInto(rootID, ['3', '4'], ['300', '200'])

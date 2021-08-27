@@ -1,8 +1,7 @@
 import { ethers } from 'hardhat'
-
+import ContractNames from '../constants/contract.names'
 async function main() {
-	const assetContractName = 'Asset'
-	const assetAddress = await ethers.getContractFactory(assetContractName)
+	const assetAddress = await ethers.getContractFactory(ContractNames.SpaceAsset)
 		.then(deployFactory => deployFactory.deploy('copernicspace.com'))
 		.then(asset => asset.address)
 	console.log('Asset deployed to:', assetAddress)

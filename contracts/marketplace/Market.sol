@@ -18,7 +18,7 @@ contract Market {
 	mapping(uint256 => SmartOffer) smartOffers;
 
 	event NewSmartOffer(
-		address seller,
+		address indexed seller,
 		uint256 what,
 		uint256 price,
 		address money,

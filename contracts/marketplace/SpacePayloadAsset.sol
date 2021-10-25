@@ -1,10 +1,9 @@
+// SPDX-License-Identifier: private
+pragma solidity ^0.8.9;
+
 import '@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Pausable.sol';
 
-// import "@openzeppelin/contracts/security/Pausable.sol";
-// import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-
 contract SpacePayloadAsset is ERC1155Pausable {
-	address public owner;
 	uint256 private nonce;
 	uint256 public constant decimals = 18;
 
@@ -13,11 +12,6 @@ contract SpacePayloadAsset is ERC1155Pausable {
 	}
 
 	constructor(string memory uri) ERC1155(uri) {}
-
-	modifier onlyOwner() {
-		require(msg.sender == owner, 'Not admin');
-		_;
-	}
 
 	modifier onlyAssetOwner(uint256 _id) {
 		require(balanceOf(msg.sender, _id) > 0, 'Not owner');
@@ -55,9 +49,9 @@ contract SpacePayloadAsset is ERC1155Pausable {
 		emit TransferFrom(_from, _to, _id, _amount);
 	}
 
-	function createAsset(uint256 _grams) external {
+	function createAsset(uint256 grams) external {
 		uint256 id = generateNewId();
-		uint256 amount = _grams * 10**decimals;
+		uint256 amount = grams * 10**decimals;
 		_mint(msg.sender, id, amount, '');
 		_pause();
 

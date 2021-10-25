@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: private
-pragma solidity 0.8.4;
+pragma solidity 0.8.9;
 
 contract KymRegister {
 	mapping(uint256 => bool) public kymStatus; // maps [asset id] to [true/false]

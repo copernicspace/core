@@ -30,10 +30,10 @@ describe('[SpacePayloadAsset.test.ts] Space Payload Asset test suite', async () 
 	it('correctly creates space payload asset', async () => {
 		const create_tx = await assetContract
 			.connect(user1)
-			.createAsset(3500)
+			.createRootAsset(3500)
 			.then(tx => tx.wait())
 		const new_asset_args = create_tx.events
-			.filter(events => events.event === 'AssetCreation')
+			.filter(events => events.event === 'RootAssetCreation')
 			.pop().args
 
 		// asset creation event
@@ -47,30 +47,30 @@ describe('[SpacePayloadAsset.test.ts] Space Payload Asset test suite', async () 
 	})
 
 	it('locks the contract after asset creation', async () => {
-		const locked_state = await assetContract.paused()
+		const locked_state = await assetContract.paused(1)
 		expect(locked_state).to.be.true
 	})
 
 	it('disallows non-asset owners from freezing/unfeezing', async () => {
 		await expect(assetContract.connect(user2).pauseAsset(1)).to.be.revertedWith(
-			'Not owner'
+			'Caller is not the creator of asset'
 		)
-		await expect(assetContract.connect(user2).unpauseAsset(1)).to.be.revertedWith(
-			'Not owner'
+		await expect(assetContract.connect(user2).unPauseAsset(1)).to.be.revertedWith(
+			'Caller is not the creator of asset'
 		)
 	})
 
 	it('allows the owner to unfreeze/freeze asset', async () => {
-		const start_state = await assetContract.paused()
-		await assetContract.connect(user1).unpauseAsset(1)
-		const end_state = await assetContract.paused()
+		const start_state = await assetContract.paused(1)
+		await assetContract.connect(user1).unPauseAsset(1)
+		const end_state = await assetContract.paused(1)
 
 		expect(start_state).to.be.true
 		expect(end_state).to.be.false
 
-		const start_state2 = await assetContract.paused()
+		const start_state2 = await assetContract.paused(1)
 		await assetContract.connect(user1).pauseAsset(1)
-		const end_state2 = await assetContract.paused()
+		const end_state2 = await assetContract.paused(1)
 
 		expect(start_state2).to.be.false
 		expect(end_state2).to.be.true
@@ -79,7 +79,7 @@ describe('[SpacePayloadAsset.test.ts] Space Payload Asset test suite', async () 
 	it('reverts transfer when paused', async () => {
 		await expect(
 			assetContract.connect(user1).send(user2.address, 1, BigInt(100 * 10 ** 18))
-		).to.be.revertedWith('Pausable: paused')
+		).to.be.revertedWith('Asset paused')
 	})
 
 	it('reverts transferFrom when paused', async () => {
@@ -91,14 +91,14 @@ describe('[SpacePayloadAsset.test.ts] Space Payload Asset test suite', async () 
 			assetContract
 				.connect(user2)
 				.sendFrom(user1.address, user2.address, 1, BigInt(50 * 10 ** 18))
-		).to.be.revertedWith('Pausable: paused')
+		).to.be.revertedWith('Asset paused')
 	})
 
 	let transferTx, transferFromTx
 
 	it('successfully transfers balance during send', async () => {
 		// unpause asset
-		await assetContract.connect(user1).unpauseAsset(1)
+		await assetContract.connect(user1).unPauseAsset(1)
 
 		const start_bal1 = await (await assetContract.balanceOf(user1.address, 1)).toBigInt()
 		const start_bal2 = await (await assetContract.balanceOf(user2.address, 1)).toBigInt()

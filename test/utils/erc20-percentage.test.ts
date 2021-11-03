@@ -4,10 +4,14 @@ import { formatUnits, parseUnits } from 'ethers/lib/utils'
 
 describe('[utils/erc20-percentage.test.ts]', () => {
 	let percentage
-	before('deploy percentage test', async () =>
-		percentage = await ethers.getContractFactory('ERC20PercentageTest')
-			.then(factory => factory.deploy())
-			.then(contract => contract.deployed()))
+	before(
+		'deploy percentage test',
+		async () =>
+			(percentage = await ethers
+				.getContractFactory('ERC20PercentageTest')
+				.then(factory => factory.deploy())
+				.then(contract => contract.deployed()))
+	)
 
 	it('has correct result for 0% from 100', async () => {
 		const amount = parseUnits('100', 18)

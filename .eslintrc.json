@@ -19,7 +19,7 @@
     "max-len": [
       "error",
       {
-        "code": 120
+        "code": 80
       }
     ],
     "linebreak-style": ["error", "unix"],

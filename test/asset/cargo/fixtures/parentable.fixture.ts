@@ -14,6 +14,7 @@ export interface Parentable extends Deploy {
 	rootID: BigNumber
 	childID: BigNumber
 }
+// todo extend parentable fixture setup, make more complex mock struct as result
 /**
  * this fixture does:
  * 		* create root asset as `creator` with 3500 balance
@@ -39,8 +40,6 @@ export const parentable: Fixture<Parentable> = async () => {
 		.then(tx => tx.wait())
 		.then(txr => getAssetID(txr))
 
-
-		
 	// create child to receiver
 	const childID = await cargoContract
 		.connect(creator)
@@ -49,8 +48,6 @@ export const parentable: Fixture<Parentable> = async () => {
 		.then(txr => getAssetID(txr))
 
 	// send to receiver
-	console.log('rootID:\t' + rootID.toString())
-	console.log('childID:\t' + childID.toString())
 	await cargoContract
 		.connect(creator)
 		.send(receiver.address, childID, receiverAmount)

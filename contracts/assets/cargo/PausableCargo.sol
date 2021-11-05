@@ -29,12 +29,18 @@ abstract contract PausableCargo is ERC1155, Pausable {
     }
 
     function pause(uint256 id) external override(Pausable) {
-        require(_msgSender() == creators[id], 'Pausable: only asset creator can pause');
+        require(
+            _msgSender() == creators[id],
+            'Pausable: only asset creator can pause'
+        );
         paused[id] = true;
     }
 
     function unpause(uint256 id) external override(Pausable) {
-        require(_msgSender() == creators[id], 'Pausable: only asset creator can unpause');
+        require(
+            _msgSender() == creators[id],
+            'Pausable: only asset creator can unpause'
+        );
         paused[id] = false;
     }
 }

@@ -58,8 +58,6 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, GeneratorID {
         uint256 id,
         uint256 amount
     ) public {
-        console.log(msg.sender);
-        console.log(_msgSender());
         safeTransferFrom(msg.sender, to, id, amount, '');
     }
 

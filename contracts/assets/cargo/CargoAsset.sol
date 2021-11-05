@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import './PausableCargo.sol';
 import './ParentableCargo.sol';
-import '../GeneratorID.sol';
+import '../../utils/GeneratorID.sol';
 import 'hardhat/console.sol';
 
 contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, GeneratorID {
@@ -12,7 +12,7 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, GeneratorID {
 
     // nonce value is used for generation of ids
     uint256 private nonce;
-    // decimals reprents the divisibility depth of 1
+    // decimals reprents the divisibility depth of 1 amount in float notation
     uint256 public constant decimals = 18;
 
     function _beforeTokenTransfer(
@@ -37,17 +37,17 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, GeneratorID {
         override(ParentableCargo)
     {
         uint256 id = generateId();
-        parents[id] = pid;
-       
-       // there is no difference burn or mint first
-       // tho, the helper function 
-       // `test/helpers/getAssetId.helper.ts`
-       // returns id of new asset from last 'TransferSingle` event
-       // because both `_burn` and `_mint` emit that event,
-       // if `_burn` is called last, helper function will return
-       // pid insted of id
-       // helper function marked with todo
-       // this comment shoukld be removed in helpers fun is fixed
+        _parents[id] = pid;
+
+        // there is no difference burn or mint first
+        // tho, the helper function
+        // `test/helpers/getAssetId.helper.ts`
+        // returns id of new asset from last 'TransferSingle` event
+        // because both `_burn` and `_mint` emit that event,
+        // if `_burn` is called last, helper function will return
+        // pid insted of id
+        // helper function marked with todo
+        // this comment shoukld be removed in helpers fun is fixed
         _burn(msg.sender, pid, amount);
         _mint(msg.sender, id, amount, '');
         emit NewParent(id, pid);

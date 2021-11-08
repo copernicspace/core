@@ -1,3 +1,3 @@
 export default {
-    spaceAsset: 'Asset',
+	CARGO_ASSET: 'CargoAsset'
 }

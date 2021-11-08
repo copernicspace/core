@@ -1,6 +1,5 @@
 import { task } from 'hardhat/config'
 import { TASK_NODE } from 'hardhat/builtin-tasks/task-names'
-import { ERC20Mock } from '../../typechain'
 import { parseUnits } from 'ethers/lib/utils'
 
 export const ERC20MOCK_MINT_TO_TASK = {
@@ -22,8 +21,10 @@ export default task(ERC20MOCK_MINT_TO_TASK.NAME, ERC20MOCK_MINT_TO_TASK.DESC)
 	.addParam(ERC20MOCK_MINT_TO_TASK.TO, ERC20MOCK_MINT_TO_TASK.TO_DESC)
 	.addParam(ERC20MOCK_MINT_TO_TASK.AMOUNT, ERC20MOCK_MINT_TO_TASK.AMOUNT_DESC)
 	.addParam(ERC20MOCK_MINT_TO_TASK.ADDRESS, ERC20MOCK_MINT_TO_TASK.ADDRESS_DESC)
-	.setAction(async ({ to, amount, address }, hre) =>
-		await hre.ethers.getContractAt(ERC20MOCK_MINT_TO_TASK.CONTRACT_NAME, address)
-			.then(contract => contract as ERC20Mock)
-			.then(erc20Mock => erc20Mock.mintTo(to, parseUnits(amount, 18)))
+	.setAction(
+		async ({ to, amount, address }, hre) =>
+			await hre.ethers
+				.getContractAt(ERC20MOCK_MINT_TO_TASK.CONTRACT_NAME, address)
+				.then(contract => contract)
+				.then(erc20Mock => erc20Mock.mintTo(to, parseUnits(amount, 18)))
 	)

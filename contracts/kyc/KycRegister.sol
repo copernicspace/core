@@ -36,17 +36,11 @@ contract KycRegister {
         currentAdmin = newAdminAddress;
     }
 
-    function setOperatorStatus(address newOperatorAddress, bool isOperator)
-        public
-        adminPermissions
-    {
+    function setOperatorStatus(address newOperatorAddress, bool isOperator) public adminPermissions {
         operatorAccess[newOperatorAddress] = isOperator;
     }
 
-    function setKycStatus(address userAddress, bool kycValue)
-        public
-        operatorPermissions
-    {
+    function setKycStatus(address userAddress, bool kycValue) public operatorPermissions {
         kycStatus[userAddress] = kycValue;
     }
 
@@ -54,11 +48,7 @@ contract KycRegister {
         return kycStatus[userAddress];
     }
 
-    function getOperatorStatusInfo(address userAddress)
-        public
-        view
-        returns (bool)
-    {
+    function getOperatorStatusInfo(address userAddress) public view returns (bool) {
         return operatorAccess[userAddress];
     }
 
@@ -68,10 +58,7 @@ contract KycRegister {
     }
 
     modifier operatorPermissions() {
-        require(
-            operatorAccess[msg.sender] || msg.sender == currentAdmin,
-            'unauthorized -- only for operators & admin'
-        );
+        require(operatorAccess[msg.sender] || msg.sender == currentAdmin, 'unauthorized -- only for operators & admin');
         _;
     }
 }

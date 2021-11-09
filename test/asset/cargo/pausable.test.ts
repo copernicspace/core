@@ -21,29 +21,20 @@ describe('[test/asset/cargo/parentable.test] SpaceCargo asset: parentable fixtur
 	before(
 		'load fixtures/parentable`',
 		async () =>
-			({
-				cargoContract,
-				creator,
-				receiver,
-				creatorAmount,
-				receiverAmount,
-				rootID,
-				childID
-			} = await waffle.loadFixture(parentable))
+			({ cargoContract, creator, receiver, creatorAmount, receiverAmount, rootID, childID } =
+				await waffle.loadFixture(parentable))
 	)
 
-    // FAILS: todo in `contracts/assets/cargo/PausableCargo.sol#pause`
+	// FAILS: todo in `contracts/assets/cargo/PausableCargo.sol#pause`
 	it('only can be paused by creator', async () =>
-		await expect(
-			cargoContract.connect(receiver).pause(rootID)
-		).to.be.revertedWith('Pausable: only asset creator can pause'))
+		await expect(cargoContract.connect(receiver).pause(rootID)).to.be.revertedWith(
+			'Pausable: only asset creator can pause'
+		))
 
 	it('can not send root if locked', async () => {
 		await cargoContract.connect(creator).pause(rootID)
 		await expect(
-			cargoContract
-				.connect(creator)
-				.send(receiver.address, rootID, parseUnits('100', 18))
+			cargoContract.connect(creator).send(receiver.address, rootID, parseUnits('100', 18))
 		).to.be.revertedWith('Pausable: token transfer while paused')
 	})
 })

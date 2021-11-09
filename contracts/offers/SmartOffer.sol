@@ -1,7 +1,5 @@
-// SPDX-License-Identifier: private
-pragma solidity ^0.8.9;
-import './OffchainSale.sol';
+// // SPDX-License-Identifier: private
+// pragma solidity ^0.8.9;
+// import './OffchainSale.sol';
 
-contract SmartOffer is OffchainSale {
-    
-}
+// contract SmartOffer is OffchainSale {}

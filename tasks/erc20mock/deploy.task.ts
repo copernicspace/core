@@ -6,10 +6,7 @@ export const ERC20MOCK_DEPLOY_TASK = {
 	CONTRACT_NAME: 'ERC20Mock'
 }
 
-export default task(
-	ERC20MOCK_DEPLOY_TASK.NAME,
-	ERC20MOCK_DEPLOY_TASK.DESC
-).setAction(
+export default task(ERC20MOCK_DEPLOY_TASK.NAME, ERC20MOCK_DEPLOY_TASK.DESC).setAction(
 	async (args, hre) =>
 		await hre.ethers
 			.getContractFactory(ERC20MOCK_DEPLOY_TASK.CONTRACT_NAME)

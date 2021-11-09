@@ -20,17 +20,11 @@ contract KymRegister {
         currentAdmin = newAdminAddress;
     }
 
-    function setOperatorStatus(address newOperatorAddress, bool isOperator)
-        public
-        adminPermissions
-    {
+    function setOperatorStatus(address newOperatorAddress, bool isOperator) public adminPermissions {
         operatorAccess[newOperatorAddress] = isOperator;
     }
 
-    function setKymStatus(uint256 assetID, bool kymValue)
-        public
-        operatorPermissions
-    {
+    function setKymStatus(uint256 assetID, bool kymValue) public operatorPermissions {
         kymStatus[assetID] = kymValue;
     }
 
@@ -38,11 +32,7 @@ contract KymRegister {
         return kymStatus[assetID];
     }
 
-    function getOperatorStatusInfo(address userAddress)
-        public
-        view
-        returns (bool)
-    {
+    function getOperatorStatusInfo(address userAddress) public view returns (bool) {
         return operatorAccess[userAddress];
     }
 
@@ -52,10 +42,7 @@ contract KymRegister {
     }
 
     modifier operatorPermissions() {
-        require(
-            operatorAccess[msg.sender] || msg.sender == currentAdmin,
-            'unauthorized -- only for operators & admin'
-        );
+        require(operatorAccess[msg.sender] || msg.sender == currentAdmin, 'unauthorized -- only for operators & admin');
         _;
     }
 }

@@ -1,14 +1,17 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Fixture } from 'ethereum-waffle'
 import { ethers } from 'hardhat'
-import { CargoAsset } from '../../../../typechain'
+import { CargoFactory } from '../../../../typechain'
 import contract_names from '../../../../constants/contract.names'
 
 export interface Deploy {
 	deployer: SignerWithAddress
-	cargoContract: CargoAsset
+	cargoFactory: CargoFactory
 }
 /**
+ * This fixture deploys cargo asset contract
+ * as template for clone factory,
+ * and clone cargo factory
  * // todo link below does not work ;(
  * @see {@link test/asset/deploy/deploy.test.ts}
  * for test suite of this fixture's expected state
@@ -16,10 +19,18 @@ export interface Deploy {
  */
 export const deploy: Fixture<Deploy> = async () => {
 	const [deployer]: SignerWithAddress[] = await ethers.getSigners()
-	const cargoContract: CargoAsset = await ethers
+
+	const cargoContractAddress = await ethers
 		.getContractFactory(contract_names.CARGO_ASSET)
-		.then(factory => factory.connect(deployer).deploy('test.uri'))
+		.then(factory => factory.connect(deployer).deploy(''))
 		.then(contract => contract.deployed())
-		.then(deployedContract => deployedContract as CargoAsset)
-	return { deployer, cargoContract }
+		.then(deployedContract => deployedContract.address)
+
+	const cargoFactory = await ethers
+		.getContractFactory(contract_names.CARGO_FACTORY)
+		.then(factory => factory.connect(deployer).deploy(cargoContractAddress))
+		.then(contract => contract.deployed())
+		.then(deployedContract => deployedContract as CargoFactory)
+
+	return { deployer, cargoFactory }
 }

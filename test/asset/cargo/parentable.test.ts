@@ -20,15 +20,8 @@ describe('[test/asset/cargo/parentable.test] SpaceCargo asset: parentable fixtur
 	before(
 		'load fixtures/parentable`',
 		async () =>
-			({
-				cargoContract,
-				creator,
-				receiver,
-				creatorAmount,
-				receiverAmount,
-				rootID,
-				childID
-			} = await waffle.loadFixture(parentable))
+			({ cargoContract, creator, receiver, creatorAmount, receiverAmount, rootID, childID } =
+				await waffle.loadFixture(parentable))
 	)
 
 	it('correct creator balance after create child and send to receiver', async () => {

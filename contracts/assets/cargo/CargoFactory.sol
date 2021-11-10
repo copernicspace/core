@@ -15,6 +15,8 @@ contract CargoFactory is CloneFactory, AccessControl {
     // role to define who can create new cargo
     bytes32 public constant FACTORY_CLIENT = keccak256('FACTORY_CLIENT');
 
+    address[] public deployed;
+
     event CargoCreated(address newCargoAddress);
 
     constructor(address _templateAddress) {
@@ -40,6 +42,7 @@ contract CargoFactory is CloneFactory, AccessControl {
         address clone = createClone(templateAddress);
         // todo make sure initizle can be called once
         CargoAsset(clone).initialize(_uri, _name, _decimals, _totalSupply);
+        deployed.push(clone);
         emit CargoCreated(clone);
     }
 

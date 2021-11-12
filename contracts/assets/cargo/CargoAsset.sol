@@ -9,8 +9,8 @@ import '../../utils/GeneratorID.sol';
 import 'hardhat/console.sol';
 
 contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, ClonableCargo, GeneratorID {
-    uint256 public childPID = generateId(); // 1
-    uint256 public grantChildPid = generateId(); // 2
+    uint256 public childPID;
+    uint256 public grantChildPID;
 
     constructor(string memory uri) ERC1155(uri) {}
 
@@ -27,7 +27,9 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, ClonableCargo, G
         name = _name;
         decimals = _decimals;
         totalSupply = _totalSupply;
-        uint256 rootID = childPID;  // BUG: assigns zero, even though childPID is NOT zero
+        childPID = generateId();
+        grantChildPID = generateId();
+        uint256 rootID = childPID;  
         _parents[rootID] = 0; // root has 0 as pid
         _mint(msg.sender, rootID, totalSupply, '');
     }
@@ -68,10 +70,10 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, ClonableCargo, G
 
     function createGrantChild(uint256 amount) external override(ParentableCargo) {
         uint256 id = generateId();
-        _parents[id] = grantChildPid; // 2
-        _burn(msg.sender, grantChildPid, amount);
+        _parents[id] = grantChildPID; // 2
+        _burn(msg.sender, grantChildPID, amount);
         _mint(msg.sender, id, amount, '');
-        emit NewParent(id, grantChildPid, amount);
+        emit NewParent(id, grantChildPID, amount);
     }
 
     function send(

@@ -10,5 +10,5 @@ import { BigNumber, ContractReceipt } from 'ethers'
 export const getCargoAddress = (txr: ContractReceipt): string =>
 	txr.events
 		.filter(e => e.event === 'CargoCreated')
-		.map(e => e.args.clone as string)
+		.map(e => e.args.newCargoAddress as string)
 		.pop()

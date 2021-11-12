@@ -27,7 +27,7 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, ClonableCargo, G
         name = _name;
         decimals = _decimals;
         totalSupply = _totalSupply;
-        uint256 rootID = childPID;
+        uint256 rootID = childPID;  // BUG: assigns zero, even though childPID is NOT zero
         _parents[rootID] = 0; // root has 0 as pid
         _mint(msg.sender, rootID, totalSupply, '');
     }

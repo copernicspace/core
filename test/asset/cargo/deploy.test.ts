@@ -9,8 +9,8 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
 export const cargoDeployTest =
 	describe('[test/asset/cargo/deploy.test] SpaceCargo asset: deploy fixture test suite', () => {
-		let userA: SignerWithAddress
-		before('load userA as signerWithAddress', async () => ([, userA] = await ethers.getSigners()))
+		let userA, userB: SignerWithAddress
+		before('load userA as signerWithAddress', async () => ([, , userA] = await ethers.getSigners()))
 
 		let cargoFactory: CargoFactory
 		before('load fixtures/deploy`', async () => ({ cargoFactory } = await waffle.loadFixture(deploy)))
@@ -25,6 +25,9 @@ export const cargoDeployTest =
 				cargoFactory.connect(userA).createCargo('test.uri.com', 'TestSpaceCargoName', 18, '3500')
 			).to.be.revertedWith('You are not allowed to create new SpaceCargo'))
 
-		it('reverts if add address to factory `allowed` from non-operator', async () =>
-			await expect(cargoFactory.allow(userA.address)).to.be.revertedWith('You are not factory manager to allow'))
+		it('reverts if add address to factory `allowed` from non-operator', async () => {
+			await expect(cargoFactory.connect(userA).addClient(userA.address)).to.be.revertedWith(
+				'Only factory owner can add managers'
+			)
+		})
 	})

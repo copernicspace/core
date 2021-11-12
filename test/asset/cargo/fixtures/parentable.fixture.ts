@@ -5,8 +5,12 @@ import { getAssetID } from '../../../helpers/getAssetId.helper'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { create, Create } from './create.fixture'
+import { CargoAsset } from '../../../../typechain'
 
 export interface Parentable extends Create {
+	deployer: SignerWithAddress
+	cargoContract: CargoAsset
+	creator: SignerWithAddress
 	receiver: SignerWithAddress // address who got the child asset
 	receiverAmount: BigNumber // amount of child asset transferd to receiver
 	childID: BigNumber
@@ -32,7 +36,7 @@ export const parentable: Fixture<Parentable> = async () => {
 	// create child to receiver
 	const childID = await cargoContract
 		.connect(creator)
-		.createChild(rootID, receiverAmount)
+		.createChild(receiverAmount)
 		.then(tx => tx.wait())
 		.then(txr => getAssetID(txr))
 
@@ -43,10 +47,10 @@ export const parentable: Fixture<Parentable> = async () => {
 		deployer,
 		cargoContract,
 		creator,
-		creatorAmount,
 		receiver,
 		receiverAmount,
-		rootID,
-		childID
+		childID,
+		totalSupply,
+		cargoFactory
 	}
 }

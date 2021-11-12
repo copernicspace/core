@@ -16,13 +16,15 @@ describe('[test/asset/cargo/parentable.test] SpaceCargo asset: parentable fixtur
 	let receiverAmount: BigNumber
 	let rootID: BigNumber
 	let childID: BigNumber
+	let deployer: SignerWithAddress
 
 	before(
 		'load fixtures/parentable`',
 		async () =>
-			({ cargoContract, creator, receiver, creatorAmount, receiverAmount, rootID, childID } =
-				await waffle.loadFixture(parentable))
+			({ cargoContract, creator, receiver, receiverAmount } = await waffle.loadFixture(parentable))
 	)
+
+	// TODO: fix
 
 	it('correct creator balance after create child and send to receiver', async () => {
 		const actual = await cargoContract.balanceOf(creator.address, rootID)

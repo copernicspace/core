@@ -20,11 +20,27 @@ export const cargoDeployTest =
 			async () => ({ deployer, cargoFactory, cargoContract, creator } = await waffle.loadFixture(create))
 		)
 
-		it('sets correct supply', async () => {
-            // Why is balance of ID=0 equal to 3500?
-            // should it be ID=1 ?
-			const actual = await cargoContract.balanceOf(cargoFactory.address, '1')
-			const expected = BigNumber.from(3500)
+		it('sets correct uri', async() => {
+			const actual = await cargoContract.uri('1')
+			const expected = 'test.uri.com'
 			expect(expected).to.be.eq(actual)
 		})
+
+		it('sets correct name', async() => {
+			const actual = await cargoContract.name()
+			const expected = 'MyTestName'
+			expect(expected).to.be.eq(actual)
+		})
+
+		it('sets correct decimals', async() => {
+			const actual = await cargoContract.decimals()
+			const expected = BigNumber.from(18)
+			expect(expected).to.be.eq(actual)
+		})
+
+		it('sets correct supply', async () => {
+			const actual = await cargoContract.balanceOf(creator.address, '1')
+			const expected = BigNumber.from(3500)
+			expect(expected).to.be.eq(actual)
+		})		
 	})

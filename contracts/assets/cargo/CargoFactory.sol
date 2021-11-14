@@ -6,7 +6,7 @@ import '../../utils/CloneFactory.sol';
 import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol';
 
-contract CargoFactory is IERC1155Receiver, CloneFactory, AccessControl {
+contract CargoFactory is CloneFactory, AccessControl {
     // address of deployed contract to clone from
     // this should be deployed `SpaceCargo` address
     address public templateAddress;
@@ -30,26 +30,6 @@ contract CargoFactory is IERC1155Receiver, CloneFactory, AccessControl {
         templateAddress = _templateAddress;
     }
 
-    function onERC1155Received(
-        address operator,
-        address from,
-        uint256 id,
-        uint256 value,
-        bytes calldata data
-    ) external override returns (bytes4) {
-        return bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"));
-    }
-
-    function onERC1155BatchReceived(
-        address operator,
-        address from,
-        uint256[] calldata ids,
-        uint256[] calldata values,
-        bytes calldata data
-    ) external override returns (bytes4) {
-        return bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"));
-    }
-
     function createCargo(
         string memory _uri,
         string memory _name,
@@ -62,7 +42,7 @@ contract CargoFactory is IERC1155Receiver, CloneFactory, AccessControl {
         );
         address clone = createClone(templateAddress);
         // todo make sure initizle can be called once
-        CargoAsset(clone).initialize(_uri, _name, _decimals, _totalSupply);
+        CargoAsset(clone).initialize(_uri, _name, _decimals, _totalSupply, msg.sender);
         deployed.push(clone);
         emit CargoCreated(clone);
     }
@@ -77,6 +57,6 @@ contract CargoFactory is IERC1155Receiver, CloneFactory, AccessControl {
             hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(FACTORY_MANAGER, msg.sender),
             'Only factory owner can add managers'
         );
-        grantRole(FACTORY_MANAGER, client);
+        grantRole(FACTORY_CLIENT, client);
     }
 }

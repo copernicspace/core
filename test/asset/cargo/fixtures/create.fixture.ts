@@ -17,7 +17,12 @@ export const create: Fixture<Create> = async () => {
 	const { deployer, cargoFactory } = await waffle.loadFixture(deploy)
 	const [, creator] = await ethers.getSigners()
 	const totalSupply = BigNumber.from(3500)
+
+	// add `creator` as factory client
+	await cargoFactory.connect(deployer).addClient(creator.address)
+
 	const cargoContract = await cargoFactory
+		.connect(creator)
 		.createCargo('test.uri.com', 'MyTestName', 18, totalSupply)
 		.then(tx => tx.wait())
 		.then(txr => getCargoAddress(txr))

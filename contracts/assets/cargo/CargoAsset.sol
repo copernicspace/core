@@ -21,7 +21,8 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, ClonableCargo, G
         string memory _uri,
         string memory _name,
         uint256 _decimals,
-        uint256 _totalSupply
+        uint256 _totalSupply,
+        address _owner
     ) external override(ClonableCargo) {
         _setURI(_uri);
         name = _name;
@@ -31,7 +32,7 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, ClonableCargo, G
         grantChildPID = generateId();
         uint256 rootID = childPID;  
         _parents[rootID] = 0; // root has 0 as pid
-        _mint(msg.sender, rootID, totalSupply, '');
+        _mint(_owner, rootID, totalSupply, '');
     }
 
     // decimals reprents the divisibility depth of 1 amount in float notation

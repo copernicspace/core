@@ -7,6 +7,7 @@ interface ClonableCargo {
         string memory _uri,
         string memory _name,
         uint256 _amount,
-        uint256 _totalSupply
+        uint256 _totalSupply,
+        address _owner
     ) external;
 }

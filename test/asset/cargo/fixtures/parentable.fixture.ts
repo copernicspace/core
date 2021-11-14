@@ -5,6 +5,7 @@ import { getAssetID } from '../../../helpers/getAssetId.helper'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { create, Create } from './create.fixture'
+import { ContractReceipt } from '@ethersproject/contracts'
 
 export interface Parentable extends Create {
 	receiver: SignerWithAddress // address who got the child asset
@@ -27,12 +28,14 @@ export const parentable: Fixture<Parentable> = async () => {
 	const { deployer, cargoFactory, creator, cargoContract, totalSupply, decimals } = await waffle.loadFixture(create)
 	const [, , receiver]: SignerWithAddress[] = await ethers.getSigners()
 	const receiverAmount = parseUnits('500', decimals)
-	// create child to receiver
 	const childID = await cargoContract
 		.connect(creator)
 		.createChild(receiverAmount)
 		.then(tx => tx.wait())
 		.then(txr => getAssetID(txr))
+
+	// todo `childID` is undefined if tests run with `hh test`
+	// works ok if run with `hh test test/asset/cargo/parentable.test.ts`
 	await cargoContract.connect(creator).send(receiver.address, childID, receiverAmount)
 
 	return {

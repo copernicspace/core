@@ -12,7 +12,7 @@ describe('[test/asset/cargo/deploy.test] CargoFactory for asset: deploy fixture 
 	before('load userA as signerWithAddress', async () => ([, , user] = await ethers.getSigners()))
 
 	let cargoFactory: CargoFactory
-	before('load fixtures/deploy`', async () => ({ cargoFactory } = await waffle.loadFixture(deploy)))
+	beforeEach('load fixtures/deploy`', async () => ({ cargoFactory } = await waffle.loadFixture(deploy)))
 
 	it('has success tx receipt status', async () =>
 		await cargoFactory.deployTransaction.wait().then(txr => expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)))

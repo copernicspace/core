@@ -14,7 +14,7 @@ describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test s
 
 	let cargoFactory: CargoFactory
 	let cargoContract: CargoAsset
-	before(
+	beforeEach(
 		'load fixtures/deploy`',
 		async () => ({ deployer, cargoFactory, cargoContract, creator } = await waffle.loadFixture(create))
 	)

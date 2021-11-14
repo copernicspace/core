@@ -33,10 +33,5 @@ export const create: Fixture<Create> = async () => {
 		.getContractAt(contractNames.CARGO_ASSET, cargoContractAddress)
 		.then(contract => contract as CargoAsset)
 
-	const tm_decimals = await cargoContract.decimals()
-	console.log('=========')
-	console.log({ tm_decimals })
-	console.log('=========')
-
 	return { deployer, cargoFactory, creator, cargoContract, totalSupply, decimals }
 }

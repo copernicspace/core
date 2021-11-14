@@ -6,6 +6,7 @@ import { ethers, waffle } from 'hardhat'
 import { CargoAsset } from '../../../../typechain'
 import { getCargoAddress } from '../../../helpers/cargoAddress'
 import contractNames from '../../../../constants/contract.names'
+import { parseUnits } from '@ethersproject/units'
 
 export interface Create extends Deploy {
 	creator: SignerWithAddress
@@ -16,17 +17,19 @@ export interface Create extends Deploy {
 export const create: Fixture<Create> = async () => {
 	const { deployer, cargoFactory } = await waffle.loadFixture(deploy)
 	const [, creator] = await ethers.getSigners()
-	const totalSupply = BigNumber.from(3500)
+	const decimals = 18
+	const totalSupply = parseUnits('3500', decimals)
 
-	// add `creator` as factory client
 	await cargoFactory.connect(deployer).addClient(creator.address)
 
-	const cargoContract = await cargoFactory
+	const cargoContractAddress = await cargoFactory
 		.connect(creator)
-		.createCargo('test.uri.com', 'MyTestName', 18, totalSupply)
+		.createCargo('test.uri.com', 'testSpaceCargo', decimals, totalSupply)
 		.then(tx => tx.wait())
 		.then(txr => getCargoAddress(txr))
-		.then(address => ethers.getContractAt(contractNames.CARGO_ASSET, address))
+
+	const cargoContract = await ethers
+		.getContractAt(contractNames.CARGO_ASSET, cargoContractAddress)
 		.then(contract => contract as CargoAsset)
 
 	return { deployer, cargoFactory, creator, cargoContract, totalSupply }

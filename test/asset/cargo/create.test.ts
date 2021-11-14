@@ -3,10 +3,10 @@ import { waffle } from 'hardhat'
 import { expect } from 'chai'
 import { CargoAsset, CargoFactory } from '../../../typechain'
 import { create } from './fixtures/create.fixture'
-import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
+import { parseUnits } from '@ethersproject/units'
 
 export const cargoDeployTest =
 	describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test suite', () => {
@@ -20,19 +20,19 @@ export const cargoDeployTest =
 			async () => ({ deployer, cargoFactory, cargoContract, creator } = await waffle.loadFixture(create))
 		)
 
-		it('sets correct uri', async() => {
+		it('has correct uri', async () => {
 			const actual = await cargoContract.uri('1')
 			const expected = 'test.uri.com'
 			expect(expected).to.be.eq(actual)
 		})
 
-		it('sets correct name', async() => {
+		it('has correct name', async () => {
 			const actual = await cargoContract.name()
-			const expected = 'MyTestName'
+			const expected = 'testSpaceCargo'
 			expect(expected).to.be.eq(actual)
 		})
 
-		it('sets correct decimals', async() => {
+		it('has correct decimals', async () => {
 			const actual = await cargoContract.decimals()
 			const expected = BigNumber.from(18)
 			expect(expected).to.be.eq(actual)
@@ -40,7 +40,7 @@ export const cargoDeployTest =
 
 		it('sets correct supply', async () => {
 			const actual = await cargoContract.balanceOf(creator.address, '1')
-			const expected = BigNumber.from(3500)
+			const expected = parseUnits('3500', 18)
 			expect(expected).to.be.eq(actual)
-		})		
+		})
 	})

@@ -18,7 +18,7 @@ contract CargoFactory is CloneFactory, AccessControl {
 
     address[] public deployed;
 
-    event CargoCreated(address newCargoAddress);
+    event CargoCreated(address indexed newCargoAddress, address indexed creator);
 
     constructor(address _templateAddress) {
         templateAddress = _templateAddress;
@@ -44,7 +44,7 @@ contract CargoFactory is CloneFactory, AccessControl {
         // todo make sure initizle can be called once
         CargoAsset(clone).initialize(_uri, _name, _decimals, _totalSupply, msg.sender);
         deployed.push(clone);
-        emit CargoCreated(clone);
+        emit CargoCreated(clone, msg.sender);
     }
 
     function addManager(address manager) external {
@@ -55,7 +55,7 @@ contract CargoFactory is CloneFactory, AccessControl {
     function addClient(address client) external {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(FACTORY_MANAGER, msg.sender),
-            'Only factory owner can add managers'
+            'Only factory owner & managers can add clients'
         );
         grantRole(FACTORY_CLIENT, client);
     }

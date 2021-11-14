@@ -1,4 +1,4 @@
-import { BigNumber, ContractReceipt } from 'ethers'
+import { ContractReceipt } from 'ethers'
 // returns address from txr from CargoFactory.create
 /**
  * helper to parse tx receipt and find first cargo factory event

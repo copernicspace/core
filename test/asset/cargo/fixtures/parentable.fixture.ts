@@ -5,12 +5,8 @@ import { getAssetID } from '../../../helpers/getAssetId.helper'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { create, Create } from './create.fixture'
-import { CargoAsset } from '../../../../typechain'
 
 export interface Parentable extends Create {
-	deployer: SignerWithAddress
-	cargoContract: CargoAsset
-	creator: SignerWithAddress
 	receiver: SignerWithAddress // address who got the child asset
 	receiverAmount: BigNumber // amount of child asset transferd to receiver
 	childID: BigNumber
@@ -24,33 +20,30 @@ export interface Parentable extends Create {
  *
  * //todo link below doe not work ;(
  * @see {@link test/asset/cargo/parentable.test.ts}
- * for test suite of this fixture's expected state
+ * for test suite of this fixture's expected statex
  * @returns blockchain state with result of fixture actions
  */
 export const parentable: Fixture<Parentable> = async () => {
-	const { deployer, cargoFactory, creator, cargoContract, totalSupply } = await waffle.loadFixture(create)
+	const { deployer, cargoFactory, creator, cargoContract, totalSupply, decimals } = await waffle.loadFixture(create)
 	const [, , receiver]: SignerWithAddress[] = await ethers.getSigners()
-	const cargoContractDecimals = await cargoContract.decimals()
-	const receiverAmount = parseUnits('500', cargoContractDecimals)
-
+	const receiverAmount = parseUnits('500', decimals)
 	// create child to receiver
 	const childID = await cargoContract
 		.connect(creator)
 		.createChild(receiverAmount)
 		.then(tx => tx.wait())
 		.then(txr => getAssetID(txr))
-
-	// send to receiver
 	await cargoContract.connect(creator).send(receiver.address, childID, receiverAmount)
 
 	return {
 		deployer,
-		cargoContract,
+		cargoFactory,
 		creator,
+		cargoContract,
+		totalSupply,
+		decimals,
 		receiver,
 		receiverAmount,
-		childID,
-		totalSupply,
-		cargoFactory
+		childID
 	}
 }

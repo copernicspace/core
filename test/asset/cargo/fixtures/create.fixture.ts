@@ -12,6 +12,7 @@ export interface Create extends Deploy {
 	creator: SignerWithAddress
 	cargoContract: CargoAsset
 	totalSupply: BigNumber
+	decimals: number
 }
 
 export const create: Fixture<Create> = async () => {
@@ -32,5 +33,10 @@ export const create: Fixture<Create> = async () => {
 		.getContractAt(contractNames.CARGO_ASSET, cargoContractAddress)
 		.then(contract => contract as CargoAsset)
 
-	return { deployer, cargoFactory, creator, cargoContract, totalSupply }
+	const tm_decimals = await cargoContract.decimals()
+	console.log('=========')
+	console.log({ tm_decimals })
+	console.log('=========')
+
+	return { deployer, cargoFactory, creator, cargoContract, totalSupply, decimals }
 }

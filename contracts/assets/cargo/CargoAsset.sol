@@ -9,8 +9,9 @@ import '../../utils/GeneratorID.sol';
 import 'hardhat/console.sol';
 
 contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, ClonableCargo, GeneratorID {
-    uint256 public childPID;
-    uint256 public grantChildPID;
+    uint256 public childPID;            // rootID
+    uint256 public grantChildPID;       // childID
+    uint256 public grantGrantChildPID;  // grantChildID
 
     constructor(string memory uri) ERC1155(uri) {}
 
@@ -28,8 +29,12 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, ClonableCargo, G
         name = _name;
         decimals = _decimals;
         totalSupply = _totalSupply;
+
+        // generate IDs
         childPID = generateId();
         grantChildPID = generateId();
+        grantGrantChildPID = generateId();
+
         uint256 rootID = childPID;  
         _parents[rootID] = 0; // root has 0 as pid
         _mint(_owner, rootID, totalSupply, '');
@@ -52,7 +57,7 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, ClonableCargo, G
     }
 
     function createChild(uint256 amount) external override(ParentableCargo) {
-        uint256 id = generateId();
+        uint256 id = grantChildPID;
         _parents[id] = childPID; // 1
 
         // there is no difference burn or mint first
@@ -70,8 +75,8 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, ClonableCargo, G
     }
 
     function createGrantChild(uint256 amount) external override(ParentableCargo) {
-        uint256 id = generateId();
-        _parents[id] = grantChildPID; // 2
+        uint256 id = grantGrantChildPID;    // 3
+        _parents[id] = grantChildPID;       // 2
         _burn(msg.sender, grantChildPID, amount);
         _mint(msg.sender, id, amount, '');
         emit NewParent(id, grantChildPID, amount);

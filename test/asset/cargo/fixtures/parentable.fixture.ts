@@ -5,12 +5,18 @@ import { getAssetID } from '../../../helpers/getAssetId.helper'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { create, Create } from './create.fixture'
-import { ContractReceipt } from '@ethersproject/contracts'
+import { CargoAsset } from '../../../../typechain'
 
 export interface Parentable extends Create {
+	deployer: SignerWithAddress
+	cargoContract: CargoAsset
+	creator: SignerWithAddress
 	receiver: SignerWithAddress // address who got the child asset
 	receiverAmount: BigNumber // amount of child asset transferd to receiver
+	createdAmount: BigNumber
 	childID: BigNumber
+	grandChildID: BigNumber
+	decimals: number
 }
 // todo extend parentable fixture setup, make more complex mock struct as result
 /**
@@ -21,32 +27,47 @@ export interface Parentable extends Create {
  *
  * //todo link below doe not work ;(
  * @see {@link test/asset/cargo/parentable.test.ts}
- * for test suite of this fixture's expected statex
+ * for test suite of this fixture's expected state
  * @returns blockchain state with result of fixture actions
  */
 export const parentable: Fixture<Parentable> = async () => {
 	const { deployer, cargoFactory, creator, cargoContract, totalSupply, decimals } = await waffle.loadFixture(create)
 	const [, , receiver]: SignerWithAddress[] = await ethers.getSigners()
-	const receiverAmount = parseUnits('500', decimals)
+	const cargoContractDecimals = await cargoContract.decimals()
+	const receiverAmount = parseUnits('500', cargoContractDecimals)
+	const createdAmount = receiverAmount.mul(2)
+
+	// create child to receiver
 	const childID = await cargoContract
 		.connect(creator)
-		.createChild(receiverAmount)
+		.createChild(createdAmount)
 		.then(tx => tx.wait())
 		.then(txr => getAssetID(txr))
 
-	// todo `childID` is undefined if tests run with `hh test`
-	// works ok if run with `hh test test/asset/cargo/parentable.test.ts`
+	// send to receiver
 	await cargoContract.connect(creator).send(receiver.address, childID, receiverAmount)
+
+	// create grand-child
+	const grandChildID = await cargoContract
+		.connect(creator)
+		.createGrantChild(receiverAmount)
+		.then(tx => tx.wait())
+		.then(txr => getAssetID(txr))
+
+	// send to receiver
+	await cargoContract.connect(creator).send(receiver.address, grandChildID, receiverAmount)
 
 	return {
 		deployer,
-		cargoFactory,
-		creator,
 		cargoContract,
-		totalSupply,
-		decimals,
+		creator,
 		receiver,
 		receiverAmount,
-		childID
+		createdAmount,
+		childID,
+		grandChildID,
+		totalSupply,
+		cargoFactory,
+		decimals
 	}
 }

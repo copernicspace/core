@@ -7,10 +7,11 @@ import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
+import { getCargoAddress } from '../../helpers/cargoAddress'
 
 describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test suite', () => {
 	let userA, userB, creator, deployer: SignerWithAddress
-	before('load userA as signerWithAddress', async () => ([, , userA] = await ethers.getSigners()))
+	before('load userA as signerWithAddress', async () => ([, , userA, userB] = await ethers.getSigners()))
 
 	let cargoFactory: CargoFactory
 	let cargoContract: CargoAsset
@@ -41,5 +42,23 @@ describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test s
 		const actual = await cargoContract.balanceOf(creator.address, '1')
 		const expected = parseUnits('3500', 18)
 		expect(expected).to.be.eq(actual)
+	})
+
+	it('disallows non-factory-clients from creating cargo', async () => {
+		await expect(
+			cargoFactory.connect(userA).createCargo('test.revert.com', 'revert test asset', 18, 6000)
+		).to.be.revertedWith('You are not allowed to create new SpaceCargo')
+	})
+
+	it('disallows non-managers from adding clients', async () => {
+		await expect(cargoFactory.connect(userA).addClient(userB.address)).to.be.revertedWith(
+			'Only factory owner & managers can add clients'
+		)
+	})
+
+	it('disallows non-factory-owners adding new factory managers', async () => {
+		await expect(cargoFactory.connect(userB).addManager(userA.address)).to.be.revertedWith(
+			'Only factory owner can add managers'
+		)
 	})
 })

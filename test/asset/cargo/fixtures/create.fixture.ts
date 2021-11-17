@@ -16,7 +16,10 @@ export interface Create extends Deploy {
 }
 
 export const create: Fixture<Create> = async () => {
-	const { deployer, cargoFactory } = await waffle.loadFixture(deploy)
+	const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader(
+		await (ethers as any).getSigners()
+	)
+	const { deployer, cargoFactory } = await loadFixture(deploy)
 	const [, creator] = await ethers.getSigners()
 	const decimals = 18
 	const totalSupply = parseUnits('3500', decimals)

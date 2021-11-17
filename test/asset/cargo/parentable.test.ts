@@ -1,10 +1,9 @@
-import { waffle } from 'hardhat'
+import { ethers, waffle } from 'hardhat'
 import { expect } from 'chai'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { CargoAsset } from '../../../typechain'
 import { parentable } from './fixtures/parentable.fixture'
 import { BigNumber } from '@ethersproject/bignumber'
-import { getAssetID } from '../../helpers/getAssetId.helper'
 
 /**
  * test suite for {@link parentable}
@@ -21,11 +20,17 @@ describe('[test/asset/cargo/parentable.test] SpaceCargo asset: parentable fixtur
 	let createdAmount: BigNumber
 	let grandChildID: BigNumber
 
+	let loadFixture: ReturnType<typeof waffle.createFixtureLoader>
+
+	before('create fixture loader', async () => {
+		loadFixture = waffle.createFixtureLoader(await (ethers as any).getSigners())
+	})
+
 	beforeEach(
 		'load fixtures/parentable`',
 		async () =>
 			({ cargoContract, creator, receiver, receiverAmount, totalSupply, childID, grandChildID, createdAmount } =
-				await waffle.loadFixture(parentable))
+				await loadFixture(parentable))
 	)
 
 	it('correct creator balance after create child and send to receiver', async () => {
@@ -69,5 +74,4 @@ describe('[test/asset/cargo/parentable.test] SpaceCargo asset: parentable fixtur
 		const expected = receiverAmount.sub(receiverAmount)
 		expect(expected).to.be.eq(actual)
 	})
-
 })

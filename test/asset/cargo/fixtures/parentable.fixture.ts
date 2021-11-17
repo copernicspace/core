@@ -40,7 +40,7 @@ export const parentable: Fixture<Parentable> = async () => {
 	// create child to receiver
 	const childID = await cargoContract
 		.connect(creator)
-		.createChild(amount, 0, 'childBrandName', receiver.address)
+		.createChild(amount, 0, 'childSpaceCargoName', receiver.address)
 		.then(tx => tx.wait())
 		.then(txr => getAssetID(txr))
 

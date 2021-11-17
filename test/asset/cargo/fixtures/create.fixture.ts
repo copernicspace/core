@@ -28,7 +28,7 @@ export const create: Fixture<Create> = async () => {
 
 	const cargoContractAddress = await cargoFactory
 		.connect(creator)
-		.createCargo('test.uri.com', 'testSpaceCargo', decimals, totalSupply)
+		.createCargo('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply)
 		.then(tx => tx.wait())
 		.then(txr => getCargoAddress(txr))
 

@@ -3,7 +3,6 @@ import { expect } from 'chai'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { CargoAsset } from '../../../typechain'
 import { parentable } from './fixtures/parentable.fixture'
-import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 
 /**

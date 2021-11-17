@@ -1,4 +1,3 @@
-// @filename cargo-deploy.test.ts
 import { waffle } from 'hardhat'
 import { expect } from 'chai'
 import { CargoFactory } from '../../../typechain'

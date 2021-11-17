@@ -45,21 +45,6 @@ describe('[test/asset/cargo/parentable.test] SpaceCargo asset: parentable fixtur
 		expect(0).to.be.eq(actual)
 	})
 
-	// it('sets correct grand-child asset ID', async () => {
-	// 	const actual = grandChildID
-	// 	const expected = BigNumber.from(3)
-	// 	expect(expected).to.be.eq(actual)
-	// })
-
-	// it('correct receiver balance of new grand-child asset', async () => {
-	// 	const actual = await cargoContract.balanceOf(receiver.address, grandChildID)
-	// 	const expected = receiverAmount
-	// 	expect(expected).to.be.eq(actual)
-	// })
-
-	// it('correct creator balance of new asset', async () => {
-	// 	const actual = await cargoContract.balanceOf(creator.address, grandChildID)
-	// 	const expected = receiverAmount.sub(receiverAmount)
-	// 	expect(expected).to.be.eq(actual)
-	// })
+	it('check name', async () =>
+		expect(await cargoContract.getFullName(childID)).to.be.eq('rootSpaceCargoName/childSpaceCargoName'))
 })

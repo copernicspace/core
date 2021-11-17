@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 import '../interfaces/Parentable.sol';
 
 import '@openzeppelin/contracts/utils/Context.sol';
+import 'hardhat/console.sol';
 
 abstract contract ParentableCargo is Parentable, Context {
     mapping(uint256 => uint256) internal _parents;
@@ -10,12 +11,12 @@ abstract contract ParentableCargo is Parentable, Context {
 
     // A --> B --> C
     function getFullName(uint256 id) public view returns (string memory) {
-        uint256 pid = getParent(id);
-        if (pid == 0) {
-            return _names[pid];
-        } else {
+        if (id != 0) {
+            uint256 pid = _parents[id];
             string memory pname = getFullName(pid);
-            return string(bytes.concat(bytes(_names[id]), '//', bytes(pname)));
+            return string(bytes.concat(bytes(pname), '/', bytes(_names[id])));
+        } else {
+            return _names[id];
         }
     }
 

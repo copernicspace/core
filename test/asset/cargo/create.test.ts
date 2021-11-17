@@ -1,4 +1,3 @@
-// @filename create.test.ts
 import { waffle } from 'hardhat'
 import { expect } from 'chai'
 import { CargoAsset, CargoFactory } from '../../../typechain'
@@ -7,17 +6,16 @@ import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
-import { getCargoAddress } from '../../helpers/cargoAddress'
 
 describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test suite', () => {
-	let userA, userB, creator, deployer: SignerWithAddress
+	let userA, userB, creator: SignerWithAddress
 	before('load userA as signerWithAddress', async () => ([, , userA, userB] = await ethers.getSigners()))
 
 	let cargoFactory: CargoFactory
 	let cargoContract: CargoAsset
 	beforeEach(
 		'load fixtures/deploy`',
-		async () => ({ deployer, cargoFactory, cargoContract, creator } = await waffle.loadFixture(create))
+		async () => ({ cargoFactory, cargoContract, creator } = await waffle.loadFixture(create))
 	)
 
 	it('has correct uri', async () => {
@@ -28,7 +26,7 @@ describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test s
 
 	it('has correct name', async () => {
 		const actual = await cargoContract.getName(0)
-		const expected = 'testSpaceCargo'
+		const expected = 'rootSpaceCargoName'
 		expect(expected).to.be.eq(actual)
 	})
 

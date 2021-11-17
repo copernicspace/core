@@ -2,10 +2,10 @@
 pragma solidity ^0.8.9;
 
 interface Pausable {
-    event Paused(address indexed operator, uint256 indexed id);
-    event Unpaused(address indexed operator, uint256 indexed id);
+    event Paused();
+    event Unpaused();
 
-    function pause(uint256 id) external;
+    function pause() external;
 
-    function unpause(uint256 id) external;
+    function unpause() external;
 }

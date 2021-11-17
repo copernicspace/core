@@ -13,29 +13,20 @@ describe('[test/asset/cargo/pausable.test] SpaceCargo asset: pausable test suite
 	let cargoContract: CargoAsset
 	let creator: SignerWithAddress
 	let receiver: SignerWithAddress
-	let creatorAmount: BigNumber
-	let receiverAmount: BigNumber
-	let rootID: BigNumber
-	let childID: BigNumber
 
 	before(
 		'load fixtures/parentable`',
-		async () =>
-			({ cargoContract, creator, receiver, receiverAmount, childID } = await waffle.loadFixture(parentable))
+		async () => ({ cargoContract, creator, receiver } = await waffle.loadFixture(parentable))
 	)
 
 	it('only can be paused by creator', async () => {
-		rootID = await cargoContract.childPID()
-
-		await expect(cargoContract.connect(receiver).pause(rootID)).to.be.revertedWith(
-			'Pausable: only asset creator can pause'
-		)
+		await expect(cargoContract.connect(receiver).pause()).to.be.revertedWith('unauthorized -- only for creator')
 	})
 
-	it('cannot send root if locked', async () => {
-		await cargoContract.connect(creator).pause(rootID)
+	it('cannot send token if paused', async () => {
+		await cargoContract.connect(creator).pause()
 		await expect(
-			cargoContract.connect(creator).send(receiver.address, rootID, parseUnits('100', 18))
-		).to.be.revertedWith('Pausable: token transfer while paused')
+			cargoContract.connect(creator).send(receiver.address, 0, parseUnits('100', 18))
+		).to.be.revertedWith('Pausable: token is paused')
 	})
 })

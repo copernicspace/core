@@ -12,10 +12,8 @@ export interface Parentable extends Create {
 	cargoContract: CargoAsset
 	creator: SignerWithAddress
 	receiver: SignerWithAddress // address who got the child asset
-	receiverAmount: BigNumber // amount of child asset transferd to receiver
-	createdAmount: BigNumber
+	amount: BigNumber // amount of child asset transferd to receiver
 	childID: BigNumber
-	grandChildID: BigNumber
 	decimals: number
 }
 // todo extend parentable fixture setup, make more complex mock struct as result
@@ -37,38 +35,22 @@ export const parentable: Fixture<Parentable> = async () => {
 	const { deployer, cargoFactory, creator, cargoContract, totalSupply, decimals } = await loadFixture(create)
 	const [, , receiver]: SignerWithAddress[] = await ethers.getSigners()
 	const cargoContractDecimals = await cargoContract.decimals()
-	const receiverAmount = parseUnits('500', cargoContractDecimals)
-	const createdAmount = receiverAmount.mul(2)
+	const amount = parseUnits('500', cargoContractDecimals)
 
 	// create child to receiver
 	const childID = await cargoContract
 		.connect(creator)
-		.createChild(createdAmount)
+		.createChild(amount, 0, 'childBrandName', receiver.address)
 		.then(tx => tx.wait())
 		.then(txr => getAssetID(txr))
-
-	// send to receiver
-	await cargoContract.connect(creator).send(receiver.address, childID, receiverAmount)
-
-	// create grand-child
-	const grandChildID = await cargoContract
-		.connect(creator)
-		.createGrantChild(receiverAmount)
-		.then(tx => tx.wait())
-		.then(txr => getAssetID(txr))
-
-	// send to receiver
-	await cargoContract.connect(creator).send(receiver.address, grandChildID, receiverAmount)
 
 	return {
 		deployer,
 		cargoContract,
 		creator,
 		receiver,
-		receiverAmount,
-		createdAmount,
+		amount,
 		childID,
-		grandChildID,
 		totalSupply,
 		cargoFactory,
 		decimals

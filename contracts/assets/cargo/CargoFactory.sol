@@ -9,7 +9,7 @@ import '@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol';
 contract CargoFactory is CloneFactory, AccessControl {
     // address of deployed contract to clone from
     // this should be deployed `SpaceCargo` address
-    address public templateAddress;
+    address public logicAddress;
 
     // role to define managers who can add clients
     bytes32 public constant FACTORY_MANAGER = keccak256('FACTORY_MANAGER');
@@ -20,14 +20,14 @@ contract CargoFactory is CloneFactory, AccessControl {
 
     event CargoCreated(address indexed newCargoAddress, address indexed creator);
 
-    constructor(address _templateAddress) {
-        templateAddress = _templateAddress;
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    constructor(address _logicAddress) {
+        logicAddress = _logicAddress;
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
-    function setTemplateAddress(address _templateAddress) public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), 'Only factory owner can set template address');
-        templateAddress = _templateAddress;
+    function setTemplateAddress(address _logicAddress) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), 'Only factory owner can set template address');
+        logicAddress = _logicAddress;
     }
 
     function createCargo(
@@ -37,24 +37,24 @@ contract CargoFactory is CloneFactory, AccessControl {
         uint256 _totalSupply
     ) public {
         require(
-            hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(FACTORY_CLIENT, msg.sender),
+            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(FACTORY_CLIENT, _msgSender()),
             'You are not allowed to create new SpaceCargo'
         );
-        address clone = createClone(templateAddress);
+        address clone = createClone(logicAddress);
         // todo make sure initizle can be called once
-        CargoAsset(clone).initialize(_uri, _name, _decimals, _totalSupply, msg.sender);
+        CargoAsset(clone).initialize(_uri, _name, _decimals, _totalSupply, _msgSender());
         deployed.push(clone);
-        emit CargoCreated(clone, msg.sender);
+        emit CargoCreated(clone, _msgSender());
     }
 
     function addManager(address manager) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), 'Only factory owner can add managers');
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), 'Only factory owner can add managers');
         grantRole(FACTORY_MANAGER, manager);
     }
 
     function addClient(address client) external {
         require(
-            hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(FACTORY_MANAGER, msg.sender),
+            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(FACTORY_MANAGER, _msgSender()),
             'Only factory owner & managers can add clients'
         );
         grantRole(FACTORY_CLIENT, client);

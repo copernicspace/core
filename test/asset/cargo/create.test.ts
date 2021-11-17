@@ -27,7 +27,7 @@ describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test s
 	})
 
 	it('has correct name', async () => {
-		const actual = await cargoContract.name()
+		const actual = await cargoContract.getName(0)
 		const expected = 'testSpaceCargo'
 		expect(expected).to.be.eq(actual)
 	})
@@ -39,7 +39,7 @@ describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test s
 	})
 
 	it('sets correct supply', async () => {
-		const actual = await cargoContract.balanceOf(creator.address, '1')
+		const actual = await cargoContract.balanceOf(creator.address, 0)
 		const expected = parseUnits('3500', 18)
 		expect(expected).to.be.eq(actual)
 	})

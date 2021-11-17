@@ -2,6 +2,7 @@ import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@typechain/hardhat'
 import 'hardhat-tracer'
+import 'hardhat-gas-reporter'
 import * as Mocha from 'mocha'
 import './tasks'
 

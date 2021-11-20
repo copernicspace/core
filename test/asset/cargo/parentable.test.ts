@@ -47,4 +47,33 @@ describe('[test/asset/cargo/parentable.test] SpaceCargo asset: parentable fixtur
 
 	it('check name', async () =>
 		expect(await cargoContract.getFullName(childID)).to.be.eq('rootSpaceCargoName/childSpaceCargoName'))
+
+	it('check getName()', async () => {
+		const actual = await cargoContract.getName(childID)
+		expect('childSpaceCargoName').to.be.eq(actual)
+	})
+
+	it('check getParent()', async () => {
+		const actual = await cargoContract.getParent(childID)
+		expect(0).to.be.eq(actual)
+	})
+
+	it('disallows non-creators from creating child asset', async () => {
+		await expect(
+			cargoContract.connect(receiver).createChild(50, childID, 'revert.test.com', receiver.address)
+		).to.be.revertedWith('unauthorized -- only for creator')
+	})
+
+	it('reverts if insufficient balance', async () => {
+		await expect(
+			cargoContract.connect(creator).createChild(50, childID, 'revert-insufficient.test.com', creator.address)
+		).to.be.revertedWith('ERC1155: burn amount exceeds balance')
+	})
+
+	it('inherits correct uri', async () => {
+		// should have the same URI as original asset
+		const actual = await cargoContract.uri(childID)
+		const expected = 'test.uri.com'
+		expect(expected).to.be.eq(actual)
+	})
 })

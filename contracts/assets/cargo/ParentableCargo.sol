@@ -9,7 +9,6 @@ abstract contract ParentableCargo is Parentable, Context {
     mapping(uint256 => uint256) internal _parents;
     mapping(uint256 => string) internal _names;
 
-    // A --> B --> C
     function getFullName(uint256 id) public view returns (string memory) {
         if (id != 0) {
             uint256 pid = _parents[id];
@@ -20,12 +19,6 @@ abstract contract ParentableCargo is Parentable, Context {
         }
     }
 
-    function createChild(
-        uint256 amount,
-        uint256 pid,
-        string memory name,
-        address to
-    ) external virtual;
 
     function getParent(uint256 id) public view override(Parentable) returns (uint256) {
         return _parents[id];

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: private
 pragma solidity 0.8.9;
 
-contract KycRegister {
+import '@openzeppelin/contracts/utils/Context.sol';
+
+contract KycRegister is Context {
     mapping(address => bool) public kycStatus;
     mapping(address => bool) public operatorAccess;
     address public currentAdmin;
@@ -29,7 +31,7 @@ contract KycRegister {
 
     constructor() {
         // by default, the address initializing the contract is set to be an Admin address
-        currentAdmin = msg.sender;
+        currentAdmin = _msgSender();
     }
 
     function changeAdmin(address newAdminAddress) public adminPermissions {
@@ -53,12 +55,15 @@ contract KycRegister {
     }
 
     modifier adminPermissions() {
-        require(msg.sender == currentAdmin, 'unauthorized -- only for admin');
+        require(_msgSender() == currentAdmin, 'unauthorized -- only for admin');
         _;
     }
 
     modifier operatorPermissions() {
-        require(operatorAccess[msg.sender] || msg.sender == currentAdmin, 'unauthorized -- only for operators & admin');
+        require(
+            operatorAccess[_msgSender()] || _msgSender() == currentAdmin,
+            'unauthorized -- only for operators & admin'
+        );
         _;
     }
 }

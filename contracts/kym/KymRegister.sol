@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: private
 pragma solidity 0.8.9;
 
-contract KymRegister {
+import '@openzeppelin/contracts/utils/Context.sol';
+
+contract KymRegister is Context {
     mapping(uint256 => bool) public kymStatus; // maps [asset id] to [true/false]
     mapping(address => bool) public operatorAccess;
     address public currentAdmin;
     address private assetAddress; // is responsible for linking kym contract to asset contract
 
     constructor(address _assetAddress) {
-        currentAdmin = msg.sender;
+        currentAdmin = _msgSender();
         assetAddress = _assetAddress;
     }
 
@@ -37,12 +39,15 @@ contract KymRegister {
     }
 
     modifier adminPermissions() {
-        require(msg.sender == currentAdmin, 'unauthorized -- only for admin');
+        require(_msgSender() == currentAdmin, 'unauthorized -- only for admin');
         _;
     }
 
     modifier operatorPermissions() {
-        require(operatorAccess[msg.sender] || msg.sender == currentAdmin, 'unauthorized -- only for operators & admin');
+        require(
+            operatorAccess[_msgSender()] || _msgSender() == currentAdmin,
+            'unauthorized -- only for operators & admin'
+        );
         _;
     }
 }

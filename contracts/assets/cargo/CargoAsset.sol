@@ -51,17 +51,8 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         uint256 pid,
         string memory name,
         address to
-    ) external override(ParentableCargo) onlyCreator {
+    ) external override(Parentable) onlyCreator {
         uint256 id = generateId();
-        // there is no difference burn or mint first
-        // tho, the helper function
-        // `test/helpers/getAssetId.helper.ts`
-        // returns id of new asset from last 'TransferSingle` event
-        // because both `_burn` and `_mint` emit that event,
-        // if `_burn` is called last, helper function will return
-        // pid insted of id
-        // helper function marked with todo
-        // this comment shoukld be removed when helper function is fixed
         _names[id] = name;
         _burn(_msgSender(), pid, amount);
         _mint(to, id, amount, '');

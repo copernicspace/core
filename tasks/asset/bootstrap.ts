@@ -2,6 +2,11 @@ import { task } from 'hardhat/config'
 import { CARGO_FACTORY_TASK } from '.'
 import { CARGO_ASSET_TASK } from './cargoAsset.deploy'
 
+/**
+ * This bootstrap task deploys `CargoAsset` contract
+ * for logic template, to pass as deploy argument to
+ * `CargoFactory` contract.
+ */
 const CARGO_BOOTSTRAP = {
 	NAME: 'cargo:bootstrap',
 	DESC: 'Deploys cargo asset and cargo factory',

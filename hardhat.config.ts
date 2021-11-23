@@ -6,6 +6,8 @@ import 'hardhat-gas-reporter'
 import * as Mocha from 'mocha'
 import './tasks'
 
+import * as secret from './secret'
+
 const config = {
 	solidity: {
 		version: '0.8.9',
@@ -19,6 +21,12 @@ const config = {
 	networks: {
 		docker: {
 			url: 'http://host.docker.internal:8545'
+		},
+		mumbai: {
+			url: `https://polygon-mumbai.g.alchemy.com/v2/${secret.ALCHEMY_API}`,
+			accounts: {
+				mnemonic: secret.SEED
+			}
 		}
 	},
 	typechain: {

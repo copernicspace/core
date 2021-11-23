@@ -20,40 +20,54 @@ describe('[test/asset/cargo/extended-parentable.test] SpaceCargo asset: extended
 	let accountA: SignerWithAddress, accountB: SignerWithAddress
 	before('load receivers', async () => ([accountA, accountB] = await ethers.getSigners()))
 
-	const cosmosChildAmount = parseUnits('105', 18)
-	let cosmosChildId: BigNumber
-	it('creates 105 cosmos child from creator account A', async () => {
-		const creatorBalanceBefore = await cargoContract.balanceOf(creator.address, rootID)
+	describe('create `cosmos` child and assert balances', () => {
+		let creatorBalance: BigNumber
+		before(
+			'save creator balance of root asset',
+			async () => (creatorBalance = await cargoContract.balanceOf(creator.address, rootID))
+		)
+		const cosmosChildAmount = parseUnits('105', 18)
+		let cosmosChildId: BigNumber
+		before('creates 105 cosmos child from creator to account A', async () => {
+			cosmosChildId = await cargoContract
+				.connect(creator)
+				.createChild(cosmosChildAmount, rootID, 'CosmosChild', accountA.address)
+				.then(tx => tx.wait())
+				.then(txr => getAssetID(txr))
+		})
+		it('has correct creators balance of root asset after `cosmos` child create', async () =>
+			expect(await cargoContract.balanceOf(creator.address, rootID)).to.be.eq(
+				creatorBalance.sub(cosmosChildAmount)
+			))
 
-		cosmosChildId = await cargoContract
-			.connect(creator)
-			.createChild(cosmosChildAmount, rootID, 'CosmosChild', accountA.address)
-			.then(tx => tx.wait())
-			.then(txr => getAssetID(txr))
-
-		expect(await cargoContract.balanceOf(accountA.address, cosmosChildId)).to.be.eq(cosmosChildAmount)
-		const creatorBalanceAfter = await cargoContract.balanceOf(creator.address, rootID)
-		expect(creatorBalanceBefore.sub(creatorBalanceAfter)).to.be.eq(cosmosChildAmount)
+		it('has correct balance of cosmos child', async () =>
+			expect(await cargoContract.balanceOf(accountA.address, cosmosChildId)).to.be.eq(cosmosChildAmount))
 	})
 
-	it('has correct balance of cosmos child', async () =>
-		expect(await cargoContract.balanceOf(accountA.address, cosmosChildId)).to.be.eq(cosmosChildAmount))
+	describe('create `star` child and assert balance', () => {
+		let creatorBalance: BigNumber
+		before(
+			'save creator balance of root asset',
+			async () => (creatorBalance = await cargoContract.balanceOf(creator.address, rootID))
+		)
+		const starChildAmount = parseUnits('555', 18)
+		let starChildId: BigNumber
+		before(
+			'creates 555 star child from creator account B',
+			async () =>
+				(starChildId = await cargoContract
+					.connect(creator)
+					.createChild(starChildAmount, rootID, 'StarChild', accountB.address)
+					.then(tx => tx.wait())
+					.then(txr => getAssetID(txr)))
+		)
 
-	const starChildAmount = parseUnits('555', 18)
-	let starChildId: BigNumber
-	it('creates 555 star child from creator account A', async () => {
-		const creatorBalanceBefore = await cargoContract.balanceOf(creator.address, rootID)
+		it('has correct creators balance of root asset after `star` child create', async () =>
+			expect(await cargoContract.balanceOf(creator.address, rootID)).to.be.eq(
+				creatorBalance.sub(starChildAmount)
+			))
 
-		starChildId = await cargoContract
-			.connect(creator)
-			.createChild(starChildAmount, rootID, 'StarChild', accountB.address)
-			.then(tx => tx.wait())
-			.then(txr => getAssetID(txr))
-
-		const creatorBalanceAfter = await cargoContract.balanceOf(creator.address, rootID)
-		expect(creatorBalanceBefore.sub(creatorBalanceAfter)).to.be.eq(starChildAmount)
+		it('has correct balance of start child', async () =>
+			expect(await cargoContract.balanceOf(accountB.address, starChildId)).to.be.eq(starChildAmount))
 	})
-
-	it('has correct balance of start child', async () =>
-		expect(await cargoContract.balanceOf(accountB.address, starChildId)).to.be.eq(starChildAmount))
 })

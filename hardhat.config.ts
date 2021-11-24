@@ -2,8 +2,11 @@ import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@typechain/hardhat'
 import 'hardhat-tracer'
+import 'hardhat-gas-reporter'
 import * as Mocha from 'mocha'
 import './tasks'
+
+import * as secret from './secret'
 
 const config = {
 	solidity: {
@@ -18,6 +21,12 @@ const config = {
 	networks: {
 		docker: {
 			url: 'http://host.docker.internal:8545'
+		},
+		mumbai: {
+			url: `https://polygon-mumbai.g.alchemy.com/v2/${secret.ALCHEMY_API}`,
+			accounts: {
+				mnemonic: secret.SEED
+			}
 		}
 	},
 	typechain: {

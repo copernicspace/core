@@ -1,18 +1,20 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Fixture } from 'ethereum-waffle'
 import { ethers, waffle } from 'hardhat'
-import { deploy, Deploy } from './deploy.fixture'
 import { getAssetID } from '../../../helpers/getAssetId.helper'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
+import { create, Create } from './create.fixture'
+import { CargoAsset } from '../../../../typechain'
 
-export interface Parentable extends Deploy {
-	creator: SignerWithAddress // address who creates the root asset
-	creatorAmount: BigNumber // amount of root asset created by $creator
+export interface Parentable extends Create {
+	deployer: SignerWithAddress
+	cargoContract: CargoAsset
+	creator: SignerWithAddress
 	receiver: SignerWithAddress // address who got the child asset
-	receiverAmount: BigNumber // amount of child asset transferd to receiver
-	rootID: BigNumber
+	amount: BigNumber // amount of child asset transferd to receiver
 	childID: BigNumber
+	decimals: number
 }
 // todo extend parentable fixture setup, make more complex mock struct as result
 /**
@@ -27,39 +29,30 @@ export interface Parentable extends Deploy {
  * @returns blockchain state with result of fixture actions
  */
 export const parentable: Fixture<Parentable> = async () => {
-	const { deployer, cargoContract } = await waffle.loadFixture(deploy)
-	const [, creator, receiver]: SignerWithAddress[] = await ethers.getSigners()
+	const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader(
+		await (ethers as any).getSigners()
+	)
+	const { deployer, cargoFactory, creator, cargoContract, totalSupply, decimals } = await loadFixture(create)
+	const [, , receiver]: SignerWithAddress[] = await ethers.getSigners()
 	const cargoContractDecimals = await cargoContract.decimals()
-	const creatorAmount = parseUnits('3500', cargoContractDecimals)
-	const receiverAmount = parseUnits('500', cargoContractDecimals)
-
-	// create root asset from creator and get id of new asset
-	const rootID = await cargoContract
-		.connect(creator)
-		.create(creatorAmount)
-		.then(tx => tx.wait())
-		.then(txr => getAssetID(txr))
+	const amount = parseUnits('500', cargoContractDecimals)
 
 	// create child to receiver
 	const childID = await cargoContract
 		.connect(creator)
-		.createChild(rootID, receiverAmount)
+		.createChild(amount, 0, 'childSpaceCargoName', receiver.address)
 		.then(tx => tx.wait())
 		.then(txr => getAssetID(txr))
-
-	// send to receiver
-	await cargoContract
-		.connect(creator)
-		.send(receiver.address, childID, receiverAmount)
 
 	return {
 		deployer,
 		cargoContract,
 		creator,
-		creatorAmount,
 		receiver,
-		receiverAmount,
-		rootID,
-		childID
+		amount,
+		childID,
+		totalSupply,
+		cargoFactory,
+		decimals
 	}
 }

@@ -2,18 +2,38 @@
 pragma solidity ^0.8.9;
 
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
+import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
+
 import './PausableCargo.sol';
 import './ParentableCargo.sol';
 import '../../utils/GeneratorID.sol';
 import 'hardhat/console.sol';
 
-contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, GeneratorID {
+contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, GeneratorID {
     constructor(string memory uri) ERC1155(uri) {}
 
-    // nonce value is used for generation of ids
-    uint256 private nonce;
-    // decimals reprents the divisibility depth of 1 amount in float notation
-    uint256 public constant decimals = 18;
+    /**
+     * instead off constructor for CloneFactory
+     */
+    function initialize(
+        string memory _uri,
+        string memory _name,
+        uint256 _decimals,
+        uint256 _totalSupply,
+        address _owner
+    ) external initializer {
+        _setURI(_uri);
+        decimals = _decimals;
+        totalSupply = _totalSupply;
+        uint256 rootID = 0;
+        _names[rootID] = _name;
+        _parents[rootID] = rootID;
+        creator = _owner;
+        _mint(_owner, rootID, totalSupply, '');
+    }
+
+    uint256 public decimals;
+    uint256 public totalSupply;
 
     function _beforeTokenTransfer(
         address operator,
@@ -26,31 +46,21 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, GeneratorID {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
-    function create(uint256 amount) external {
+    function createChild(
+        uint256 amount,
+        uint256 pid,
+        string memory name,
+        address to
+    ) external override(Parentable) onlyCreator {
         uint256 id = generateId();
-        creators[id] = _msgSender();
-        _mint(_msgSender(), id, amount, '');
+        _names[id] = name;
+        _burn(_msgSender(), pid, amount);
+        _mint(to, id, amount, '');
+        emit NewParent(id, pid, amount);
     }
 
-    function createChild(uint256 pid, uint256 amount)
-        external
-        override(ParentableCargo)
-    {
-        uint256 id = generateId();
-        _parents[id] = pid;
-
-        // there is no difference burn or mint first
-        // tho, the helper function
-        // `test/helpers/getAssetId.helper.ts`
-        // returns id of new asset from last 'TransferSingle` event
-        // because both `_burn` and `_mint` emit that event,
-        // if `_burn` is called last, helper function will return
-        // pid insted of id
-        // helper function marked with todo
-        // this comment shoukld be removed in helpers fun is fixed
-        _burn(msg.sender, pid, amount);
-        _mint(msg.sender, id, amount, '');
-        emit NewParent(id, pid);
+    function burn(uint256 amount) external onlyCreator {
+        _burn(_msgSender(), 0, amount);
     }
 
     function send(
@@ -58,7 +68,7 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, GeneratorID {
         uint256 id,
         uint256 amount
     ) public {
-        safeTransferFrom(msg.sender, to, id, amount, '');
+        safeTransferFrom(_msgSender(), to, id, amount, '');
     }
 
     function sendFrom(

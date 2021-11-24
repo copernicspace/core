@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: private
 pragma solidity 0.8.9;
 
-contract KymRegister {
+import '@openzeppelin/contracts/utils/Context.sol';
+
+contract KymRegister is Context {
     mapping(uint256 => bool) public kymStatus; // maps [asset id] to [true/false]
     mapping(address => bool) public operatorAccess;
     address public currentAdmin;
     address private assetAddress; // is responsible for linking kym contract to asset contract
 
     constructor(address _assetAddress) {
-        currentAdmin = msg.sender;
+        currentAdmin = _msgSender();
         assetAddress = _assetAddress;
     }
 
@@ -20,17 +22,11 @@ contract KymRegister {
         currentAdmin = newAdminAddress;
     }
 
-    function setOperatorStatus(address newOperatorAddress, bool isOperator)
-        public
-        adminPermissions
-    {
+    function setOperatorStatus(address newOperatorAddress, bool isOperator) public adminPermissions {
         operatorAccess[newOperatorAddress] = isOperator;
     }
 
-    function setKymStatus(uint256 assetID, bool kymValue)
-        public
-        operatorPermissions
-    {
+    function setKymStatus(uint256 assetID, bool kymValue) public operatorPermissions {
         kymStatus[assetID] = kymValue;
     }
 
@@ -38,22 +34,18 @@ contract KymRegister {
         return kymStatus[assetID];
     }
 
-    function getOperatorStatusInfo(address userAddress)
-        public
-        view
-        returns (bool)
-    {
+    function getOperatorStatusInfo(address userAddress) public view returns (bool) {
         return operatorAccess[userAddress];
     }
 
     modifier adminPermissions() {
-        require(msg.sender == currentAdmin, 'unauthorized -- only for admin');
+        require(_msgSender() == currentAdmin, 'unauthorized -- only for admin');
         _;
     }
 
     modifier operatorPermissions() {
         require(
-            operatorAccess[msg.sender] || msg.sender == currentAdmin,
+            operatorAccess[_msgSender()] || _msgSender() == currentAdmin,
             'unauthorized -- only for operators & admin'
         );
         _;

@@ -4,15 +4,14 @@ import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import '../interfaces/Pausable.sol';
 
 abstract contract PausableCargo is ERC1155, Pausable {
-    mapping(uint256 => bool) private paused;
-    mapping(uint256 => address) internal creators;
+    bool public paused;
+    address public creator;
 
     /**
      * @dev See {ERC1155-_beforeTokenTransfer}.
      *
      * Requirements:
-     *
-     * - the id of transferred asset must not be paused.
+     * - the asset must not be paused.
      */
     function _beforeTokenTransfer(
         address operator,
@@ -22,25 +21,20 @@ abstract contract PausableCargo is ERC1155, Pausable {
         uint256[] memory amounts,
         bytes memory data
     ) internal virtual override {
-        for (uint256 i = 0; i < ids.length; i++) {
-            require(!paused[ids[i]], 'Pausable: token transfer while paused');
-        }
+        require(!paused, 'Pausable: token is paused');
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
-    function pause(uint256 id) external override(Pausable) {
-        require(
-            _msgSender() == creators[id],
-            'Pausable: only asset creator can pause'
-        );
-        paused[id] = true;
+    function pause() external override(Pausable) onlyCreator {
+        paused = true;
     }
 
-    function unpause(uint256 id) external override(Pausable) {
-        require(
-            _msgSender() == creators[id],
-            'Pausable: only asset creator can unpause'
-        );
-        paused[id] = false;
+    function unpause() external override(Pausable) onlyCreator {
+        paused = false;
+    }
+
+    modifier onlyCreator() {
+        require(_msgSender() == creator, 'unauthorized -- only for creator');
+        _;
     }
 }

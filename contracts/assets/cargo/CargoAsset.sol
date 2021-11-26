@@ -13,6 +13,8 @@ import '../../kyc/KycRegister.sol';
 contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, GeneratorID, KycRegister {
     constructor(string memory uri) ERC1155(uri) {}
 
+    KycRegister public kycRegister;
+
     /**
      * instead off constructor for CloneFactory
      */
@@ -33,6 +35,12 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         _mint(_owner, rootID, totalSupply, '');
     }
 
+    // Kyc setup must be called before initialize
+    // (before first transaction -- mint)
+    function _setupKyc(address _kycAddress) external {
+        kycRegister = KycRegister(_kycAddress);
+    }
+
     uint256 public decimals;
     uint256 public totalSupply;
 
@@ -44,7 +52,7 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         uint256[] memory amounts,
         bytes memory data
     ) internal virtual override(ERC1155, PausableCargo) {
-        require(getKycStatusInfo(from) || from == address(0), 'user not on KYC list');
+        require(kycRegister.getKycStatusInfo(from) || from == address(0), 'user not on KYC list');
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 

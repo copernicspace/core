@@ -34,7 +34,8 @@ contract CargoFactory is CloneFactory, AccessControl {
         string memory _uri,
         string memory _name,
         uint256 _decimals,
-        uint256 _totalSupply
+        uint256 _totalSupply,
+        address _kycAddress
     ) public {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(FACTORY_CLIENT, _msgSender()),
@@ -42,6 +43,7 @@ contract CargoFactory is CloneFactory, AccessControl {
         );
         address clone = createClone(logicAddress);
         // todo make sure initizle can be called once
+        CargoAsset(clone)._setupKyc(_kycAddress);
         CargoAsset(clone).initialize(_uri, _name, _decimals, _totalSupply, _msgSender());
         deployed.push(clone);
         emit CargoCreated(clone, _msgSender());

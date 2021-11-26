@@ -3,11 +3,13 @@ import { Fixture } from 'ethereum-waffle'
 import { ethers, waffle } from 'hardhat'
 import { CargoFactory } from '../../../../typechain'
 import contract_names from '../../../../constants/contract.names'
+import { Address } from 'cluster'
 
 export interface Deploy {
 	deployer: SignerWithAddress
 	creator: SignerWithAddress
 	cargoFactory: CargoFactory
+	kycContractAddress: string
 }
 
 /**
@@ -28,11 +30,17 @@ export const deploy: Fixture<Deploy> = async () => {
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract.address)
 
+	const kycContractAddress = await ethers
+		.getContractFactory(contract_names.KYC_REGISTER)
+		.then(factory => factory.connect(deployer).deploy())
+		.then(contract => contract.deployed())
+		.then(deployedContract => deployedContract.address)
+
 	const cargoFactory = await ethers
 		.getContractFactory(contract_names.CARGO_FACTORY)
 		.then(factory => factory.connect(deployer).deploy(cargoContractAddress))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract as CargoFactory)
 
-	return { deployer, creator, cargoFactory }
+	return { deployer, creator, cargoFactory, cargoContractAddress, kycContractAddress }
 }

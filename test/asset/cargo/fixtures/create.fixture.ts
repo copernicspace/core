@@ -8,6 +8,7 @@ import { CargoAsset } from '../../../../typechain'
 import { getCargoAddress } from '../../../helpers/cargoAddress'
 import contractNames from '../../../../constants/contract.names'
 import { parseUnits } from '@ethersproject/units'
+import { loadFixture } from './fixtureLoader'
 
 export interface Create extends Deploy {
 	creator: SignerWithAddress
@@ -17,9 +18,6 @@ export interface Create extends Deploy {
 }
 
 export const create: Fixture<Create> = async () => {
-	const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader(
-		await (ethers as any).getSigners()
-	)
 	const { deployer, creator, cargoFactory } = await loadFixture(deploy)
 	const decimals = 18
 	const totalSupply = parseUnits('3500', decimals)

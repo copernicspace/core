@@ -8,8 +8,9 @@ import './PausableCargo.sol';
 import './ParentableCargo.sol';
 import '../../utils/GeneratorID.sol';
 import 'hardhat/console.sol';
+import '../../kyc/KycRegister.sol';
 
-contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, GeneratorID {
+contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, GeneratorID, KycRegister {
     constructor(string memory uri) ERC1155(uri) {}
 
     /**
@@ -43,6 +44,7 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         uint256[] memory amounts,
         bytes memory data
     ) internal virtual override(ERC1155, PausableCargo) {
+        require(getKycStatusInfo(from) || from == address(0), 'user not on KYC list');
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 

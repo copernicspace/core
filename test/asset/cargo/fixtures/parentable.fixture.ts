@@ -37,6 +37,9 @@ export const parentable: Fixture<Parentable> = async () => {
 	const cargoContractDecimals = await cargoContract.decimals()
 	const amount = parseUnits('500', cargoContractDecimals)
 
+	// TODO: implement operator checks
+	await cargoContract.connect(deployer).setKycStatus(creator.address, true)
+
 	// create child to receiver
 	const childID = await cargoContract
 		.connect(creator)

@@ -2,8 +2,9 @@
 pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/utils/Context.sol';
+import 'hardhat/console.sol';
 
-contract KycRegister is Context {
+abstract contract KycRegister is Context {
     mapping(address => bool) public kycStatus;
     mapping(address => bool) public operatorAccess;
     address public currentAdmin;
@@ -42,7 +43,8 @@ contract KycRegister is Context {
         operatorAccess[newOperatorAddress] = isOperator;
     }
 
-    function setKycStatus(address userAddress, bool kycValue) public operatorPermissions {
+    function setKycStatus(address userAddress, bool kycValue) public {
+        // TODO: limit so that caller must be on list of operators
         kycStatus[userAddress] = kycValue;
     }
 

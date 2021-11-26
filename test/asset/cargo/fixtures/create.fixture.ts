@@ -4,6 +4,7 @@ import { deploy, Deploy } from './deploy.fixture'
 import { Fixture } from 'ethereum-waffle'
 import { ethers, waffle } from 'hardhat'
 import { CargoAsset } from '../../../../typechain'
+// import { KY }
 import { getCargoAddress } from '../../../helpers/cargoAddress'
 import contractNames from '../../../../constants/contract.names'
 import { parseUnits } from '@ethersproject/units'
@@ -19,8 +20,7 @@ export const create: Fixture<Create> = async () => {
 	const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader(
 		await (ethers as any).getSigners()
 	)
-	const { deployer, cargoFactory } = await loadFixture(deploy)
-	const [, creator] = await ethers.getSigners()
+	const { deployer, creator, cargoFactory } = await loadFixture(deploy)
 	const decimals = 18
 	const totalSupply = parseUnits('3500', decimals)
 

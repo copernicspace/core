@@ -6,6 +6,7 @@ import contract_names from '../../../../constants/contract.names'
 
 export interface Deploy {
 	deployer: SignerWithAddress
+	creator: SignerWithAddress
 	cargoFactory: CargoFactory
 }
 /**
@@ -18,7 +19,7 @@ export interface Deploy {
  * @returns blockchain state with result of fixture actions
  */
 export const deploy: Fixture<Deploy> = async () => {
-	const [deployer]: SignerWithAddress[] = await ethers.getSigners()
+	const [deployer, creator]: SignerWithAddress[] = await ethers.getSigners()
 
 	const cargoContractAddress = await ethers
 		.getContractFactory(contract_names.CARGO_ASSET)
@@ -32,5 +33,5 @@ export const deploy: Fixture<Deploy> = async () => {
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract as CargoFactory)
 
-	return { deployer, cargoFactory }
+	return { deployer, creator, cargoFactory }
 }

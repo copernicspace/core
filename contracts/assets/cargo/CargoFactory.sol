@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 import './CargoAsset.sol';
 import '../../utils/CloneFactory.sol';
 import '@openzeppelin/contracts/access/AccessControl.sol';
+import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import '@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol';
 
 contract CargoFactory is CloneFactory, AccessControl {
@@ -43,8 +44,14 @@ contract CargoFactory is CloneFactory, AccessControl {
         );
         address clone = createClone(logicAddress);
         // todo make sure initizle can be called once
+
+        // set up KYC for checks
         CargoAsset(clone)._setupKyc(_kycAddress);
+        // before initialize make sure user is permitted to create cargo (Kyc permissions)
+        require(CargoAsset(clone).kycRegister().getKycStatusInfo(msg.sender), 'user not on KYC list');
+        // initialize cargo asset
         CargoAsset(clone).initialize(_uri, _name, _decimals, _totalSupply, _msgSender());
+
         deployed.push(clone);
         emit CargoCreated(clone, _msgSender());
     }

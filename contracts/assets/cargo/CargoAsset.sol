@@ -52,7 +52,10 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         uint256[] memory amounts,
         bytes memory data
     ) internal virtual override(ERC1155, PausableCargo) {
-        require(kycRegister.getKycStatusInfo(from) || from == address(0), 'user not on KYC list');
+        if(from != address(0)) {
+            require(kycRegister.getKycStatusInfo(from), 'user not on KYC list');
+        }
+        // require(kycRegister.getKycStatusInfo(to) || to == address(0), 'user not on KYC list');
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 

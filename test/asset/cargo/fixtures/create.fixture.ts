@@ -26,6 +26,12 @@ export const create: Fixture<Create> = async () => {
 
 	await cargoFactory.connect(deployer).addClient(creator.address)
 
+	const kycContract = await ethers
+		.getContractAt(contractNames.KYC_REGISTER, kycContractAddress)
+		.then(contract => contract as KycRegister)
+
+	await kycContract.connect(deployer).setKycStatus(creator.address, true)
+
 	const cargoContractAddress = await cargoFactory
 		.connect(creator)
 		.createCargo('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply, kycContractAddress)
@@ -36,9 +42,7 @@ export const create: Fixture<Create> = async () => {
 		.getContractAt(contractNames.CARGO_ASSET, cargoContractAddress)
 		.then(contract => contract as CargoAsset)
 
-	const kycContract = await ethers
-		.getContractAt(contractNames.KYC_REGISTER, kycContractAddress)
-		.then(contract => contract as KycRegister)
+	
 
 	return { deployer, creator, cargoFactory, cargoContract, totalSupply, decimals, kycContractAddress, kycContract }
 }

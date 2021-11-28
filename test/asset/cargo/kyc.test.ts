@@ -161,4 +161,50 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 		const expected_root_bal = parseUnits('1500', cargoContractDecimals)
 		expect(expected_root_bal).to.be.eq(actual_root_bal)
 	})
+
+	it('disallows non-operators from setting KYC status', async () => {
+		await expect(kycContract.connect(creator).setKycStatus(userB.address, true)).to.be.revertedWith(
+			'unauthorized -- only for operators & admin'
+		)
+	})
+
+	it('disallows non-admin from adding new operators', async () => {
+		await expect(kycContract.connect(creator).setOperatorStatus(userA.address, true)).to.be.revertedWith(
+			'unauthorized -- only for admin'
+		)
+	})
+
+	it('correctly adds new operators from admin address', async () => {
+		const start_status = await kycContract.getOperatorStatusInfo(userB.address)
+		await expect(kycContract.connect(deployer).setOperatorStatus(userB.address, true))
+		const end_status = await kycContract.getOperatorStatusInfo(userB.address)
+
+		expect(start_status).to.be.false
+		expect(end_status).to.be.true
+	})
+
+	it('correctly changes admin address', async () => {
+		const start_status = await kycContract.currentAdmin()
+		await expect(kycContract.connect(deployer).changeAdmin(userB.address))
+		const end_status = await kycContract.currentAdmin()
+
+		expect(start_status).to.be.eq(deployer.address)
+		expect(end_status).to.be.eq(userB.address)
+
+		await expect(kycContract.connect(deployer).setOperatorStatus(userA.address, true)).to.be.revertedWith(
+			'unauthorized -- only for admin'
+		)
+	})
+
+	it('defaults kyc status of an account to false', async () => {
+		const [, , , , account] = await ethers.getSigners()
+		const actual = await kycContract.getKycStatusInfo(account.address)
+		expect(actual).to.be.false
+	})
+
+	it('defaults operator status of an account to false', async () => {
+		const [, , , , account] = await ethers.getSigners()
+		const actual = await kycContract.getOperatorStatusInfo(account.address)
+		expect(actual).to.be.false
+	})
 })

@@ -37,8 +37,8 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
 
     // Kyc setup must be called before initialize
     // (before first transaction -- mint)
-    function _setupKyc(address _kycAddress) external {
-        kycRegister = KycRegister(_kycAddress);
+    function _setupKyc(KycRegister _kycRegister) external {
+        kycRegister = _kycRegister;
     }
 
     uint256 public decimals;

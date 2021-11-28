@@ -20,15 +20,25 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 	let kycContract: KycRegister
 	let kycContractAddress: string
 	let deployer: SignerWithAddress
-	beforeEach(
+	let cargoContractDecimals: BigNumber
+	before(
 		'load fixtures/deploy`',
 		async () =>
 			({ cargoFactory, cargoContract, creator, kycContract, deployer, kycContractAddress } =
 				await waffle.loadFixture(parentable))
 	)
 
+	before('get decimals', async () => {
+		cargoContractDecimals = await cargoContract.decimals()
+	})
+
+	it('correctly set creator KYC permissions in fixture', async () => {
+		const expected = await kycContract.getKycStatusInfo(creator.address)
+		expect(expected).to.be.true
+	})
+
 	it('disallows creating child if user not on KYC list', async () => {
-		const cargoContractDecimals = await cargoContract.decimals()
+		cargoContractDecimals = await cargoContract.decimals()
 		const amount = parseUnits('500', cargoContractDecimals)
 
 		// remove KYC permissions
@@ -39,11 +49,14 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 		).to.be.revertedWith('not on KYC list')
 	})
 
+	it('correctly set creator KYC permissions in test above', async () => {
+		const expected = await kycContract.getKycStatusInfo(creator.address)
+		expect(expected).to.be.false
+	})
+
 	it('allows creating child if user on KYC list', async () => {
 		// grant KYC permissions
 		await kycContract.connect(deployer).setKycStatus(creator.address, true)
-
-		const cargoContractDecimals = await cargoContract.decimals()
 		const amount = parseUnits('500', cargoContractDecimals)
 
 		// create child to receiver
@@ -61,7 +74,9 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 	})
 
 	it('disallows creating asset if user not on KYC list', async () => {
-		const cargoContractDecimals = await cargoContract.decimals()
+		// remove userA perms
+		await kycContract.connect(deployer).setKycStatus(userA.address, false)
+
 		const amount = parseUnits('2000', cargoContractDecimals)
 		// add userA to cargoFactory perms
 		await cargoFactory.connect(deployer).addClient(userA.address)
@@ -73,20 +88,18 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 		).to.be.revertedWith('not on KYC list')
 	})
 
-	it('allows creating asset if same user is on KYC list', async () => {
-		const cargoContractDecimals = await cargoContract.decimals()
-		const amount = parseUnits('2000', cargoContractDecimals)
-		// add userA to cargoFactory perms
-		await cargoFactory.connect(deployer).addClient(userA.address)
+	let newCargoContractAddress: string
+	let newCargoContract: CargoAsset
+	let amount: BigNumber
 
-		// add KYC permissions to userA
-		await kycContract.setKycStatus(userA.address, true)
+	before('create new root cargo contract', async () => {
+		amount = parseUnits('2000', cargoContractDecimals)
 
-		const newCargoContractAddress = await cargoFactory
+		newCargoContractAddress = await cargoFactory
 			.connect(creator)
 			.createCargo(
-				'new-test.uri.com',
-				'NEW rootSpaceCargoName',
+				'second.test.uri.com',
+				'Second rootSpaceCargo',
 				cargoContractDecimals,
 				amount,
 				kycContractAddress
@@ -94,26 +107,58 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 			.then(tx => tx.wait())
 			.then(txr => getCargoAddress(txr))
 
-		const newCargoContract = await ethers
+		newCargoContract = await ethers
 			.getContractAt(contractNames.CARGO_ASSET, newCargoContractAddress)
 			.then(contract => contract as CargoAsset)
+	})
 
-		it('has correct uri', async () => {
-			const actual = await newCargoContract.uri('2')
-			const expected = 'new-test.uri.com'
-			expect(expected).to.be.eq(actual)
-		})
+	it('correctly created new contract', async () => {
+		// has correct URI
+		const actual_uri = await newCargoContract.uri('2')
+		const expected_uri = 'second.test.uri.com'
+		expect(expected_uri).to.be.eq(actual_uri)
 
-		it('has correct name', async () => {
-			const actual = await newCargoContract.getName(0)
-			const expected = 'NEW rootSpaceCargoName'
-			expect(expected).to.be.eq(actual)
-		})
+		// has correct name
+		const actual_name = await newCargoContract.getName(0)
+		const expected_name = 'Second rootSpaceCargo'
+		expect(expected_name).to.be.eq(actual_name)
 
-		it('has correct decimals', async () => {
-			const actual = await newCargoContract.decimals()
-			const expected = BigNumber.from(18)
-			expect(expected).to.be.eq(actual)
-		})
+		// has correct decimals
+		const actual_decimals = await newCargoContract.decimals()
+		const expected_decimals = BigNumber.from(18)
+		expect(expected_decimals).to.be.eq(actual_decimals)
+
+		// has correct supply
+		const actual_supply = await newCargoContract.balanceOf(creator.address, 0)
+		const expected_supply = parseUnits('2000', 18)
+		expect(expected_supply).to.be.eq(actual_supply)
+	})
+
+	let newChildID: BigNumber
+	let newAmount: BigNumber
+	it('correctly created new child asset', async () => {
+		// use creator for new asset (they should already kave KYC permissions)
+		const cargoContractDecimals = await newCargoContract.decimals()
+		newAmount = parseUnits('500', cargoContractDecimals)
+
+		// create child to receiver (user B)
+		newChildID = await newCargoContract
+			.connect(creator)
+			.createChild(newAmount, 0, 'new-new child', userB.address)
+			.then(tx => tx.wait())
+			.then(txr => getAssetID(txr))
+
+		// has correct ID
+		expect(newChildID).to.be.eq(BigNumber.from(1))
+
+		// added correct child balance to userB
+		const actual_child_bal = await newCargoContract.balanceOf(userB.address, newChildID)
+		const expected_child_bal = newAmount
+		expect(expected_child_bal).to.be.eq(actual_child_bal)
+
+		// set correct root balance of creator
+		const actual_root_bal = await newCargoContract.balanceOf(creator.address, 0)
+		const expected_root_bal = parseUnits('1500', cargoContractDecimals)
+		expect(expected_root_bal).to.be.eq(actual_root_bal)
 	})
 })

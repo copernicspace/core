@@ -7,10 +7,13 @@ import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import '@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol';
 
-contract CargoFactory is CloneFactory, AccessControl {
+contract CargoFactory is CloneFactory, AccessControl, KycRegister {
     // address of deployed contract to clone from
     // this should be deployed `SpaceCargo` address
     address public logicAddress;
+
+    // kyc register instance
+    KycRegister private kycRegister;
 
     // role to define managers who can add clients
     bytes32 public constant FACTORY_MANAGER = keccak256('FACTORY_MANAGER');
@@ -36,7 +39,7 @@ contract CargoFactory is CloneFactory, AccessControl {
         string memory _name,
         uint256 _decimals,
         uint256 _totalSupply,
-        address _kycAddress
+        KycRegister _kycRegister
     ) public {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(FACTORY_CLIENT, _msgSender()),
@@ -46,7 +49,7 @@ contract CargoFactory is CloneFactory, AccessControl {
         // todo make sure initizle can be called once
 
         // set up KYC for checks
-        CargoAsset(clone)._setupKyc(_kycAddress);
+        CargoAsset(clone)._setupKyc(_kycRegister);
         // before initialize make sure user is permitted to create cargo (Kyc permissions)
         require(CargoAsset(clone).kycRegister().getKycStatusInfo(msg.sender), 'user not on KYC list');
         // initialize cargo asset

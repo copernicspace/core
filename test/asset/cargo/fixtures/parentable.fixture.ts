@@ -30,8 +30,9 @@ export interface Parentable extends Create {
  * @returns blockchain state with result of fixture actions
  */
 export const parentable: Fixture<Parentable> = async () => {
-	const { deployer, cargoFactory, creator, cargoContract, totalSupply, decimals, kycContractAddress, kycContract } =
-		await loadFixture(create)
+	const { deployer, cargoFactory, creator, cargoContract, totalSupply, decimals, kycContract } = await loadFixture(
+		create
+	)
 	const [, , receiver]: SignerWithAddress[] = await ethers.getSigners()
 	const cargoContractDecimals = await cargoContract.decimals()
 	const amount = parseUnits('500', cargoContractDecimals)
@@ -55,7 +56,6 @@ export const parentable: Fixture<Parentable> = async () => {
 		totalSupply,
 		cargoFactory,
 		decimals,
-		kycContractAddress,
 		kycContract
 	}
 }

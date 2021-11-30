@@ -1,15 +1,14 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Fixture } from 'ethereum-waffle'
-import { ethers, waffle } from 'hardhat'
-import { CargoFactory } from '../../../../typechain'
+import { ethers } from 'hardhat'
+import { CargoFactory, KycRegister } from '../../../../typechain'
 import contract_names from '../../../../constants/contract.names'
-import { Address } from 'cluster'
 
 export interface Deploy {
 	deployer: SignerWithAddress
 	creator: SignerWithAddress
 	cargoFactory: CargoFactory
-	kycContractAddress: string
+	kycContract: KycRegister
 }
 
 /**
@@ -30,11 +29,11 @@ export const deploy: Fixture<Deploy> = async () => {
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract.address)
 
-	const kycContractAddress = await ethers
+	const kycContract = await ethers
 		.getContractFactory(contract_names.KYC_REGISTER)
 		.then(factory => factory.connect(deployer).deploy())
 		.then(contract => contract.deployed())
-		.then(deployedContract => deployedContract.address)
+		.then(deployedContract => deployedContract as KycRegister)
 
 	const cargoFactory = await ethers
 		.getContractFactory(contract_names.CARGO_FACTORY)
@@ -42,5 +41,5 @@ export const deploy: Fixture<Deploy> = async () => {
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract as CargoFactory)
 
-	return { deployer, creator, cargoFactory, cargoContractAddress, kycContractAddress }
+	return { deployer, creator, cargoFactory, cargoContractAddress, kycContract }
 }

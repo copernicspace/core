@@ -1,6 +1,6 @@
 import { waffle } from 'hardhat'
 import { expect } from 'chai'
-import { CargoAsset, CargoFactory } from '../../../typechain'
+import { CargoAsset, CargoFactory, KycRegister } from '../../../typechain'
 import { create } from './fixtures/create.fixture'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
@@ -13,10 +13,10 @@ describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test s
 
 	let cargoFactory: CargoFactory
 	let cargoContract: CargoAsset
-	let kycContractAddress: string
+	let kycContract: KycRegister
 	beforeEach(
 		'load fixtures/deploy`',
-		async () => ({ cargoFactory, cargoContract, creator, kycContractAddress } = await waffle.loadFixture(create))
+		async () => ({ cargoFactory, cargoContract, creator, kycContract } = await waffle.loadFixture(create))
 	)
 
 	it('has correct uri', async () => {
@@ -47,7 +47,7 @@ describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test s
 		await expect(
 			cargoFactory
 				.connect(userA)
-				.createCargo('test.revert.com', 'revert test asset', 18, 6000, kycContractAddress)
+				.createCargo('test.revert.com', 'revert test asset', 18, 6000, kycContract.address)
 		).to.be.revertedWith('You are not allowed to create new SpaceCargo')
 	})
 

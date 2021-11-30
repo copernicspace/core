@@ -8,7 +8,7 @@ async function main() {
 		.then(asset => asset.address)
 	console.log('Asset deployed to:', assetAddress)
 
-    const factoryAddress = await ethers
+	const factoryAddress = await ethers
 		.getContractFactory(ContractNames.CARGO_FACTORY)
 		.then(deployFactory => deployFactory.deploy())
 		.then(asset => asset.address)

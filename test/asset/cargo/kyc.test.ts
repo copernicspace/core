@@ -1,7 +1,6 @@
 import { waffle } from 'hardhat'
 import { expect } from 'chai'
 import { CargoAsset, CargoFactory, KycRegister } from '../../../typechain'
-import { create } from './fixtures/create.fixture'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
@@ -18,14 +17,12 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 	let cargoFactory: CargoFactory
 	let cargoContract: CargoAsset
 	let kycContract: KycRegister
-	let kycContractAddress: string
 	let deployer: SignerWithAddress
 	let cargoContractDecimals: BigNumber
 	before(
 		'load fixtures/deploy`',
 		async () =>
-			({ cargoFactory, cargoContract, creator, kycContract, deployer, kycContractAddress } =
-				await waffle.loadFixture(parentable))
+			({ cargoFactory, cargoContract, creator, kycContract, deployer } = await waffle.loadFixture(parentable))
 	)
 
 	before('get decimals', async () => {
@@ -84,7 +81,7 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 		await expect(
 			cargoFactory
 				.connect(userA)
-				.createCargo('userA.cargo.com', 'userA test cargo', cargoContractDecimals, amount, kycContractAddress)
+				.createCargo('userA.cargo.com', 'userA test cargo', cargoContractDecimals, amount, kycContract.address)
 		).to.be.revertedWith('not on KYC list')
 	})
 
@@ -102,7 +99,7 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 				'Second rootSpaceCargo',
 				cargoContractDecimals,
 				amount,
-				kycContractAddress
+				kycContract.address
 			)
 			.then(tx => tx.wait())
 			.then(txr => getCargoAddress(txr))
@@ -176,7 +173,7 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 
 	it('correctly adds new operators from admin address', async () => {
 		const start_status = await kycContract.getOperatorStatusInfo(userB.address)
-		await expect(kycContract.connect(deployer).setOperatorStatus(userB.address, true))
+		expect(await kycContract.connect(deployer).setOperatorStatus(userB.address, true))
 		const end_status = await kycContract.getOperatorStatusInfo(userB.address)
 
 		expect(start_status).to.be.false
@@ -185,7 +182,7 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 
 	it('correctly changes admin address', async () => {
 		const start_status = await kycContract.currentAdmin()
-		await expect(kycContract.connect(deployer).changeAdmin(userB.address))
+		expect(await kycContract.connect(deployer).changeAdmin(userB.address))
 		const end_status = await kycContract.currentAdmin()
 
 		expect(start_status).to.be.eq(deployer.address)

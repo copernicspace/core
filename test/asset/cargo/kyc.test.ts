@@ -160,6 +160,26 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 		expect(expected_root_bal).to.be.eq(actual_root_bal)
 	})
 
+	it('create token with same uri', async() => {
+		amount = parseUnits('2000', cargoContractDecimals)
+
+		newCargoContractAddress = await cargoFactory
+			.connect(creator)
+			.createCargo(
+				'second.test.uri.com',	// same URI
+				'Second rootSpaceCargo',
+				cargoContractDecimals,
+				amount,
+				kycContract.address
+			)
+			.then(tx => tx.wait())
+			.then(txr => getCargoAddress(txr))
+
+		newCargoContract = await ethers
+			.getContractAt(contractNames.CARGO_ASSET, newCargoContractAddress)
+			.then(contract => contract as CargoAsset)
+	})
+
 	it('reverts on create new cargo from non kyc user', async () => {
 		const cargoContractDecimals = await newCargoContract.decimals()
 		newAmount = parseUnits('500', cargoContractDecimals)
@@ -215,4 +235,18 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 		const actual = await kycContract.getOperatorStatusInfo(account.address)
 		expect(actual).to.be.false
 	})
+
+	it('disallows sending balance to & from non-kyc users', async () => {
+		await kycContract.connect(userB).setKycStatus(userB.address, false)
+		// send to userB
+		await expect(newCargoContract.connect(creator).send(userA.address, 0, 100)).to.be.revertedWith(
+			'not on KYC list'
+		)
+		// send from user B
+		await expect(newCargoContract.connect(userA).send(creator.address, 0, 100)).to.be.revertedWith(
+			'not on KYC list'
+		)
+	})
+
+	
 })

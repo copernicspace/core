@@ -26,11 +26,16 @@ describe('[test/asset/cargo/extended-parentable.test] SpaceCargo asset: extended
 	let accountA: SignerWithAddress, accountB: SignerWithAddress
 	before('load receivers', async () => ([, , accountA, accountB] = await ethers.getSigners()))
 
-	describe.skip('create `cosmos` child and assert balances', () => {
+	describe('create `cosmos` child and assert balances', () => {
 		let creatorBalance: BigNumber
 		before(
 			'save creator balance of root asset',
 			async () => (creatorBalance = await cargoContract.balanceOf(creator.address, rootID))
+		)
+
+		before(
+			'kyc approve account A',
+			async () => await kycContract.connect(deployer).setKycStatus(accountA.address, true)
 		)
 		const cosmosChildAmount = parseUnits('105', 18)
 		let cosmosChildId: BigNumber
@@ -57,6 +62,11 @@ describe('[test/asset/cargo/extended-parentable.test] SpaceCargo asset: extended
 		before(
 			'save creator balance of root asset',
 			async () => (creatorBalance = await cargoContract.balanceOf(creator.address, rootID))
+		)
+
+		before(
+			'kyc approve account B',
+			async () => await kycContract.connect(deployer).setKycStatus(accountB.address, true)
 		)
 		const starChildAmount = parseUnits('555', 18)
 		let starChildId: BigNumber

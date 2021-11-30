@@ -134,6 +134,7 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 	let newChildID: BigNumber
 	let newAmount: BigNumber
 	it('correctly created new child asset', async () => {
+		await kycContract.connect(deployer).setKycStatus(userB.address, true)
 		// use creator for new asset (they should already kave KYC permissions)
 		const cargoContractDecimals = await newCargoContract.decimals()
 		newAmount = parseUnits('500', cargoContractDecimals)
@@ -204,13 +205,13 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 	})
 
 	it('defaults kyc status of an account to false', async () => {
-		const [, , , , account] = await ethers.getSigners()
+		const [, , , , , account] = await ethers.getSigners()
 		const actual = await kycContract.getKycStatusInfo(account.address)
 		expect(actual).to.be.false
 	})
 
 	it('defaults operator status of an account to false', async () => {
-		const [, , , , , account] = await ethers.getSigners()
+		const [, , , , , , account] = await ethers.getSigners()
 		const actual = await kycContract.getOperatorStatusInfo(account.address)
 		expect(actual).to.be.false
 	})

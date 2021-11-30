@@ -22,10 +22,16 @@ const config = {
 		docker: {
 			url: 'http://host.docker.internal:8545'
 		},
-		mumbai: {
-			url: `https://polygon-mumbai.g.alchemy.com/v2/${secret.ALCHEMY_API}`,
+		polygon: {
+			url: `https://polygon-mainnet.g.alchemy.com/v2/${secret.POLYGON_ALCHEMY_API}`,
 			accounts: {
-				mnemonic: secret.SEED
+				mnemonic: secret.POLYGON_SEED
+			}
+		},
+		mumbai: {
+			url: `https://polygon-mumbai.g.alchemy.com/v2/${secret.MUMBAI_ALCHEMY_API}`,
+			accounts: {
+				mnemonic: secret.MUMBAI_SEED
 			}
 		}
 	},

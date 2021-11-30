@@ -71,4 +71,13 @@ contract CargoFactory is CloneFactory, AccessControl, KycRegister {
         );
         grantRole(FACTORY_CLIENT, client);
     }
+
+
+    function revokeClient(address client) external {
+        require(
+            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(FACTORY_MANAGER, _msgSender()),
+            'Only factory owner & managers can add clients'
+        );
+        revokeRole(FACTORY_CLIENT, client);
+    }
 }

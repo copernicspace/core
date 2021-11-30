@@ -1,6 +1,6 @@
 import { waffle } from 'hardhat'
 import { expect } from 'chai'
-import { CargoFactory } from '../../../typechain'
+import { CargoFactory, KycRegister } from '../../../typechain'
 import { deploy } from './fixtures/deploy.fixture'
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { ethers } from 'hardhat'
@@ -11,14 +11,17 @@ describe('[test/asset/cargo/deploy.test] CargoFactory for asset: deploy fixture 
 	before('load userA as signerWithAddress', async () => ([, , user] = await ethers.getSigners()))
 
 	let cargoFactory: CargoFactory
-	beforeEach('load fixtures/deploy`', async () => ({ cargoFactory } = await waffle.loadFixture(deploy)))
+	let kycContract: KycRegister
+	beforeEach('load fixtures/deploy`', async () => ({ cargoFactory, kycContract } = await waffle.loadFixture(deploy)))
 
 	it('has success tx receipt status', async () =>
 		await cargoFactory.deployTransaction.wait().then(txr => expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)))
 
 	it('reverts on `createCargo`, if user is not a factory client', async () =>
 		await expect(
-			cargoFactory.connect(user).createCargo('test.uri.com', 'TestSpaceCargoName', 18, '3500')
+			cargoFactory
+				.connect(user)
+				.createCargo('test.uri.com', 'TestSpaceCargoName', 18, '3500', kycContract.address)
 		).to.be.revertedWith('You are not allowed to create new SpaceCargo'))
 
 	it('reverts if addClient called from non manager', async () => {

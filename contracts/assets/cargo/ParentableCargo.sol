@@ -19,7 +19,6 @@ abstract contract ParentableCargo is Parentable, Context {
         }
     }
 
-
     function getParent(uint256 id) public view override(Parentable) returns (uint256) {
         return _parents[id];
     }

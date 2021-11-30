@@ -8,9 +8,12 @@ import './PausableCargo.sol';
 import './ParentableCargo.sol';
 import '../../utils/GeneratorID.sol';
 import 'hardhat/console.sol';
+import '../../kyc/KycRegister.sol';
 
-contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, GeneratorID {
+contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, GeneratorID, KycRegister {
     constructor(string memory uri) ERC1155(uri) {}
+
+    KycRegister public kycRegister;
 
     /**
      * instead off constructor for CloneFactory
@@ -32,6 +35,12 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         _mint(_owner, rootID, totalSupply, '');
     }
 
+    // Kyc setup must be called before initialize
+    // (before first transaction -- mint)
+    function _setupKyc(KycRegister _kycRegister) external {
+        kycRegister = _kycRegister;
+    }
+
     uint256 public decimals;
     uint256 public totalSupply;
 
@@ -43,6 +52,13 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         uint256[] memory amounts,
         bytes memory data
     ) internal virtual override(ERC1155, PausableCargo) {
+        if (from != address(0)) {
+            require(kycRegister.getKycStatusInfo(from), 'user not on KYC list');
+        }
+        if (to != address(0)) {
+            require(kycRegister.getKycStatusInfo(to), 'user not on KYC list');
+        }
+        // require(kycRegister.getKycStatusInfo(to) || to == address(0), 'user not on KYC list');
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 

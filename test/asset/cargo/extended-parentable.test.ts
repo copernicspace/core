@@ -1,11 +1,12 @@
 import { ethers, waffle } from 'hardhat'
 import { expect } from 'chai'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { CargoAsset } from '../../../typechain'
+import { CargoAsset, KycRegister } from '../../../typechain'
 import { parentable } from './fixtures/parentable.fixture'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { getAssetID } from '../../helpers/getAssetId.helper'
+import { loadFixture } from '@ethereum-waffle/provider'
 
 /**
  * test suite for {@link parentable}
@@ -13,12 +14,17 @@ import { getAssetID } from '../../helpers/getAssetId.helper'
 describe('[test/asset/cargo/extended-parentable.test] SpaceCargo asset: extended parentable fixture test suite', () => {
 	let cargoContract: CargoAsset
 	let creator: SignerWithAddress
+	let kycContract: KycRegister
+	let deployer: SignerWithAddress
 	const rootID = 0
 
-	before('load fixtures/parentable`', async () => ({ cargoContract, creator } = await waffle.loadFixture(parentable)))
+	before(
+		'load fixtures/parentable`',
+		async () => ({ cargoContract, creator, kycContract, deployer } = await waffle.loadFixture(parentable))
+	)
 
 	let accountA: SignerWithAddress, accountB: SignerWithAddress
-	before('load receivers', async () => ([accountA, accountB] = await ethers.getSigners()))
+	before('load receivers', async () => ([, , accountA, accountB] = await ethers.getSigners()))
 
 	describe('create `cosmos` child and assert balances', () => {
 		let creatorBalance: BigNumber
@@ -26,15 +32,22 @@ describe('[test/asset/cargo/extended-parentable.test] SpaceCargo asset: extended
 			'save creator balance of root asset',
 			async () => (creatorBalance = await cargoContract.balanceOf(creator.address, rootID))
 		)
+
+		before(
+			'kyc approve account A',
+			async () => await kycContract.connect(deployer).setKycStatus(accountA.address, true)
+		)
 		const cosmosChildAmount = parseUnits('105', 18)
 		let cosmosChildId: BigNumber
-		before('creates 105 cosmos child from creator to account A', async () => {
-			cosmosChildId = await cargoContract
-				.connect(creator)
-				.createChild(cosmosChildAmount, rootID, 'CosmosChild', accountA.address)
-				.then(tx => tx.wait())
-				.then(txr => getAssetID(txr))
-		})
+		before(
+			'creates 105 cosmos child from creator to account A',
+			async () =>
+				(cosmosChildId = await cargoContract
+					.connect(creator)
+					.createChild(cosmosChildAmount, rootID, 'CosmosChild', accountA.address)
+					.then(tx => tx.wait())
+					.then(txr => getAssetID(txr)))
+		)
 		it('has correct creators balance of root asset after `cosmos` child create', async () =>
 			expect(await cargoContract.balanceOf(creator.address, rootID)).to.be.eq(
 				creatorBalance.sub(cosmosChildAmount)
@@ -49,6 +62,11 @@ describe('[test/asset/cargo/extended-parentable.test] SpaceCargo asset: extended
 		before(
 			'save creator balance of root asset',
 			async () => (creatorBalance = await cargoContract.balanceOf(creator.address, rootID))
+		)
+
+		before(
+			'kyc approve account B',
+			async () => await kycContract.connect(deployer).setKycStatus(accountB.address, true)
 		)
 		const starChildAmount = parseUnits('555', 18)
 		let starChildId: BigNumber

@@ -11,8 +11,8 @@ import contractNames from '../../../constants/contract.names'
 import { getCargoAddress } from '../../helpers/cargoAddress'
 
 describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
-	let userA, userB, creator: SignerWithAddress
-	before('load userA as signerWithAddress', async () => ([, , userA, userB] = await ethers.getSigners()))
+	let userA, userB, userC, creator: SignerWithAddress
+	before('load userA as signerWithAddress', async () => ([, , , userA, userB, userC] = await ethers.getSigners()))
 
 	let cargoFactory: CargoFactory
 	let cargoContract: CargoAsset
@@ -159,6 +159,16 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 		expect(expected_root_bal).to.be.eq(actual_root_bal)
 	})
 
+	it('reverts on create new cargo from non kyc user', async () => {
+		const cargoContractDecimals = await newCargoContract.decimals()
+		newAmount = parseUnits('500', cargoContractDecimals)
+
+		// create child to receiver (user B)
+		const txr = newCargoContract.connect(creator).createChild(newAmount, 0, 'new-new child', userC.address)
+
+		await expect(txr).to.be.revertedWith('user not on KYC list')
+	})
+
 	it('disallows non-operators from setting KYC status', async () => {
 		await expect(kycContract.connect(creator).setKycStatus(userB.address, true)).to.be.revertedWith(
 			'unauthorized -- only for operators & admin'
@@ -200,7 +210,7 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 	})
 
 	it('defaults operator status of an account to false', async () => {
-		const [, , , , account] = await ethers.getSigners()
+		const [, , , , , account] = await ethers.getSigners()
 		const actual = await kycContract.getOperatorStatusInfo(account.address)
 		expect(actual).to.be.false
 	})

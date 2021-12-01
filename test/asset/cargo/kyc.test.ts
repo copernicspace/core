@@ -9,6 +9,7 @@ import { parseUnits } from '@ethersproject/units'
 import { parentable } from './fixtures/parentable.fixture'
 import contractNames from '../../../constants/contract.names'
 import { getCargoAddress } from '../../helpers/cargoAddress'
+import contract_names from '../../../constants/contract.names'
 
 describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 	let userA, userB, userC, creator: SignerWithAddress
@@ -32,6 +33,12 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 	it('correctly set creator KYC permissions in fixture', async () => {
 		const expected = await kycContract.getKycStatusInfo(creator.address)
 		expect(expected).to.be.true
+	})
+
+	it('disallows instantiating kyc contract again after it has been set-up', async () => {
+		await expect(cargoContract.connect(deployer)._setupKyc(kycContract.address)).to.be.revertedWith(
+			'kyc already set up - cannot initialize again'
+		)
 	})
 
 	it('disallows creating child if user not on KYC list', async () => {
@@ -204,6 +211,18 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 		)
 	})
 
+	it('disallows sending balance to & from non-kyc users', async () => {
+		await kycContract.connect(userB).setKycStatus(userB.address, false)
+		// send to userB
+		await expect(newCargoContract.connect(creator).send(userA.address, 0, 100)).to.be.revertedWith(
+			'not on KYC list'
+		)
+		// send from user B
+		await expect(newCargoContract.connect(userA).send(creator.address, 0, 100)).to.be.revertedWith(
+			'not on KYC list'
+		)
+	})
+
 	it('defaults kyc status of an account to false', async () => {
 		const [, , , , , account] = await ethers.getSigners()
 		const actual = await kycContract.getKycStatusInfo(account.address)
@@ -214,5 +233,49 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 		const [, , , , , , account] = await ethers.getSigners()
 		const actual = await kycContract.getOperatorStatusInfo(account.address)
 		expect(actual).to.be.false
+	})
+
+	it('overwrites old kyc with correct kyc during creation', async () => {
+		// create a kyc contract & deploy with deployer
+		const old_kycContract = await ethers
+			.getContractFactory(contract_names.KYC_REGISTER)
+			.then(factory => factory.connect(deployer).deploy())
+			.then(contract => contract.deployed())
+			.then(deployedContract => deployedContract as KycRegister)
+
+		// make changes before initialize
+		await old_kycContract.connect(deployer).setKycStatus(userC.address, true)
+
+		// create a new asset with correct kyc
+		amount = parseUnits('2000', cargoContractDecimals)
+
+		const _newCargoContractAddress = await cargoFactory
+			.connect(creator)
+			.createCargo(
+				'second.test.uri.com',
+				'Second rootSpaceCargo',
+				cargoContractDecimals,
+				amount,
+				kycContract.address // perviously used KYC
+			)
+			.then(tx => tx.wait())
+			.then(txr => getCargoAddress(txr))
+
+		const _newCargoContract = await ethers
+			.getContractAt(contractNames.CARGO_ASSET, _newCargoContractAddress)
+			.then(contract => contract as CargoAsset)
+
+		// user C not on correct KYC - should be reverted
+		await expect(
+			_newCargoContract.connect(creator).send(userC.address, 0, parseUnits('100', cargoContractDecimals))
+		).to.be.revertedWith('user not on KYC list')
+
+		// userC can be added to KYC by current admin (userB)
+		await kycContract.connect(userB).setKycStatus(userC.address, true)
+
+		// userC can now be sent transfers
+		await expect(
+			_newCargoContract.connect(creator).send(userC.address, 0, parseUnits('100', cargoContractDecimals))
+		).to.not.be.revertedWith('user not on KYC list')
 	})
 })

@@ -8,6 +8,7 @@ contract KycRegister is Context {
     mapping(address => bool) public kycStatus;
     mapping(address => bool) public operatorAccess;
     address public currentAdmin;
+    bool private _finalState;
 
     /*
         Admin:
@@ -53,6 +54,19 @@ contract KycRegister is Context {
 
     function getOperatorStatusInfo(address userAddress) public view returns (bool) {
         return operatorAccess[userAddress];
+    }
+
+    function finalize() internal {
+        _finalState = true;
+    }
+
+    modifier finalizer() {
+        require(!_finalState, 'Kyc: contract is already finalized');
+
+        if(!_finalState) {
+            _;
+            finalize();
+        }
     }
 
     modifier adminPermissions() {

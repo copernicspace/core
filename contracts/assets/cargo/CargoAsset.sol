@@ -14,7 +14,6 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
     constructor(string memory uri) ERC1155(uri) {}
 
     KycRegister public kycRegister;
-    bool private isInit;
 
     /**
      * instead off constructor for CloneFactory
@@ -34,13 +33,11 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         _parents[rootID] = rootID;
         creator = _owner;
         _mint(_owner, rootID, totalSupply, '');
-        isInit = true;
     }
 
     // Kyc setup must be called before initialize
     // (before first transaction -- mint)
-    function _setupKyc(KycRegister _kycRegister) external {
-        require(!isInit, 'kyc already set up - cannot initialize again');
+    function _setupKyc(KycRegister _kycRegister) external finalizer {
         kycRegister = _kycRegister;
     }
 
@@ -61,7 +58,6 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         if (to != address(0)) {
             require(kycRegister.getKycStatusInfo(to), 'user not on KYC list');
         }
-        // require(kycRegister.getKycStatusInfo(to) || to == address(0), 'user not on KYC list');
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 

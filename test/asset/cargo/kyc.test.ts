@@ -35,9 +35,23 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 		expect(expected).to.be.true
 	})
 
-	it('disallows instantiating kyc contract again after it has been set-up', async () => {
+	it('disallows _setupKyc() after finalized', async () => {
 		await expect(cargoContract.connect(deployer)._setupKyc(kycContract.address)).to.be.revertedWith(
-			'kyc already set up - cannot initialize again'
+			'Kyc: contract is already finalized'
+		)
+	})
+
+	it('disallows _setupKyc() with another kyc contract after finalized', async () => {
+		const kycContract2 = await ethers
+			.getContractFactory(contract_names.KYC_REGISTER)
+			.then(factory => factory.connect(deployer).deploy())
+			.then(contract => contract.deployed())
+			.then(deployedContract => deployedContract as KycRegister)
+
+		expect(kycContract.address).to.not.be.eq(kycContract2.address)
+
+		await expect(cargoContract.connect(deployer)._setupKyc(kycContract2.address)).to.be.revertedWith(
+			'Kyc: contract is already finalized'
 		)
 	})
 

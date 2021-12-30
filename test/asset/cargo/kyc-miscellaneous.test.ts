@@ -10,7 +10,7 @@ import contractNames from '../../../constants/contract.names'
 import { getCargoAddress } from '../../helpers/cargoAddress'
 import contract_names from '../../../constants/contract.names'
 
-describe('[test/asset/cargo/kyc-permissions.test] SpaceCargo asset: kyc miscellaneous', () => {
+describe('[test/asset/cargo/kyc-miscellaneous.test] SpaceCargo asset: kyc miscellaneous', () => {
 	/**
 	 * Test suite for checking KycRegister permission change process
 	 */

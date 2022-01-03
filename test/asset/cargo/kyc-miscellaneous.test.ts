@@ -3,19 +3,15 @@ import { expect } from 'chai'
 import { CargoAsset, CargoFactory, KycRegister } from '../../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { BigNumber } from '@ethersproject/bignumber'
-import { parseUnits } from '@ethersproject/units'
 import { parentable } from './fixtures/parentable.fixture'
-import contractNames from '../../../constants/contract.names'
-import { getCargoAddress } from '../../helpers/cargoAddress'
-import contract_names from '../../../constants/contract.names'
+import * as std_ops from '../../helpers/standardOperations'
 
 describe('[test/asset/cargo/kyc-miscellaneous.test] SpaceCargo asset: kyc miscellaneous', () => {
 	/**
 	 * Test suite for checking KycRegister permission change process
 	 */
-	let userA, userB, userC, creator: SignerWithAddress
-	before('load userA as signerWithAddress', async () => ([, , , userA, userB, userC] = await ethers.getSigners()))
+	let userA, userB, creator: SignerWithAddress
+	before('load userA as signerWithAddress', async () => ([, , , userA, userB] = await ethers.getSigners()))
 
 	let cargoFactory: CargoFactory
 	let cargoContract: CargoAsset
@@ -42,11 +38,7 @@ describe('[test/asset/cargo/kyc-miscellaneous.test] SpaceCargo asset: kyc miscel
 	})
 
 	it('disallows _setupKyc() with another kyc contract after finalized', async () => {
-		const kycContract2 = await ethers
-			.getContractFactory(contract_names.KYC_REGISTER)
-			.then(factory => factory.connect(deployer).deploy())
-			.then(contract => contract.deployed())
-			.then(deployedContract => deployedContract as KycRegister)
+		const kycContract2 = await std_ops.kycInstantiation(deployer)
 
 		expect(kycContract.address).to.not.be.eq(kycContract2.address)
 

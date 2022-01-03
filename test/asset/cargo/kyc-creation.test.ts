@@ -65,7 +65,7 @@ describe('[test/asset/cargo/kyc-creation.test] SpaceCargo asset: kyc & asset cre
 			'Second rootSpaceCargo',
 			cargoContractDecimals,
 			parseUnits('2000', cargoContractDecimals),
-			kycContract.address
+			kycContract
 		)
 	})
 
@@ -159,7 +159,7 @@ describe('[test/asset/cargo/kyc-creation.test] SpaceCargo asset: kyc & asset cre
 			'Second rootSpaceCargo',
 			cargoContractDecimals,
 			parseUnits('2000', cargoContractDecimals),
-			kycContract.address
+			kycContract
 		)
 
 		// user C not on correct KYC - should be reverted

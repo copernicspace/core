@@ -11,9 +11,9 @@ import { CargoAsset, CargoFactory, KycRegister } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
-import { getAssetID } from '../helpers/getAssetId.helper'
+import { getAssetID } from './getAssetId.helper'
 import contractNames from '../../constants/contract.names'
-import { getCargoAddress } from '../helpers/cargoAddress'
+import { getCargoAddress } from './cargoAddress'
 import contract_names from '../../constants/contract.names'
 
 /**
@@ -38,11 +38,11 @@ export async function cargoCreationAddress(
 	_name: string,
 	_decimals: BigNumberish,
 	_totalSupply: BigNumberish,
-	_kycRegisterAddress: string
+	_kycRegister: KycRegister
 ) {
 	return await _factory
 		.connect(_caller)
-		.createCargo(_uri, _name, _decimals, _totalSupply, _kycRegisterAddress)
+		.createCargo(_uri, _name, _decimals, _totalSupply, _kycRegister.address)
 		.then(tx => tx.wait())
 		.then(txr => getCargoAddress(txr))
 }
@@ -64,12 +64,12 @@ export async function cargoCreation(
 	_name: string,
 	_decimals: BigNumberish,
 	_totalSupply: BigNumberish,
-	_kycRegisterAddress: string
+	_kycRegister: KycRegister
 ) {
 	return await ethers
 		.getContractAt(
 			contractNames.CARGO_ASSET,
-			await cargoCreationAddress(_factory, _caller, _uri, _name, _decimals, _totalSupply, _kycRegisterAddress)
+			await cargoCreationAddress(_factory, _caller, _uri, _name, _decimals, _totalSupply, _kycRegister)
 		)
 		.then(contract => contract as CargoAsset)
 }

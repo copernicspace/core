@@ -7,7 +7,7 @@
  */
 
 import { expect } from 'chai'
-import { CargoAsset, CargoFactory, KycRegister } from '../../typechain'
+import { CargoAsset, CargoFactory, CargoFactory__factory, KycRegister } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
@@ -16,156 +16,125 @@ import contractNames from '../../constants/contract.names'
 import { getCargoAddress } from './cargoAddress'
 import contract_names from '../../constants/contract.names'
 
-/**
- *      1.
- *      Cargo asset creation process:
- */
+let factoryContract: CargoFactory
+let cargoContract: CargoAsset
+let contractDecimals: BigNumber
+let kycRegisterContract: KycRegister
+let signer: SignerWithAddress
 
-/**
- * @param _factory              address of the factory contract
- * @param _caller               signer to call the transaction
- * @param _uri                  asset uri
- * @param _name                 asset name
- * @param _decimals             contract decimals
- * @param _totalSupply          contract supply (balance of tokens minted)
- * @param _kycRegisterAddress   address of kyc register instance
- * @returns                     > Address of cargo asset <
- */
-export async function cargoCreationAddress(
-	_factory: CargoFactory,
-	_caller: SignerWithAddress,
-	_uri: string,
-	_name: string,
-	_decimals: BigNumberish,
-	_totalSupply: BigNumberish,
-	_kycRegister: KycRegister
-) {
-	return await _factory
-		.connect(_caller)
-		.createCargo(_uri, _name, _decimals, _totalSupply, _kycRegister.address)
-		.then(tx => tx.wait())
-		.then(txr => getCargoAddress(txr))
+// default values
+
+export function setFactory(factory: CargoFactory, kyc: KycRegister, decimals: BigNumber) {
+	factoryContract = factory
+	kycRegisterContract = kyc
+	contractDecimals = decimals
 }
 
-/**
- * @param _factory              address of the factory contract
- * @param _caller               signer to call the transaction
- * @param _uri                  asset uri
- * @param _name                 asset name
- * @param _decimals             contract decimals
- * @param _totalSupply          contract supply (balance of tokens minted)
- * @param _kycRegisterAddress   address of kyc register instance
- * @returns                     > Instance of cargo asset <
- */
-export async function cargoCreation(
-	_factory: CargoFactory,
-	_caller: SignerWithAddress,
-	_uri: string,
-	_name: string,
-	_decimals: BigNumberish,
-	_totalSupply: BigNumberish,
-	_kycRegister: KycRegister
-) {
-	return await ethers
-		.getContractAt(
-			contractNames.CARGO_ASSET,
-			await cargoCreationAddress(_factory, _caller, _uri, _name, _decimals, _totalSupply, _kycRegister)
-		)
-		.then(contract => contract as CargoAsset)
+export function setCargoAsset(asset: CargoAsset) {
+	cargoContract = asset
 }
 
-/**
- *      2.
- *      Cargo child creation process:
- */
+export const create = {
+	/**
+	 * Asset creation feature set
+	 *
+	 * call 'specifier' methods to set local parameters for execution
+	 * if none specifier methods called, default state variables will be used as parameters
+	 */
 
-/**
- *
- * @param _contract     cargo asset contract to create child of
- * @param _caller       signer to call the transaction
- * @param _amount       balance of tokens minted
- * @param _pid          parent asset ID
- * @param _name         child asset name
- * @param _to           signer to receive the balance minted
- * @returns             ID of child asset
- */
-export async function childCreation(
-	_contract: CargoAsset,
-	_caller: SignerWithAddress,
-	_amount: BigNumberish,
-	_pid: BigNumberish,
-	_name: string,
-	_to: SignerWithAddress
-) {
-	return await _contract
-		.connect(_caller)
-		.createChild(_amount, _pid, _name, _to.address)
-		.then(tx => tx.wait())
-		.then(txr => getAssetID(txr))
+	// local parameters
+	localSigner: null,
+	localReceiver: null,
+
+	// specifier methods
+	from(signer: SignerWithAddress) {
+		this.localSigner = signer
+		return this
+	},
+	to(receiver: SignerWithAddress) {
+		this.localReceiver = receiver
+		return this
+	},
+
+	// feature-set methods
+	async root(uri: string, name: string, totalSupply: BigNumber) {
+		if (this.localSigner == null) {
+			// use global state
+			this.localSigner = signer
+		}
+		// execute:
+		const cargoAddress = await factoryContract
+			.connect(this.localSigner)
+			.createCargo(uri, name, contractDecimals, totalSupply, kycRegisterContract.address)
+			.then(tx => tx.wait())
+			.then(txr => getCargoAddress(txr))
+
+		const cargoAsset = ethers
+			.getContractAt(contractNames.CARGO_ASSET, cargoAddress)
+			.then(contract => contract as CargoAsset)
+
+		// clear local parameters
+		this.localSigner = null
+
+		// return asset instance
+		return cargoAsset
+	},
+
+	async child(pid: BigNumber, name: string, supply: BigNumber) {
+		if (this.localSigner == null) {
+			// use global state
+			this.localSigner = signer
+		}
+		if (this.localReceiver == null) {
+			// use global state
+			this.localReceiver = signer
+		}
+		// execute:
+		const childAsset = await cargoContract
+			.connect(this.localSigner)
+			.createChild(supply, pid, name, this.localReceiver.address)
+			.then(tx => tx.wait())
+			.then(txr => getAssetID(txr))
+
+		// clear local parameters
+		this.localSigner = null
+
+		// return asset instance
+		return childAsset
+	}
 }
 
-/**
- *      3.
- *      KYC contract instantiation
- */
+export const kyc = {
+	/**
+	 * Kyc feature set
+	 *
+	 * call 'specifier' methods to set local parameters for execution
+	 * if none specifier methods called, default state variables will be used as parameters
+	 */
 
-/**
- * @param _caller   signer to call the transaction
- * @returns         instance of KYC contract
- */
-export async function kycInstantiation(_caller: SignerWithAddress) {
-	return await ethers
-		.getContractFactory(contract_names.KYC_REGISTER)
-		.then(factory => factory.connect(_caller).deploy())
-		.then(contract => contract.deployed())
-		.then(deployedContract => deployedContract as KycRegister)
-}
+	// local parameters
+	localSigner: null,
 
-/**
- *      4.
- *      KYC manipulation
- */
+	// specifier methods
+	from(signer: SignerWithAddress) {
+		this.localSigner = signer
+		return this
+	},
 
-/**
- * @param _kycInstance  KYC contract
- * @param _caller       signer that calls the transaction
- * @param _target       signer whose KYC status is to be set to TRUE
- * @returns             function call
- */
-export async function kyc_add(_kycInstance: KycRegister, _caller: SignerWithAddress, _target: SignerWithAddress) {
-	return await _kycInstance.connect(_caller).setKycStatus(_target.address, true)
-}
+	// feature-set methods
+	async instantiate() {
+		return await ethers
+			.getContractFactory(contract_names.KYC_REGISTER)
+			.then(factory => factory.connect(this.localSigner).deploy())
+			.then(contract => contract.deployed())
+			.then(deployedContract => deployedContract as KycRegister)
+	},
 
-/**
- * @param _kycInstance  KYC contract
- * @param _caller       signer that calls the transaction
- * @param _target       signer whose KYC status is to be set to FALSE
- * @returns             function call
- */
-export async function kyc_remove(_kycInstance: KycRegister, _caller: SignerWithAddress, _target: SignerWithAddress) {
-	return await _kycInstance.connect(_caller).setKycStatus(_target.address, false)
-}
+	async add(_target: SignerWithAddress) {
+		return await kycRegisterContract.connect(this.localSigner).setKycStatus(_target.address, true)
+	},
 
-/**
- *      5.
- *      Shorthand-testing
- *
- *      used for: most often called tests with chai's expect
- */
-
-/**
- * @param _cargoContract    cargo asset contract on which balances are stored
- * @param _target           signer whose balance is checked
- * @param _targetID         ID of asset whose balance is checked
- * @param _expValue         expected value
- * @returns                 expect statement
- */
-export async function checkBal(
-	_cargoContract: CargoAsset,
-	_target: SignerWithAddress,
-	_targetID: BigNumber,
-	_expValue: BigNumber
-) {
-	const actual = await _cargoContract.balanceOf(_target.address, _targetID)
-	return await expect(_expValue).to.be.eq(actual)
+	async remove(_target: SignerWithAddress) {
+		return await kycRegisterContract.connect(this.localSigner).setKycStatus(_target.address, false)
+	}
 }

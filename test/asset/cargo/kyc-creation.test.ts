@@ -21,6 +21,7 @@ describe('[test/asset/cargo/kyc-creation.test] SpaceCargo asset: kyc & asset cre
 	let kycContract: KycRegister
 	let deployer: SignerWithAddress
 	let cargoContractDecimals: BigNumber
+
 	before(
 		'load fixtures/deploy',
 		async () =>
@@ -32,11 +33,6 @@ describe('[test/asset/cargo/kyc-creation.test] SpaceCargo asset: kyc & asset cre
 	})
 
 	// ===== Child asset creation =====
-
-	before('set initial state', async () => {
-		std_ops.setFactory(cargoFactory, kycContract, cargoContractDecimals)
-		std_ops.setCargoAsset(cargoContract)
-	})
 
 	const amount: BigNumber = parseUnits('500', cargoContractDecimals)
 	it('allows creating child if user on KYC list', async () => {

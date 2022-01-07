@@ -22,16 +22,48 @@ let contractDecimals: BigNumber
 let kycRegisterContract: KycRegister
 let signer: SignerWithAddress
 
-// default values
+export const global = {
+	/**
+	 * Test preparation feature set
+	 *
+	 * get & set global parameters for the execution context
+	 */
 
-export function setFactory(factory: CargoFactory, kyc: KycRegister, decimals: BigNumber) {
-	factoryContract = factory
-	kycRegisterContract = kyc
-	contractDecimals = decimals
-}
+	set: {
+		factoryContract(factory: CargoFactory) {
+			factoryContract = factory
+		},
+		cargoAsset(asset: CargoAsset) {
+			cargoContract = asset
+		},
+		kycContract(kycRegister: KycRegister) {
+			kycRegisterContract = kycRegister
+		},
+		contractDecimals(decimals: BigNumber) {
+			contractDecimals = decimals
+		},
+		startSigner(_signer: SignerWithAddress) {
+			signer = _signer
+		}
+	},
 
-export function setCargoAsset(asset: CargoAsset) {
-	cargoContract = asset
+	get: {
+		factoryContract() {
+			return factoryContract
+		},
+		cargoAsset() {
+			return cargoContract
+		},
+		kycContract() {
+			return kycRegisterContract
+		},
+		contractDecimals() {
+			return contractDecimals
+		},
+		startSigner() {
+			return signer
+		}
+	}
 }
 
 export const create = {
@@ -45,8 +77,11 @@ export const create = {
 	// local parameters
 	localSigner: null,
 	localReceiver: null,
+	localDecimals: null,
+	localKyc: null,
+	localAsset: null,
 
-	// specifier methods
+	// specifier methods (act as override to global parameters)
 	from(signer: SignerWithAddress) {
 		this.localSigner = signer
 		return this
@@ -55,17 +90,38 @@ export const create = {
 		this.localReceiver = receiver
 		return this
 	},
+	useDecimals(decimals: BigNumber) {
+		this.localDecimals = decimals
+		return this
+	},
+	useKyc(kycContract: KycRegister) {
+		this.localKyc = kycContract
+		return this
+	},
+	onContract(_cargoContract: CargoAsset) {
+		this.localAsset = _cargoContract
+		return this
+	},
 
 	// feature-set methods
 	async root(uri: string, name: string, totalSupply: BigNumber) {
+		// check if local parameters specified
 		if (this.localSigner == null) {
 			// use global state
 			this.localSigner = signer
 		}
+		if (this.localDecimals == null) {
+			// use global state
+			this.localDecimals = contractDecimals
+		}
+		if (this.localKyc == null) {
+			// use global state
+			this.localKyc = kycRegisterContract
+		}
 		// execute:
 		const cargoAddress = await factoryContract
 			.connect(this.localSigner)
-			.createCargo(uri, name, contractDecimals, totalSupply, kycRegisterContract.address)
+			.createCargo(uri, name, this.localDecimals, totalSupply, this.localKyc.address)
 			.then(tx => tx.wait())
 			.then(txr => getCargoAddress(txr))
 
@@ -75,6 +131,8 @@ export const create = {
 
 		// clear local parameters
 		this.localSigner = null
+		this.localDecimals = null
+		this.localKyc = null
 
 		// return asset instance
 		return cargoAsset
@@ -89,8 +147,12 @@ export const create = {
 			// use global state
 			this.localReceiver = signer
 		}
+		if (this.localAsset == null) {
+			// use global state
+			this.localAsset = cargoContract
+		}
 		// execute:
-		const childAsset = await cargoContract
+		const childAsset = await this.localAsset
 			.connect(this.localSigner)
 			.createChild(supply, pid, name, this.localReceiver.address)
 			.then(tx => tx.wait())
@@ -98,6 +160,7 @@ export const create = {
 
 		// clear local parameters
 		this.localSigner = null
+		this.localAsset = null
 
 		// return asset instance
 		return childAsset
@@ -114,27 +177,59 @@ export const kyc = {
 
 	// local parameters
 	localSigner: null,
+	localKyc: null,
 
-	// specifier methods
+	// specifier methods (act as override to global parameters)
 	from(signer: SignerWithAddress) {
 		this.localSigner = signer
+		return this
+	},
+	chooseKyc(kycContract: KycRegister) {
+		this.localKyc = kycContract
 		return this
 	},
 
 	// feature-set methods
 	async instantiate() {
-		return await ethers
+		if (this.localSigner == null) {
+			// use global state
+			this.localSigner = signer
+		}
+
+		const kycInstance = await ethers
 			.getContractFactory(contract_names.KYC_REGISTER)
 			.then(factory => factory.connect(this.localSigner).deploy())
 			.then(contract => contract.deployed())
 			.then(deployedContract => deployedContract as KycRegister)
+
+		// clear local parameters
+		this.localSigner = null
+
+		// return kyc instance
+		return kycInstance
 	},
 
 	async add(_target: SignerWithAddress) {
-		return await kycRegisterContract.connect(this.localSigner).setKycStatus(_target.address, true)
+		if (this.localKyc == null) {
+			// use global state
+			this.localKyc = kycRegisterContract
+		}
+		// execute:
+		await this.localKyc.connect(this.localSigner).setKycStatus(_target.address, true)
+
+		// clear local parameters
+		this.localKyc = null
 	},
 
 	async remove(_target: SignerWithAddress) {
-		return await kycRegisterContract.connect(this.localSigner).setKycStatus(_target.address, false)
+		if (this.localKyc == null) {
+			// use global state
+			this.localKyc = kycRegisterContract
+		}
+		// execute:
+		await this.localKyc.connect(this.localSigner).setKycStatus(_target.address, false)
+
+		// clear local parameters
+		this.localKyc = null
 	}
 }

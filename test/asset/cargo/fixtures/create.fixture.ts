@@ -8,6 +8,7 @@ import { getCargoAddress } from '../../../helpers/cargoAddress'
 import contractNames from '../../../../constants/contract.names'
 import { parseUnits } from '@ethersproject/units'
 import { loadFixture } from './fixtureLoader'
+import * as std_ops from '../../../helpers/standardOperations'
 
 export interface Create extends Deploy {
 	creator: SignerWithAddress
@@ -35,6 +36,12 @@ export const create: Fixture<Create> = async () => {
 	const cargoContract = await ethers
 		.getContractAt(contractNames.CARGO_ASSET, cargoContractAddress)
 		.then(contract => contract as CargoAsset)
+
+	// set starting global parameters
+	std_ops.global.set.factoryContract(cargoFactory)
+	std_ops.global.set.cargoAsset(cargoContract)
+	std_ops.global.set.kycContract(kycContract)
+	std_ops.global.set.contractDecimals(BigNumber.from(decimals))
 
 	return { deployer, creator, cargoFactory, cargoContract, totalSupply, decimals, kycContract }
 }

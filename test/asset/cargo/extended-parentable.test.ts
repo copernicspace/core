@@ -6,8 +6,6 @@ import { parentable } from './fixtures/parentable.fixture'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { getAssetID } from '../../helpers/getAssetId.helper'
-import { loadFixture } from '@ethereum-waffle/provider'
-import * as std_ops from '../../helpers/standardOperations'
 
 /**
  * test suite for {@link parentable}
@@ -41,10 +39,11 @@ describe('[test/asset/cargo/extended-parentable.test] SpaceCargo asset: extended
 		const cosmosChildAmount = parseUnits('105', 18)
 		let cosmosChildId: BigNumber
 		before('creates 105 cosmos child from creator to account A', async () => {
-			cosmosChildId = await std_ops.create
-				.from(creator)
-				.to(accountA)
-				.child(rootID, 'CosmosChild', cosmosChildAmount)
+			cosmosChildId = await cargoContract
+				.connect(creator)
+				.createChild(cosmosChildAmount, rootID, 'CosmosChild', accountA.address)
+				.then(tx => tx.wait())
+				.then(txr => getAssetID(txr))
 		})
 		it('has correct creators balance of root asset after `cosmos` child create', async () =>
 			expect(await cargoContract.balanceOf(creator.address, rootID)).to.be.eq(
@@ -71,10 +70,11 @@ describe('[test/asset/cargo/extended-parentable.test] SpaceCargo asset: extended
 		before(
 			'creates 555 star child from creator account B',
 			async () =>
-				(starChildId = await std_ops.create
-					.from(creator)
-					.to(accountB)
-					.child(rootID, 'StarChild', starChildAmount))
+				(starChildId = await cargoContract
+					.connect(creator)
+					.createChild(starChildAmount, rootID, 'StarChild', accountB.address)
+					.then(tx => tx.wait())
+					.then(txr => getAssetID(txr)))
 		)
 
 		it('has correct creators balance of root asset after `star` child create', async () =>

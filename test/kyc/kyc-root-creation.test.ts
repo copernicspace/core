@@ -6,7 +6,9 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
-import * as std_ops from '../helpers/standardOperations'
+import contract_names from '../../constants/contract.names'
+import { getCargoAddress } from '../helpers/cargoAddress'
+import contractNames from '../../constants/contract.names'
 
 describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 	let userA, userB, userC, creator: SignerWithAddress
@@ -35,10 +37,23 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 	 */
 
 	let cargoContractA: CargoAsset
+	let cargoContractAaddress
 	before('create root cargo contract [with starting KYC]', async () => {
-		cargoContractA = await std_ops.create
-			.from(creator)
-			.root('first.test.uri.com', 'First rootSpaceCargo', parseUnits('2000', cargoContractDecimals))
+		cargoContractAaddress = await cargoFactory
+			.connect(creator)
+			.createCargo(
+				'first.test.uri.com',
+				'First rootSpaceCargo',
+				cargoContractDecimals,
+				parseUnits('2000', cargoContractDecimals),
+				kycContract.address
+			)
+			.then(tx => tx.wait())
+			.then(txr => getCargoAddress(txr))
+
+		cargoContractA = await ethers
+			.getContractAt(contractNames.CARGO_ASSET, cargoContractAaddress)
+			.then(contract => contract as CargoAsset)
 	})
 
 	it('connected correct [first] KYC Register', async () => {
@@ -53,22 +68,38 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 	 */
 
 	let secondKYC: KycRegister
+	let cargoContractBaddress
 	let cargoContractB: CargoAsset
 	before('create root cargo contract [with new KYC]', async () => {
 		// create a new instance of KYC contact
-		secondKYC = await std_ops.kyc.from(deployer).instantiate()
+		secondKYC = await ethers
+			.getContractFactory(contract_names.KYC_REGISTER)
+			.then(factory => factory.connect(deployer).deploy())
+			.then(contract => contract.deployed())
+			.then(deployedContract => deployedContract as KycRegister)
 
 		// give factory permissions
 		await cargoFactory.connect(deployer).addClient(userA.address)
 
 		// add userA to secondKYC permissions
-		await std_ops.kyc.chooseKyc(secondKYC).from(deployer).add(userA)
+		await secondKYC.connect(deployer).setKycStatus(userA.address, true)
 
 		// when creating a new contract, specify override KYC
-		cargoContractB = await std_ops.create
-			.from(userA)
-			.useKyc(secondKYC)
-			.root('second.test.uri.com', 'Second rootSpaceCargo', parseUnits('2000', cargoContractDecimals))
+		cargoContractBaddress = await cargoFactory
+			.connect(userA)
+			.createCargo(
+				'second.test.uri.com',
+				'Second rootSpaceCargo',
+				cargoContractDecimals,
+				parseUnits('2000', cargoContractDecimals),
+				secondKYC.address
+			)
+			.then(tx => tx.wait())
+			.then(txr => getCargoAddress(txr))
+
+		cargoContractB = await ethers
+			.getContractAt(contractNames.CARGO_ASSET, cargoContractBaddress)
+			.then(contract => contract as CargoAsset)
 	})
 
 	it('connected correct [second] KYC Register', async () => {
@@ -78,7 +109,7 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 	})
 
 	/**
-	 *      4.
+	 *      3.
 	 *      Check if root asset creation is reverted
 	 *      if caller does not have KYC permissions
 	 */
@@ -86,17 +117,28 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 	it('disallows creating root cargo if not KYC permitted', async () => {
 		// userA does not have KYC permissions on starting KYC
 		await expect(
-			std_ops.create
-				.from(userA)
-				.root('revert.test.uri.com', 'Revert rootSpaceCargo', parseUnits('2000', cargoContractDecimals))
+			cargoFactory
+				.connect(userA)
+				.createCargo(
+					'revert.test.uri.com',
+					'Revert rootSpaceCargo',
+					cargoContractDecimals,
+					parseUnits('2000', cargoContractDecimals),
+					kycContract.address
+				)
 		).to.be.revertedWith('user not on KYC list')
 
 		// creator does not kave KYC permissions on secondKYC
 		await expect(
-			std_ops.create
-				.from(creator)
-				.useKyc(secondKYC)
-				.root('revert.test.uri.com', 'Revert rootSpaceCargo', parseUnits('2000', cargoContractDecimals))
+			cargoFactory
+				.connect(creator)
+				.createCargo(
+					'revert.test.uri.com',
+					'Revert rootSpaceCargo',
+					cargoContractDecimals,
+					parseUnits('2000', cargoContractDecimals),
+					secondKYC.address
+				)
 		).to.be.revertedWith('user not on KYC list')
 	})
 })

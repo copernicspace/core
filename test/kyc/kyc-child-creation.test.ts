@@ -6,7 +6,9 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
-import * as std_ops from '../helpers/standardOperations'
+import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
+import contractNames from '../../constants/contract.names'
+import { getCargoAddress } from '../helpers/cargoAddress'
 
 describe('SpaceCargoAsset: Child creation & integration with KYC', () => {
 	let userA, userB, userC, creator: SignerWithAddress
@@ -34,8 +36,11 @@ describe('SpaceCargoAsset: Child creation & integration with KYC', () => {
 	 */
 
 	it('allows creating new child asset if KYC permitted', async () => {
-		await expect(std_ops.create.from(creator).child(0, 'child name', parseUnits('500', cargoContractDecimals))).to
-			.not.be.reverted
+		await expect(
+			cargoContract
+				.connect(creator)
+				.createChild(parseUnits('500', cargoContractDecimals), 0, 'child name', creator.address)
+		).to.not.be.reverted
 	})
 
 	/**
@@ -46,14 +51,17 @@ describe('SpaceCargoAsset: Child creation & integration with KYC', () => {
 
 	it('reverts child asset creation if not KYC permitted', async () => {
 		// take away creator's KYC permissions
-		await std_ops.kyc.from(deployer).remove(creator)
+		await kycContract.connect(deployer).setKycStatus(creator.address, false)
+		// await std_ops.kyc.from(deployer).remove(creator)
 
 		await expect(
-			std_ops.create.from(creator).child(0, 'child name', parseUnits('500', cargoContractDecimals))
+			cargoContract
+				.connect(creator)
+				.createChild(parseUnits('500', cargoContractDecimals), 0, 'child name', creator.address)
 		).to.be.revertedWith('user not on KYC list')
 
 		// re-add creator's KYC permissions
-		await std_ops.kyc.from(deployer).add(creator)
+		await kycContract.connect(deployer).setKycStatus(creator.address, true)
 	})
 
 	/**
@@ -61,19 +69,31 @@ describe('SpaceCargoAsset: Child creation & integration with KYC', () => {
 	 * 		Check if can create child based on other root with same KYC
 	 */
 
-	let cargoContractA
+	let cargoContractAaddress
+	let cargoContractA: CargoAsset
 	before('create new root cargo contract [with starting KYC]', async () => {
-		cargoContractA = await std_ops.create
-			.from(creator)
-			.root('second.test.uri.com', 'Second rootSpaceCargo', parseUnits('2000', cargoContractDecimals))
+		cargoContractAaddress = await cargoFactory
+			.connect(creator)
+			.createCargo(
+				'second.test.uri.com',
+				'Second rootSpaceCargo',
+				cargoContractDecimals,
+				parseUnits('2000', cargoContractDecimals),
+				kycContract.address
+			)
+			.then(tx => tx.wait())
+			.then(txr => getCargoAddress(txr))
+
+		cargoContractA = await ethers
+			.getContractAt(contractNames.CARGO_ASSET, cargoContractAaddress)
+			.then(contract => contract as CargoAsset)
 	})
 
 	it('allows creating new child asset [on new root] if KYC permitted', async () => {
 		await expect(
-			std_ops.create
-				.from(creator)
-				.onContract(cargoContractA)
-				.child(0, 'child name', parseUnits('500', cargoContractDecimals))
+			cargoContractA
+				.connect(creator)
+				.createChild(parseUnits('500', cargoContractDecimals), 0, 'child name', creator.address)
 		).to.not.be.reverted
 	})
 })

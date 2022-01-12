@@ -37,11 +37,5 @@ export const createCargoAsset: Fixture<Create> = async () => {
 		.getContractAt(contractNames.CARGO_ASSET, cargoContractAddress)
 		.then(contract => contract as CargoAsset)
 
-	// set starting global parameters
-	std_ops.global.set.factoryContract(cargoFactory)
-	std_ops.global.set.cargoAsset(cargoContract)
-	std_ops.global.set.kycContract(kycContract)
-	std_ops.global.set.contractDecimals(BigNumber.from(decimals))
-
 	return { deployer, creator, cargoFactory, cargoContract, totalSupply, decimals, kycContract }
 }

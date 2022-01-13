@@ -1,6 +1,6 @@
 import { waffle } from 'hardhat'
 import { expect } from 'chai'
-import { CargoAsset, KycRegister } from '../../typechain'
+import { CargoAsset } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
@@ -14,13 +14,12 @@ describe('SpaceCargoAsset: KYC revert on transfer testing', () => {
 	before('load userA as signerWithAddress', async () => ([, , , userA] = await ethers.getSigners()))
 
 	let cargoContract: CargoAsset
-	let kycContract: KycRegister
 	let deployer: SignerWithAddress
 	let decimals: number
 
 	before(
 		'load fixtures/deploy`',
-		async () => ({ cargoContract, creator, kycContract, deployer, decimals } = await waffle.loadFixture(parentable))
+		async () => ({ cargoContract, creator, deployer, decimals } = await waffle.loadFixture(parentable))
 	)
 
 	it('disallows sending balance to non-KYC users', async () =>
@@ -28,19 +27,8 @@ describe('SpaceCargoAsset: KYC revert on transfer testing', () => {
 			cargoContract.connect(deployer).send(userA.address, 0, parseUnits('100', decimals))
 		).to.be.revertedWith('user not on KYC list'))
 
-	it('disallows sending balance from non-KYC users', async () => {
-		// add permissions to userA
-		await kycContract.connect(deployer).setKycStatus(userA.address, true)
-
-		// transfer funds to userA
-		await cargoContract.connect(creator).send(userA.address, 0, parseUnits('100', decimals))
-
-		// remove permissions from userA
-		await kycContract.connect(deployer).setKycStatus(userA.address, false)
-
-		// try sending from userA to creator
+	it('disallows sending balance from non-KYC users', async () =>
 		await expect(
 			cargoContract.connect(userA).send(creator.address, 0, parseUnits('100', decimals))
-		).to.be.revertedWith('user not on KYC list')
-	})
+		).to.be.revertedWith('user not on KYC list'))
 })

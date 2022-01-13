@@ -1,48 +1,46 @@
 import { waffle } from 'hardhat'
 import { expect } from 'chai'
-import { CargoAsset, CargoFactory, KycRegister } from '../../typechain'
+import { CargoAsset, KycRegister } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
 import { parseUnits } from 'ethers/lib/utils'
 
+/**
+ * Test suite for checking KycRegister permission change process
+ */
 describe('SpaceCargoAsset: KYC revert on transfer testing', () => {
-	/**
-	 * Test suite for checking KycRegister permission change process
-	 */
-	let userA, userB, creator: SignerWithAddress
-	before('load userA as signerWithAddress', async () => ([, , , userA, userB] = await ethers.getSigners()))
+	let userA, creator: SignerWithAddress
+	before('load userA as signerWithAddress', async () => ([, , , userA] = await ethers.getSigners()))
 
-	let cargoFactory: CargoFactory
 	let cargoContract: CargoAsset
 	let kycContract: KycRegister
 	let deployer: SignerWithAddress
+	let decimals: number
 
 	before(
 		'load fixtures/deploy`',
-		async () =>
-			({ cargoFactory, cargoContract, creator, kycContract, deployer } = await waffle.loadFixture(parentable))
+		async () => ({ cargoContract, creator, kycContract, deployer, decimals } = await waffle.loadFixture(parentable))
 	)
 
-	it('disallows sending balance to non-KYC users', async () => {
+	it('disallows sending balance to non-KYC users', async () =>
 		await expect(
-			cargoContract.connect(deployer).send(userA.address, 0, parseUnits('100', await cargoContract.decimals()))
-		).to.be.revertedWith('user not on KYC list')
-	})
+			cargoContract.connect(deployer).send(userA.address, 0, parseUnits('100', decimals))
+		).to.be.revertedWith('user not on KYC list'))
 
 	it('disallows sending balance from non-KYC users', async () => {
 		// add permissions to userA
 		await kycContract.connect(deployer).setKycStatus(userA.address, true)
 
 		// transfer funds to userA
-		await cargoContract.connect(creator).send(userA.address, 0, parseUnits('100', await cargoContract.decimals()))
+		await cargoContract.connect(creator).send(userA.address, 0, parseUnits('100', decimals))
 
 		// remove permissions from userA
 		await kycContract.connect(deployer).setKycStatus(userA.address, false)
 
 		// try sending from userA to creator
 		await expect(
-			cargoContract.connect(userA).send(creator.address, 0, parseUnits('100', await cargoContract.decimals()))
+			cargoContract.connect(userA).send(creator.address, 0, parseUnits('100', decimals))
 		).to.be.revertedWith('user not on KYC list')
 	})
 })

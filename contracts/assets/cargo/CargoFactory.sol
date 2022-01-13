@@ -49,7 +49,7 @@ contract CargoFactory is CloneFactory, AccessControl, KycRegister {
         // todo make sure initizle can be called once
 
         // set up KYC for checks
-        CargoAsset(clone)._setupKyc(_kycRegister);
+        CargoAsset(clone).setupKyc(_kycRegister);
         // before initialize make sure user is permitted to create cargo (Kyc permissions)
         require(CargoAsset(clone).kycRegister().getKycStatusInfo(msg.sender), 'user not on KYC list');
         // initialize cargo asset

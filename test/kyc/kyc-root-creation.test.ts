@@ -3,7 +3,6 @@ import { expect } from 'chai'
 import { CargoAsset, CargoFactory, KycRegister } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
 import contract_names from '../../constants/contract.names'
@@ -11,24 +10,17 @@ import { getCargoAddress } from '../helpers/cargoAddress'
 import contractNames from '../../constants/contract.names'
 
 describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
-	let userA, userB, userC, creator: SignerWithAddress
-	before('load userA as signerWithAddress', async () => ([, , , userA, userB, userC] = await ethers.getSigners()))
+	let userA, creator: SignerWithAddress
+	before('load userA as signerWithAddress', async () => ([, , , userA] = await ethers.getSigners()))
 
 	let cargoFactory: CargoFactory
-	let cargoContract: CargoAsset
 	let kycContract: KycRegister
 	let deployer: SignerWithAddress
-	let cargoContractDecimals: BigNumber
-
+	let decimals: number
 	before(
 		'load fixtures/parentable',
-		async () =>
-			({ cargoFactory, cargoContract, creator, kycContract, deployer } = await waffle.loadFixture(parentable))
+		async () => ({ cargoFactory, creator, kycContract, deployer, decimals } = await waffle.loadFixture(parentable))
 	)
-
-	before('get decimals', async () => {
-		cargoContractDecimals = await cargoContract.decimals()
-	})
 
 	/**
 	 *      1.
@@ -37,15 +29,15 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 	 */
 
 	let cargoContractA: CargoAsset
-	let cargoContractAaddress
+	let cargoContractAaddress: string
 	before('create root cargo contract [with starting KYC]', async () => {
 		cargoContractAaddress = await cargoFactory
 			.connect(creator)
 			.createCargo(
 				'first.test.uri.com',
 				'First rootSpaceCargo',
-				cargoContractDecimals,
-				parseUnits('2000', cargoContractDecimals),
+				decimals,
+				parseUnits('2000', decimals),
 				kycContract.address
 			)
 			.then(tx => tx.wait())
@@ -90,8 +82,8 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 			.createCargo(
 				'second.test.uri.com',
 				'Second rootSpaceCargo',
-				cargoContractDecimals,
-				parseUnits('2000', cargoContractDecimals),
+				decimals,
+				parseUnits('2000', decimals),
 				secondKYC.address
 			)
 			.then(tx => tx.wait())
@@ -122,8 +114,8 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 				.createCargo(
 					'revert.test.uri.com',
 					'Revert rootSpaceCargo',
-					cargoContractDecimals,
-					parseUnits('2000', cargoContractDecimals),
+					decimals,
+					parseUnits('2000', decimals),
 					kycContract.address
 				)
 		).to.be.revertedWith('user not on KYC list')
@@ -135,8 +127,8 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 				.createCargo(
 					'revert.test.uri.com',
 					'Revert rootSpaceCargo',
-					cargoContractDecimals,
-					parseUnits('2000', cargoContractDecimals),
+					decimals,
+					parseUnits('2000', decimals),
 					secondKYC.address
 				)
 		).to.be.revertedWith('user not on KYC list')

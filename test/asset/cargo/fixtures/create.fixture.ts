@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { deploy, Deploy } from './deploy.fixture'
+import { deployCargoAsset, Deploy } from './deploy.fixture'
 import { Fixture } from 'ethereum-waffle'
 import { ethers } from 'hardhat'
 import { CargoAsset, KycRegister } from '../../../../typechain'
@@ -17,8 +17,8 @@ export interface Create extends Deploy {
 	kycContract: KycRegister
 }
 
-export const create: Fixture<Create> = async () => {
-	const { deployer, creator, cargoFactory, kycContract } = await loadFixture(deploy)
+export const createCargoAsset: Fixture<Create> = async () => {
+	const { deployer, creator, cargoFactory, kycContract } = await loadFixture(deployCargoAsset)
 	const decimals = 18
 	const totalSupply = parseUnits('3500', decimals)
 

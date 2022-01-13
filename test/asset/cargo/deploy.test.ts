@@ -1,7 +1,7 @@
 import { waffle } from 'hardhat'
 import { expect } from 'chai'
 import { CargoFactory, KycRegister } from '../../../typechain'
-import { deploy } from './fixtures/deploy.fixture'
+import { deployCargoAsset } from './fixtures/deploy.fixture'
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
@@ -12,7 +12,10 @@ describe('[test/asset/cargo/deploy.test] CargoFactory for asset: deploy fixture 
 
 	let cargoFactory: CargoFactory
 	let kycContract: KycRegister
-	beforeEach('load fixtures/deploy`', async () => ({ cargoFactory, kycContract } = await waffle.loadFixture(deploy)))
+	before(
+		'load fixtures/deploy`',
+		async () => ({ cargoFactory, kycContract } = await waffle.loadFixture(deployCargoAsset))
+	)
 
 	it('has success tx receipt status', async () =>
 		await cargoFactory.deployTransaction.wait().then(txr => expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)))

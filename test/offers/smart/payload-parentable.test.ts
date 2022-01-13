@@ -6,11 +6,7 @@
 
 // describe('[payload-parentable.test.ts] Space Payload Asset Parentable Interface tests', async () => {
 // 	let deployer, user1, user2, user3, user4: SignerWithAddress
-// 	before(
-// 		'get signers from hh node',
-// 		async () =>
-// 			([deployer, user1, user2, user3, user4] = await ethers.getSigners())
-// 	)
+// 	before('get signers from hh node', async () => ([deployer, user1, user2, user3, user4] = await ethers.getSigners()))
 
 // 	let assetContract: SpacePayloadAsset
 // 	before(
@@ -34,9 +30,7 @@
 // 			.connect(user1)
 // 			.createRootAsset(3500)
 // 			.then(tx => tx.wait())
-// 		const new_asset_args = root_create_tx.events
-// 			.filter(events => events.event === 'RootAssetCreation')
-// 			.pop().args
+// 		const new_asset_args = root_create_tx.events.filter(events => events.event === 'RootAssetCreation').pop().args
 
 // 		// asset creation event
 // 		expect(new_asset_args._id).to.be.eq(1)
@@ -44,10 +38,7 @@
 // 		expect(new_asset_args._amount).to.be.eq(BigInt(3500 * 10 ** 18))
 
 // 		// creator's balance
-// 		const us1_bal = await assetContract.balanceOf(
-// 			user1.address,
-// 			new_asset_args._id
-// 		)
+// 		const us1_bal = await assetContract.balanceOf(user1.address, new_asset_args._id)
 // 		expect(us1_bal).to.be.eq(BigInt(3500 * 10 ** 18))
 // 	})
 
@@ -60,9 +51,7 @@
 // 			.connect(user1)
 // 			.createAsset(2000, 1)
 // 			.then(tx => tx.wait())
-// 		const new_asset_args = create_tx.events
-// 			.filter(events => events.event === 'AssetCreation')
-// 			.pop().args
+// 		const new_asset_args = create_tx.events.filter(events => events.event === 'AssetCreation').pop().args
 
 // 		// asset creation event
 // 		expect(new_asset_args._id).to.be.eq(2)
@@ -71,17 +60,12 @@
 // 		expect(new_asset_args._pid).to.be.eq(1)
 
 // 		// creator's balance
-// 		const us1_bal = await assetContract.balanceOf(
-// 			user1.address,
-// 			new_asset_args._id
-// 		)
+// 		const us1_bal = await assetContract.balanceOf(user1.address, new_asset_args._id)
 // 		expect(us1_bal).to.be.eq(BigInt(2000 * 10 ** 18))
 // 	})
 
 // 	it('disallows creating child assets based on an asset not owned by creator', async () => {
-// 		await expect(
-// 			assetContract.connect(user2).createAsset(1000, 1)
-// 		).to.be.revertedWith(
+// 		await expect(assetContract.connect(user2).createAsset(1000, 1)).to.be.revertedWith(
 // 			'Required child asset weight exceeds the creator balance'
 // 		)
 // 	})
@@ -94,28 +78,18 @@
 // 		await assetContract.connect(user1).unPauseAsset(1)
 
 // 		// Transfer some weight to user 3 for testing
-// 		const start_b_3 = await (
-// 			await assetContract.balanceOf(user3.address, 1)
-// 		).toBigInt()
-// 		await assetContract
-// 			.connect(user3)
-// 			.sendFrom(user1.address, user3.address, 1, BigInt(500 * 10 ** 18))
-// 		const end_b_3 = await (
-// 			await assetContract.balanceOf(user3.address, 1)
-// 		).toBigInt()
+// 		const start_b_3 = await (await assetContract.balanceOf(user3.address, 1)).toBigInt()
+// 		await assetContract.connect(user3).sendFrom(user1.address, user3.address, 1, BigInt(500 * 10 ** 18))
+// 		const end_b_3 = await (await assetContract.balanceOf(user3.address, 1)).toBigInt()
 
 // 		expect(start_b_3.toString()).to.be.eq('0')
-// 		expect(end_b_3.toString()).to.be.eq(
-// 			(start_b_3 + BigInt(500 * 10 ** 18)).toString()
-// 		)
+// 		expect(end_b_3.toString()).to.be.eq((start_b_3 + BigInt(500 * 10 ** 18)).toString())
 
 // 		const create_tx = await assetContract
 // 			.connect(user3)
 // 			.createAsset(300, 1)
 // 			.then(tx => tx.wait())
-// 		const new_asset_args = create_tx.events
-// 			.filter(events => events.event === 'AssetCreation')
-// 			.pop().args
+// 		const new_asset_args = create_tx.events.filter(events => events.event === 'AssetCreation').pop().args
 
 // 		// asset creation event
 // 		expect(new_asset_args._id).to.be.eq(3)
@@ -126,17 +100,12 @@
 // 		expect(await assetContract.parentIds(3)).to.be.eq(1)
 
 // 		// creator's balance
-// 		const us3_bal = await assetContract.balanceOf(
-// 			user3.address,
-// 			new_asset_args._id
-// 		)
+// 		const us3_bal = await assetContract.balanceOf(user3.address, new_asset_args._id)
 // 		expect(us3_bal).to.be.eq(BigInt(300 * 10 ** 18))
 // 	})
 
 // 	it('cannot create child asset if balance too low', async () => {
-// 		await expect(
-// 			assetContract.connect(user3).createAsset(600, 1)
-// 		).to.be.revertedWith(
+// 		await expect(assetContract.connect(user3).createAsset(600, 1)).to.be.revertedWith(
 // 			'Required child asset weight exceeds the creator balance'
 // 		)
 // 	})

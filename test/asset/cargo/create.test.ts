@@ -1,7 +1,7 @@
 import { waffle } from 'hardhat'
 import { expect } from 'chai'
 import { CargoAsset, CargoFactory, KycRegister } from '../../../typechain'
-import { create } from './fixtures/create.fixture'
+import { createCargoAsset } from './fixtures/create.fixture'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
@@ -16,7 +16,7 @@ describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test s
 	let kycContract: KycRegister
 	beforeEach(
 		'load fixtures/deploy`',
-		async () => ({ cargoFactory, cargoContract, creator, kycContract } = await waffle.loadFixture(create))
+		async () => ({ cargoFactory, cargoContract, creator, kycContract } = await waffle.loadFixture(createCargoAsset))
 	)
 
 	it('has correct uri', async () => {

@@ -4,7 +4,7 @@ import { ethers } from 'hardhat'
 import { getAssetID } from '../../../helpers/getAssetId.helper'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
-import { create, Create } from './create.fixture'
+import { createCargoAsset, Create } from './create.fixture'
 import { CargoAsset } from '../../../../typechain'
 import { loadFixture } from './fixtureLoader'
 
@@ -31,7 +31,7 @@ export interface Parentable extends Create {
  */
 export const parentable: Fixture<Parentable> = async () => {
 	const { deployer, cargoFactory, creator, cargoContract, totalSupply, decimals, kycContract } = await loadFixture(
-		create
+		createCargoAsset
 	)
 	const [, , receiver]: SignerWithAddress[] = await ethers.getSigners()
 	const cargoContractDecimals = await cargoContract.decimals()

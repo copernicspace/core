@@ -3,13 +3,13 @@ pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '../assets/cargo/CargoAsset.sol';
-import 'hardhat/console.sol';
 
 contract InstantOffer {
     event NewOffer(
         address indexed seller,
-        uint256 indexed what,
-        uint256 indexed amount,
+        address indexed asset,
+        uint256 indexed assetID,
+        uint256 amount,
         uint256 price,
         address money,
         uint256 sellID
@@ -18,8 +18,9 @@ contract InstantOffer {
     event Buy(address buyer, uint256 sellID);
 
     struct Offer {
+        address asset;
         address seller;
-        uint256 what;
+        uint256 assetID;
         uint256 price;
         address money;
         uint256 sellID;
@@ -28,32 +29,33 @@ contract InstantOffer {
     uint256 private numOffers;
     mapping(uint256 => Offer) private offers;
 
-    CargoAsset public asset;
-
-    constructor(address _asset) {
-        asset = CargoAsset(_asset);
-    }
+    constructor() {}
 
     function sell(
-        uint256 what,
+        address asset,
+        uint256 assetID,
         uint256 amount,
         uint256 price,
         address money
     ) public returns (uint256 sellID) {
-        require(asset.balanceOf(msg.sender, what) >= 1, 'Failed to create new sell, insuffucient balance');
+        require(
+            CargoAsset(asset).balanceOf(msg.sender, assetID) >= 1,
+            'Failed to create new sell, insuffucient balance'
+        );
 
         require(
-            asset.isApprovedForAll(msg.sender, address(this)) == true,
+            CargoAsset(asset).isApprovedForAll(msg.sender, address(this)) == true,
             'This contract has no approval to operate sellers assets'
         );
         sellID = numOffers++;
         Offer storage offer = offers[sellID];
+        offer.asset = asset;
         offer.seller = msg.sender;
-        offer.what = what;
+        offer.assetID = assetID;
         offer.price = price;
         offer.money = money;
         offer.sellID = sellID;
-        emit NewOffer(msg.sender, what, amount, price, money, sellID);
+        emit NewOffer(msg.sender, asset, assetID, amount, price, money, sellID);
     }
 
     function getSmartOffer(uint256 _sellID)
@@ -61,29 +63,25 @@ contract InstantOffer {
         view
         returns (
             address seller,
-            uint256 what,
+            uint256 assetID,
             uint256 price,
             address money,
             uint256 sellID
         )
     {
         Offer memory offer = offers[_sellID];
-        return (offer.seller, offer.what, offer.price, offer.money, offer.sellID);
+        return (offer.seller, offer.assetID, offer.price, offer.money, offer.sellID);
     }
 
     function buy(uint256 sellID, uint256 amount) public {
-        Offer memory so = offers[sellID];
+        Offer memory offer = offers[sellID];
+        CargoAsset asset = CargoAsset(offer.asset);
         address buyer = msg.sender;
-        IERC20 money = IERC20(so.money);
-        uint256 amountPrice = amount * so.price;
+        IERC20 money = IERC20(offer.money);
+        uint256 amountPrice = amount * offer.price;
         require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
-        money.transferFrom(buyer, so.seller, amountPrice);
-        console.log(so.seller);
-        console.log(buyer);
-        console.log(so.what);
-        console.log(amount);
-
-        asset.sendFrom(so.seller, buyer, so.what, amount);
+        money.transferFrom(buyer, offer.seller, amountPrice);
+        asset.sendFrom(offer.seller, buyer, offer.assetID, amount);
         emit Buy(buyer, sellID);
     }
 }

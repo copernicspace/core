@@ -28,7 +28,7 @@ export const deployInstantOffer: Fixture<DeployInstantOffer> = async () => {
 
 	const instantOffer = await ethers
 		.getContractFactory(contract_names.INSTANT_OFFER)
-		.then(factory => factory.connect(deployer).deploy(cargoContract.address))
+		.then(factory => factory.connect(deployer).deploy())
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract as InstantOffer)
 

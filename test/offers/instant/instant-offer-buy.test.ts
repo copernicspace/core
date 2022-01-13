@@ -3,7 +3,7 @@ import { ethers, waffle } from 'hardhat'
 import { deployInstantOffer } from './fixtures/deployInstantOffer.fixture'
 import { CargoAsset, InstantOffer, KycRegister, ERC20Mock } from '../../../typechain'
 import contractNames from '../../../constants/contract.names'
-import { BigNumber, BigNumberish, ContractReceipt } from 'ethers'
+import { BigNumber, BigNumberish } from 'ethers'
 import { expect } from 'chai'
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { getOfferSellID } from '../../helpers/getOfferId.helper'
@@ -20,6 +20,7 @@ describe('instant offer: `buy` test suite', () => {
 	const rootId = 0
 
 	let userA: SignerWithAddress
+
 	before('load userA as signerWithAddress', async () => ([, , userA] = await ethers.getSigners()))
 
 	before(
@@ -47,7 +48,7 @@ describe('instant offer: `buy` test suite', () => {
 
 		const txr = await instantOffer
 			.connect(creator)
-			.sell(rootId, totalSupply, price, erc20Mock.address)
+			.sell(cargoContract.address, rootId, totalSupply, price, erc20Mock.address)
 			.then(tx => tx.wait())
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		offerId = getOfferSellID(txr)

@@ -22,4 +22,5 @@ export default task(ADD_CLIENT_TASK.NAME, ADD_CLIENT_TASK.DESC)
 			await hre.ethers
 				.getContractAt(ADD_CLIENT_TASK.CONTRACT_NAME, factory)
 				.then(contract => contract.addClient(client))
+				.then(tx => console.log(tx.hash))
 	)

@@ -89,7 +89,7 @@ contract InstantOffer {
         uint256 amountPrice = amount.mul(offer.price); 
         require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
         money.transferFrom(buyer, offer.seller, amountPrice);
-        uint256 uintAmount = amount.mul(10**18);
+        uint256 uintAmount = amount.mul(10**decimals);
         asset.sendFrom(offer.seller, buyer, offer.assetID, uintAmount);
         emit Buy(buyer, sellID);
     }

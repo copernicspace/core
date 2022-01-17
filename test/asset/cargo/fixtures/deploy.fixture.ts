@@ -21,7 +21,7 @@ export interface Deploy {
  * @returns blockchain state with result of fixture actions
  */
 
-export const deploy: Fixture<Deploy> = async () => {
+export const deployCargoAsset: Fixture<Deploy> = async () => {
 	const [deployer, creator]: SignerWithAddress[] = await ethers.getSigners()
 	const cargoContractAddress = await ethers
 		.getContractFactory(contract_names.CARGO_ASSET)

@@ -41,7 +41,7 @@ describe('instant offer: `buy` test suite', () => {
 	})
 
 	let offerId: BigNumberish
-	const price = parseUnits('4250', 18)
+	const price = parseUnits('1', 18)
 	it('should create new offer', async () => {
 		// approve offer contract before create sell offer
 		await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, true)
@@ -54,20 +54,22 @@ describe('instant offer: `buy` test suite', () => {
 		offerId = getOfferSellID(txr)
 	})
 
-	const buyAmount = parseUnits('100', 18)
+	const buyAmountDecimal = '100'
+	const buyAmountUint = parseUnits(buyAmountDecimal, 18)
 	it('should have success status of buy tx', async () => {
 		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply)
-		const approveAmount = price.mul(buyAmount)
-		await erc20Mock.connect(userA).mint(approveAmount)
+		const approveAmount = price.mul(buyAmountDecimal)
+		await erc20Mock.connect(userA).mint(parseUnits('100', 18))
 		await erc20Mock.connect(userA).approve(instantOffer.address, approveAmount)
 		await kycContract.connect(deployer).setKycStatus(userA.address, true)
 
 		const buyTxr = await instantOffer
 			.connect(userA)
-			.buy(offerId, buyAmount)
+			.buy(offerId, buyAmountDecimal)
 			.then(tx => tx.wait())
 
-		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply.sub(buyAmount))
-		expect(await cargoContract.balanceOf(userA.address, rootId)).to.be.eq(buyAmount)
+
+		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply.sub(buyAmountUint))
+		expect(await cargoContract.balanceOf(userA.address, rootId)).to.be.eq(buyAmountUint)
 	})
 })

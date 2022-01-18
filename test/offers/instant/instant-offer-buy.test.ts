@@ -68,7 +68,6 @@ describe('instant offer: `buy` test suite', () => {
 			.buy(offerId, buyAmountDecimal)
 			.then(tx => tx.wait())
 
-
 		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply.sub(buyAmountUint))
 		expect(await cargoContract.balanceOf(userA.address, rootId)).to.be.eq(buyAmountUint)
 	})

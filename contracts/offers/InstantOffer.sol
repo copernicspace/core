@@ -82,7 +82,7 @@ contract InstantOffer {
         address buyer = msg.sender;
         IERC20 money = IERC20(offer.money);
         uint256 decimals = asset.decimals();
-        uint256 amountPrice = amount * offer.price; 
+        uint256 amountPrice = amount * offer.price;
         require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
         money.transferFrom(buyer, offer.seller, amountPrice);
         uint256 uintAmount = amount * (10**decimals);

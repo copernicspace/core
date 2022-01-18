@@ -2,12 +2,9 @@
 pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import '../assets/cargo/CargoAsset.sol';
 
 contract InstantOffer {
-    using SafeMath for uint256;
-
     event NewOffer(
         address indexed seller,
         address indexed asset,
@@ -58,7 +55,6 @@ contract InstantOffer {
         offer.price = price;
         offer.money = money;
         offer.sellID = sellID;
-        // todo add amount to offer 
         emit NewOffer(msg.sender, asset, assetID, amount, price, money, sellID);
     }
 
@@ -86,10 +82,10 @@ contract InstantOffer {
         address buyer = msg.sender;
         IERC20 money = IERC20(offer.money);
         uint256 decimals = asset.decimals();
-        uint256 amountPrice = amount.mul(offer.price); 
+        uint256 amountPrice = amount * offer.price; 
         require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
         money.transferFrom(buyer, offer.seller, amountPrice);
-        uint256 uintAmount = amount.mul(10**decimals);
+        uint256 uintAmount = amount * (10**decimals);
         asset.sendFrom(offer.seller, buyer, offer.assetID, uintAmount);
         emit Buy(buyer, sellID);
     }

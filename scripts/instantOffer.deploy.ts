@@ -5,7 +5,8 @@ const main = async () =>
 	await ethers
 		.getContractFactory(ContractNames.INSTANT_OFFER)
 		.then(deployFactory => deployFactory.deploy())
-		.then(asset => console.log(asset.address))
+		.then(contract => contract.deployed())
+		.then(deployedContract => console.log(deployedContract.address))
 
 main()
 	.then(() => process.exit(0))

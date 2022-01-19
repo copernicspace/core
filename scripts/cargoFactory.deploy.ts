@@ -2,11 +2,11 @@ import { ethers } from 'hardhat'
 import ContractNames from '../constants/contract.names'
 
 async function main() {
-	const assetAddress = await ethers
+	const cargoFactoryAddress = await ethers
 		.getContractFactory(ContractNames.CARGO_FACTORY)
 		.then(deployFactory => deployFactory.deploy())
 		.then(asset => asset.address)
-	console.log('Asset deployed to:', assetAddress)
+	console.log('Cargo factory deployed to:', cargoFactoryAddress)
 }
 
 main()

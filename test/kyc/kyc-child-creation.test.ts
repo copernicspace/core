@@ -6,14 +6,11 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
-import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
 import contractNames from '../../constants/contract.names'
 import { getCargoAddress } from '../helpers/cargoAddress'
 
 describe('SpaceCargoAsset: Child creation & integration with KYC', () => {
-	let userA, userB, userC, creator: SignerWithAddress
-	before('load userA as signerWithAddress', async () => ([, , , userA, userB, userC] = await ethers.getSigners()))
-
+	let creator: SignerWithAddress
 	let cargoFactory: CargoFactory
 	let cargoContract: CargoAsset
 	let kycContract: KycRegister
@@ -52,7 +49,6 @@ describe('SpaceCargoAsset: Child creation & integration with KYC', () => {
 	it('reverts child asset creation if not KYC permitted', async () => {
 		// take away creator's KYC permissions
 		await kycContract.connect(deployer).setKycStatus(creator.address, false)
-		// await std_ops.kyc.from(deployer).remove(creator)
 
 		await expect(
 			cargoContract

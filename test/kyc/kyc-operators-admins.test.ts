@@ -12,15 +12,12 @@ describe('SpaceCargoAsset: KYC instantiation during root creation', () => {
 	let userA, userB, creator: SignerWithAddress
 	before('load userA as signerWithAddress', async () => ([, , , userA, userB] = await ethers.getSigners()))
 
-	let cargoFactory: CargoFactory
-	let cargoContract: CargoAsset
 	let kycContract: KycRegister
 	let deployer: SignerWithAddress
 
 	before(
 		'load fixtures/deploy`',
-		async () =>
-			({ cargoFactory, cargoContract, creator, kycContract, deployer } = await waffle.loadFixture(parentable))
+		async () => ({ creator, kycContract, deployer } = await waffle.loadFixture(parentable))
 	)
 
 	it('disallows non-operators from setting KYC status', async () => {

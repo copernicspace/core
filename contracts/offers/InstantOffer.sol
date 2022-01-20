@@ -39,7 +39,7 @@ contract InstantOffer {
         address money
     ) public returns (uint256 sellID) {
         require(
-            CargoAsset(asset).balanceOf(msg.sender, assetID) >= 1,
+            CargoAsset(asset).balanceOf(msg.sender, assetID) >= amount,
             'Failed to create new sell, insuffucient balance'
         );
 

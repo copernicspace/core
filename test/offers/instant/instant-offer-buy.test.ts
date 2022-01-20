@@ -71,4 +71,93 @@ describe('instant offer: `buy` test suite', () => {
 		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply.sub(buyAmountUint))
 		expect(await cargoContract.balanceOf(userA.address, rootId)).to.be.eq(buyAmountUint)
 	})
+
+	let smartOfferParams
+	describe('set the parameters correctly', async () => {
+		before('get smart offer parameters', async () => {
+			smartOfferParams = await instantOffer.getSmartOffer(offerId)
+		})
+
+		it('set the seller correctly', async () => {
+			await expect(smartOfferParams.seller).to.be.eq(creator.address)
+		})
+		it('set the assetID correctly', async () => {
+			await expect(smartOfferParams.assetID).to.be.eq(rootId)
+		})
+		it('set the price correctly', async () => {
+			await expect(smartOfferParams.price).to.be.eq(price)
+		})
+		it('set the money address correctly', async () => {
+			await expect(smartOfferParams.money).to.be.eq(erc20Mock.address)
+		})
+		it('set the sellID correctly', async () => {
+			await expect(smartOfferParams.sellID).to.be.eq(offerId)
+		})
+	})
+
+	describe('reverts `sell()` if requirements not met', async () => {
+		it('reverts if insufficient balance', async () => {
+			await expect(
+				instantOffer.connect(creator).sell(cargoContract.address, rootId, totalSupply, price, erc20Mock.address)
+			).to.be.revertedWith('Failed to create new sell, insuffucient balance')
+		})
+		it('reverts if seller not ApprovedForAll', async () => {
+			// set approval to false
+			await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, false)
+			await expect(
+				instantOffer
+					.connect(creator)
+					.sell(cargoContract.address, rootId, BigNumber.from(1), price, erc20Mock.address)
+			).to.be.revertedWith('his contract has no approval to operate sellers assets')
+
+			// re-add approval
+			await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, true)
+		})
+	})
+
+	describe('reverts `buy()` if requirements not met', async () => {
+		it('reverts if insufficient ERC20 balance', async () => {
+			const buyAmountDecimal = '10000' // 10e4
+			/*
+				price 			= 4.25 * 10e3
+				buy amount 		= 10e4
+				decimals		= 10e18
+
+				total ERC balance requirement (total price) = 4.25 * 10e25
+				available balance = 9.575 * 10e24 (lower than total price)
+			*/
+			// approve for higher cost
+			const approveAmount = price.mul(buyAmountDecimal)
+			await erc20Mock.connect(userA).approve(instantOffer.address, approveAmount)
+
+			// check if reverts due to insufficient ER20
+			await expect(instantOffer.connect(userA).buy(offerId, buyAmountDecimal)).to.be.revertedWith(
+				'ERC20: transfer amount exceeds balance'
+			)
+		})
+		it('reverts if trying to buy more than is on sale', async () => {
+			// available = 3400
+			const buyAmountDecimal = '10000'
+			// approve for 10e4 purchase
+			await erc20Mock.connect(userA).mint(parseUnits('100000000', 18))
+			const approveAmount = price.mul(buyAmountDecimal)
+			await erc20Mock.connect(userA).approve(instantOffer.address, approveAmount)
+			// check if ERC1155 revert
+			await expect(instantOffer.connect(userA).buy(offerId, buyAmountDecimal)).to.be.revertedWith(
+				'ERC1155: insufficient balance for transfer'
+			)
+		})
+		it('reverts if insufficient approval amount', async () => {
+			const buyAmountDecimal = '1000' // 10e3
+
+			// approve for lower cost
+			const approveAmount = price.mul(buyAmountDecimal).div(2)
+			await erc20Mock.connect(userA).approve(instantOffer.address, approveAmount)
+
+			// check if reverts due to insufficient approval amount
+			await expect(instantOffer.connect(userA).buy(offerId, buyAmountDecimal)).to.be.revertedWith(
+				'Insufficient balance via allowance to purchase'
+			)
+		})
+	})
 })

@@ -4,11 +4,10 @@ import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
-import { constants } from 'ethers'
 import { CargoAsset, CargoFactory, KycRegister } from '../../../typechain'
-import { createCargoAsset } from './fixtures/create.fixture'
+import { createCargoAssetWithRoyalties } from './fixtures/create.fixture'
 
-describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test suite', () => {
+describe('[test/asset/cargo/royalties.test] SpaceCargo asset with royalties: create fixture test suite', () => {
 	let userA, userB, creator: SignerWithAddress
 	before('load userA as signerWithAddress', async () => ([, , userA, userB] = await ethers.getSigners()))
 
@@ -17,7 +16,10 @@ describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test s
 	let kycContract: KycRegister
 	beforeEach(
 		'load fixtures/deploy`',
-		async () => ({ cargoFactory, cargoContract, creator, kycContract } = await waffle.loadFixture(createCargoAsset))
+		async () =>
+			({ cargoFactory, cargoContract, creator, kycContract } = await waffle.loadFixture(
+				createCargoAssetWithRoyalties
+			))
 	)
 
 	it('has correct uri', async () => {
@@ -44,22 +46,23 @@ describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test s
 		expect(expected).to.be.eq(actual)
 	})
 
-	it('has correct royalties', async () => {
+	it('has correct royalties percent', async () => {
 		const actual = await cargoContract.royalties()
-		const expected = BigNumber.from(0)
+		const expected = BigNumber.from(235)
 		expect(expected).to.be.eq(actual)
 	})
 
-	it('has no platformOperator address', async () => {
+	it('has correct platformOperator address', async () => {
 		const actual = await cargoContract.platformOperator()
-		expect(constants.AddressZero).to.be.eq(actual)
+		const expected = await cargoFactory.platformOperator()
+		expect(expected).to.be.eq(actual)
 	})
 
 	it('disallows non-factory-clients from creating cargo', async () => {
 		await expect(
 			cargoFactory
 				.connect(userA)
-				.createCargo('test.revert.com', 'revert test asset', 18, 6000, kycContract.address, 0)
+				.createCargo('test.revert.com', 'revert test asset', 18, 6000, kycContract.address, 235)
 		).to.be.revertedWith('You are not allowed to create new SpaceCargo')
 	})
 

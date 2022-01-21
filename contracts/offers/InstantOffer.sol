@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: private
-pragma solidity 0.8.9;
+pragma solidity ^0.8.9;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '../assets/cargo/CargoAsset.sol';
@@ -84,7 +84,22 @@ contract InstantOffer {
         uint256 decimals = asset.decimals();
         uint256 amountPrice = amount * offer.price;
         require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
-        money.transferFrom(buyer, offer.seller, amountPrice);
+        address assetCreator = asset.creator();
+        address platformOperator = asset.platformOperator();
+        uint128 royalties = asset.royalties();
+        
+        if (offer.seller == assetCreator || royalties == 0 || platformOperator == address(0)) {
+            money.transferFrom(buyer, offer.seller, amountPrice);
+        } else {
+            uint256 royaltiesAmount = (amountPrice * royalties) / 10000;
+            uint256 royaltiesHalved = royaltiesAmount / 2;
+            uint256 totalPriceWithoutRoyalties = amountPrice - royaltiesAmount;
+            
+            money.transferFrom(buyer, platformOperator, royaltiesHalved);
+            money.transferFrom(buyer, assetCreator, royaltiesHalved);
+            money.transferFrom(buyer, offer.seller, totalPriceWithoutRoyalties);
+        }
+        
         uint256 uintAmount = amount * (10**decimals);
         asset.transferFrom(offer.seller, buyer, offer.assetID, uintAmount);
         emit Buy(buyer, sellID);

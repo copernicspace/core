@@ -75,7 +75,8 @@ describe('SpaceCargoAsset: Child creation & integration with KYC', () => {
 				'Second rootSpaceCargo',
 				cargoContractDecimals,
 				parseUnits('2000', cargoContractDecimals),
-				kycContract.address
+				kycContract.address,
+				0
 			)
 			.then(tx => tx.wait())
 			.then(txr => getCargoAddress(txr))

@@ -11,6 +11,9 @@ import '../../utils/GeneratorID.sol';
 import '../../kyc/KycRegister.sol';
 
 contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, GeneratorID, AccessControl {
+    uint128 public royalties;
+    address public platformOperator;
+
     constructor(string memory uri) ERC1155(uri) {}
 
     KycRegister public kycRegister;
@@ -25,7 +28,9 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         uint256 _decimals,
         uint256 _totalSupply,
         address _owner,
-        address factoryOwner
+        address _factoryOwner,
+        uint128 _royalties,
+        address _platformOperator
     ) external initializer {
         _setURI(_uri);
         decimals = _decimals;
@@ -34,8 +39,12 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         _names[rootID] = _name;
         _parents[rootID] = rootID;
         creator = _owner;
+        if (_royalties > 0 && _platformOperator != address(0)) {
+            royalties = _royalties;
+            platformOperator = _platformOperator;
+        }
         _mint(_owner, rootID, totalSupply, '');
-        _setupRole(DEFAULT_ADMIN_ROLE, factoryOwner);
+        _setupRole(DEFAULT_ADMIN_ROLE, _factoryOwner);
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, AccessControl) returns (bool) {

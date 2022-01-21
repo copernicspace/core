@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { waffle } from 'hardhat'
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { InstantOffer } from '../../../typechain'
-import { deployInstantOffer } from './fixtures/deployInstantOffer.fixture'
+import { deployInstantOffer } from './fixtures/deployOffer.fixture'
 
 describe('instant offer: deploy test suite', () => {
 	let instantOffer: InstantOffer

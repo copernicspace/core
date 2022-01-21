@@ -3,9 +3,9 @@ import { Fixture } from 'ethereum-waffle'
 import { ethers } from 'hardhat'
 import { CargoAsset, InstantOffer, KycRegister } from '../../../../typechain'
 import contract_names from '../../../../constants/contract.names'
-import { loadFixture } from '../../../asset/cargo/fixtures/fixtureLoader'
 import { createCargoAsset } from '../../../asset/cargo/fixtures/create.fixture'
 import { BigNumber } from 'ethers'
+import { loadFixture } from '../../../helpers/fixtureLoader'
 
 export interface DeployInstantOffer {
 	deployer: SignerWithAddress

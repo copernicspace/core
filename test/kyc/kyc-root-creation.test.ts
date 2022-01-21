@@ -38,7 +38,8 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 				'First rootSpaceCargo',
 				decimals,
 				parseUnits('2000', decimals),
-				kycContract.address
+				kycContract.address,
+				0
 			)
 			.then(tx => tx.wait())
 			.then(txr => getCargoAddress(txr))
@@ -84,7 +85,8 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 				'Second rootSpaceCargo',
 				decimals,
 				parseUnits('2000', decimals),
-				secondKYC.address
+				secondKYC.address,
+				0
 			)
 			.then(tx => tx.wait())
 			.then(txr => getCargoAddress(txr))
@@ -116,7 +118,8 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 					'Revert rootSpaceCargo',
 					decimals,
 					parseUnits('2000', decimals),
-					kycContract.address
+					kycContract.address,
+					0
 				)
 		).to.be.revertedWith('user not on KYC list')
 
@@ -129,7 +132,8 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 					'Revert rootSpaceCargo',
 					decimals,
 					parseUnits('2000', decimals),
-					secondKYC.address
+					secondKYC.address,
+					0
 				)
 		).to.be.revertedWith('user not on KYC list')
 	})

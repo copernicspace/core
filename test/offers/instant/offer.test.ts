@@ -1,15 +1,15 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers, waffle } from 'hardhat'
-import { deployInstantOffer } from './fixtures/deployInstantOffer.fixture'
-import { CargoAsset, InstantOffer, KycRegister, ERC20Mock } from '../../../typechain'
-import contractNames from '../../../constants/contract.names'
 import { BigNumber, BigNumberish } from 'ethers'
 import { expect } from 'chai'
+import { parseUnits } from '@ethersproject/units'
+import { CargoAsset, InstantOffer, KycRegister, ERC20Mock } from '../../../typechain'
+import contractNames from '../../../constants/contract.names'
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { getOfferSellID } from '../../helpers/getOfferId.helper'
-import { parseUnits } from '@ethersproject/units'
+import { deployInstantOffer } from './fixtures/deployOffer.fixture'
 
-describe('instant offer: `buy` test suite', () => {
+describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture test suite', () => {
 	let deployer: SignerWithAddress
 	let creator: SignerWithAddress
 	let instantOffer: InstantOffer
@@ -56,6 +56,7 @@ describe('instant offer: `buy` test suite', () => {
 
 	const buyAmountDecimal = '100'
 	const buyAmountUint = parseUnits(buyAmountDecimal, 18)
+
 	it('should have success status of buy tx', async () => {
 		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply)
 		const approveAmount = price.mul(buyAmountDecimal)
@@ -63,11 +64,18 @@ describe('instant offer: `buy` test suite', () => {
 		await erc20Mock.connect(userA).approve(instantOffer.address, approveAmount)
 		await kycContract.connect(deployer).setKycStatus(userA.address, true)
 
-		const buyTxr = await instantOffer
+		const kycAddress = kycContract.address
+		console.log({ kycAddress })
+
+		const kycAddressFromContract = await cargoContract.kycRegister()
+		console.log({ kycAddressFromContract })
+
+		const txr = await instantOffer
 			.connect(userA)
 			.buy(offerId, buyAmountDecimal)
 			.then(tx => tx.wait())
 
+		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply.sub(buyAmountUint))
 		expect(await cargoContract.balanceOf(userA.address, rootId)).to.be.eq(buyAmountUint)
 	})

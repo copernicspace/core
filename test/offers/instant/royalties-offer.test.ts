@@ -1,0 +1,124 @@
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { ethers, waffle } from 'hardhat'
+import { BigNumber, BigNumberish } from 'ethers'
+import { expect } from 'chai'
+import { parseUnits } from '@ethersproject/units'
+import { CargoAsset, InstantOffer, KycRegister, ERC20Mock } from '../../../typechain'
+import contractNames from '../../../constants/contract.names'
+import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
+import { getOfferSellID } from '../../helpers/getOfferId.helper'
+import { deployInstantOfferWithRoyalties } from './fixtures/deployRoyaltiesOffer.fixture.'
+
+describe('[test/offers/instant/royalties-offer.test] Instant offer with royalties: deployOfferRoyalties fixture test suite', () => {
+	let deployer: SignerWithAddress
+	let creator: SignerWithAddress
+	let instantOffer: InstantOffer
+	let cargoContract: CargoAsset
+	let kycContract: KycRegister
+	let totalSupply: BigNumber
+
+	const rootId = 0
+
+	let userA: SignerWithAddress
+	let userB: SignerWithAddress
+
+	before('load userA and userB as signerWithAddress', async () => ([, , userA, userB] = await ethers.getSigners()))
+
+	before(
+		'load `fixtures/deployInstantOfferWithRoyalties`',
+		async () =>
+			({ deployer, creator, instantOffer, cargoContract, kycContract, totalSupply } = await waffle.loadFixture(
+				deployInstantOfferWithRoyalties
+			))
+	)
+
+	let erc20Mock: ERC20Mock
+	before('deploy ERC20 Mock', async () => {
+		erc20Mock = await ethers
+			.getContractFactory(contractNames.ERC20_MOCK)
+			.then(factory => factory.deploy())
+			.then(contract => contract.deployed())
+			.then(deployedContract => deployedContract as ERC20Mock)
+	})
+
+	let offerId: BigNumberish
+	const price = parseUnits('4250', 18)
+	it('should create new offer', async () => {
+		// approve offer contract before create sell offer
+		await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, true)
+
+		const txr = await instantOffer
+			.connect(creator)
+			.sell(cargoContract.address, rootId, totalSupply, price, erc20Mock.address)
+			.then(tx => tx.wait())
+		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
+		offerId = getOfferSellID(txr)
+	})
+
+	const buyAmountDecimal = '100'
+	const buyAmountUint = parseUnits(buyAmountDecimal, 18)
+	const erc20MintAmountForBuyers = parseUnits('10000000', 18)
+	it('should have success status of buy tx', async () => {
+		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply)
+		const approveAmount = price.mul(buyAmountDecimal)
+		await erc20Mock.connect(userA).mint(erc20MintAmountForBuyers)
+		await erc20Mock.connect(userA).approve(instantOffer.address, approveAmount)
+		await kycContract.connect(deployer).setKycStatus(userA.address, true)
+
+		const txr = await instantOffer
+			.connect(userA)
+			.buy(offerId, buyAmountDecimal)
+			.then(tx => tx.wait())
+
+		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
+		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply.sub(buyAmountUint))
+		expect(await cargoContract.balanceOf(userA.address, rootId)).to.be.eq(buyAmountUint)
+		expect(await erc20Mock.balanceOf(creator.address)).to.be.eq(approveAmount)
+	})
+
+	let resellOfferId: BigNumberish
+	const resellPrice = parseUnits('5000', 18)
+	const royalties = 235
+	it('userA should be able to create resell offer with royalties included', async () => {
+		// approve offer contract before create sell offer
+		await cargoContract.connect(userA).setApprovalForAll(instantOffer.address, true)
+
+		const txr = await instantOffer
+			.connect(userA)
+			.sell(cargoContract.address, rootId, buyAmountUint, resellPrice, erc20Mock.address)
+			.then(tx => tx.wait())
+		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
+		expect(await cargoContract.royalties()).to.be.eq(royalties)
+		resellOfferId = getOfferSellID(txr)
+	})
+
+	it('userB should be able to buy resell offer with royalties supplied to asset creator and platformOperator', async () => {
+		expect(await cargoContract.balanceOf(userA.address, rootId)).to.be.eq(buyAmountUint)
+
+		const secondDealTotalPrice = resellPrice.mul(buyAmountDecimal)
+		await erc20Mock.connect(userB).mint(erc20MintAmountForBuyers)
+		await erc20Mock.connect(userB).approve(instantOffer.address, secondDealTotalPrice)
+		await kycContract.connect(deployer).setKycStatus(userB.address, true)
+
+		const txr = await instantOffer
+			.connect(userB)
+			.buy(resellOfferId, buyAmountDecimal)
+			.then(tx => tx.wait())
+
+		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
+		// check the balance of transfered asset tokens
+		expect(await cargoContract.balanceOf(userA.address, rootId)).to.be.eq(0)
+		expect(await cargoContract.balanceOf(userB.address, rootId)).to.be.eq(buyAmountUint)
+
+		// check royalties balances of platformOperator and assetCreator (should include firstDeal profit + royalties)
+		const royaltiesAmount = secondDealTotalPrice.mul(royalties).div(BigNumber.from(10000))
+		expect(await erc20Mock.balanceOf(await cargoContract.platformOperator())).to.be.eq(royaltiesAmount.div(2))
+
+		const firstDealTotalPrice = price.mul(buyAmountDecimal)
+		expect(await erc20Mock.balanceOf(creator.address)).to.be.eq(firstDealTotalPrice.add(royaltiesAmount.div(2)))
+
+		// check the userA balance as a reseller
+		const userAProfitAfterDeals = secondDealTotalPrice.sub(royaltiesAmount).sub(firstDealTotalPrice)
+		expect(await erc20Mock.balanceOf(userA.address)).to.be.eq(erc20MintAmountForBuyers.add(userAProfitAfterDeals))
+	})
+})

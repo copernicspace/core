@@ -7,7 +7,7 @@ import { CargoAsset, KycRegister } from '../../../../typechain'
 import { getCargoAddress } from '../../../helpers/cargoAddress'
 import contractNames from '../../../../constants/contract.names'
 import { parseUnits } from '@ethersproject/units'
-import { loadFixture } from './fixtureLoader'
+import { loadFixture } from '../../../helpers/fixtureLoader'
 
 export interface Create extends Deploy {
 	creator: SignerWithAddress
@@ -21,6 +21,7 @@ export const createCargoAsset: Fixture<Create> = async () => {
 	const { deployer, creator, cargoFactory, kycContract } = await loadFixture(deployCargoAsset)
 	const decimals = 18
 	const totalSupply = parseUnits('3500', decimals)
+	const royalties = 0
 
 	await cargoFactory.connect(deployer).addClient(creator.address)
 
@@ -28,7 +29,30 @@ export const createCargoAsset: Fixture<Create> = async () => {
 
 	const cargoContractAddress = await cargoFactory
 		.connect(creator)
-		.createCargo('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply, kycContract.address)
+		.createCargo('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply, kycContract.address, royalties)
+		.then(tx => tx.wait())
+		.then(txr => getCargoAddress(txr))
+
+	const cargoContract = await ethers
+		.getContractAt(contractNames.CARGO_ASSET, cargoContractAddress)
+		.then(contract => contract as CargoAsset)
+
+	return { deployer, creator, cargoFactory, cargoContract, totalSupply, decimals, kycContract }
+}
+
+export const createCargoAssetWithRoyalties: Fixture<Create> = async () => {
+	const { deployer, creator, cargoFactory, kycContract } = await loadFixture(deployCargoAsset)
+	const decimals = 18
+	const totalSupply = parseUnits('3500', decimals)
+	const royalties = 235
+
+	await cargoFactory.connect(deployer).addClient(creator.address)
+
+	await kycContract.connect(deployer).setKycStatus(creator.address, true)
+
+	const cargoContractAddress = await cargoFactory
+		.connect(creator)
+		.createCargo('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply, kycContract.address, royalties)
 		.then(tx => tx.wait())
 		.then(txr => getCargoAddress(txr))
 

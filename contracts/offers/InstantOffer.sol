@@ -17,6 +17,8 @@ contract InstantOffer {
 
     event Buy(address buyer, uint256 sellID);
 
+    event OfferStatusToggle(uint256 sellID, bool isActive);
+
     struct Offer {
         address asset;
         address seller;
@@ -28,8 +30,14 @@ contract InstantOffer {
 
     uint256 private numOffers;
     mapping(uint256 => Offer) private offers;
+    mapping(uint256 => bool) private isActive;
 
     constructor() {}
+
+    modifier offerActive(uint256 sellID) {
+        require(isActive[sellID], 'Revert: offer not active');
+        _;
+    }
 
     function sell(
         address asset,
@@ -55,7 +63,22 @@ contract InstantOffer {
         offer.price = price;
         offer.money = money;
         offer.sellID = sellID;
+        isActive[sellID] = true;
         emit NewOffer(msg.sender, asset, assetID, amount, price, money, sellID);
+    }
+
+    function toggleOfferActive(uint256 sellID) public returns (bool _isActive) {
+        Offer memory offer = offers[sellID];
+        require(msg.sender == offer.seller, 'Cannot set offer status: not seller');
+        bool newStatus = !isActive[sellID];
+        isActive[sellID] = newStatus;
+
+        emit OfferStatusToggle(sellID, newStatus);
+        return newStatus;
+    }
+
+    function getOfferStatus(uint256 sellID) public view returns (bool _isActive) {
+        return isActive[sellID];
     }
 
     function getSmartOffer(uint256 _sellID)
@@ -76,7 +99,7 @@ contract InstantOffer {
     /** 
         amount has to be in decimal form
      */
-    function buy(uint256 sellID, uint256 amount) public {
+    function buy(uint256 sellID, uint256 amount) public offerActive(sellID) {
         Offer memory offer = offers[sellID];
         CargoAsset asset = CargoAsset(offer.asset);
         address buyer = msg.sender;

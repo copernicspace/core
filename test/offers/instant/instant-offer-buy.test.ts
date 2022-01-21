@@ -115,6 +115,32 @@ describe('instant offer: `buy` test suite', () => {
 		})
 	})
 
+	describe('toggle isActive status', async () => {
+		it('sets correct start status', async () => {
+			const startStatus = await instantOffer.getOfferStatus(offerId)
+			expect(startStatus).to.be.true
+		})
+		it('allows disabling active offer', async () => {
+			const startStatus = await instantOffer.getOfferStatus(offerId)
+			await instantOffer.connect(creator).toggleOfferActive(offerId)
+			const endStatus = await instantOffer.getOfferStatus(offerId)
+			expect(startStatus).to.be.true
+			expect(endStatus).to.be.false
+		})
+		it('allows enabling active offer', async () => {
+			const startStatus = await instantOffer.getOfferStatus(offerId)
+			await instantOffer.connect(creator).toggleOfferActive(offerId)
+			const endStatus = await instantOffer.getOfferStatus(offerId)
+			expect(startStatus).to.be.false
+			expect(endStatus).to.be.true
+		})
+		it('reverts if trying to set status from non-creator account', async () => {
+			await expect(instantOffer.connect(userA).toggleOfferActive(offerId)).to.be.revertedWith(
+				'Cannot set offer status: not seller'
+			)
+		})
+	})
+
 	describe('reverts `buy()` if requirements not met', async () => {
 		it('reverts if insufficient ERC20 balance', async () => {
 			const buyAmountDecimal = '10000' // 10e4
@@ -158,6 +184,12 @@ describe('instant offer: `buy` test suite', () => {
 			await expect(instantOffer.connect(userA).buy(offerId, buyAmountDecimal)).to.be.revertedWith(
 				'Insufficient balance via allowance to purchase'
 			)
+		})
+		it('reverts if offer set to inactive', async () => {
+			// set offer to inactive
+			await instantOffer.connect(creator).toggleOfferActive(offerId)
+
+			await expect(instantOffer.connect(userA).buy(offerId, '1')).to.be.revertedWith('Revert: offer not active')
 		})
 	})
 })

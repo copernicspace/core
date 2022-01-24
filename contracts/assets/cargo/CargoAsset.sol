@@ -78,7 +78,7 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         _burn(_msgSender(), 0, amount);
     }
 
-    function send(
+    function transfer(
         address to,
         uint256 id,
         uint256 amount
@@ -86,7 +86,7 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         safeTransferFrom(_msgSender(), to, id, amount, '');
     }
 
-    function sendFrom(
+    function transferFrom(
         address from,
         address to,
         uint256 id,

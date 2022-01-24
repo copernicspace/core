@@ -3,32 +3,51 @@ import { expect } from 'chai'
 import { CargoAsset } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
 import { parseUnits } from 'ethers/lib/utils'
+import { kyc } from '../asset/cargo/fixtures/kyc.fixture'
+import { BigNumber } from '@ethersproject/bignumber'
+import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
 
 /**
  * Test suite for checking KycRegister permission change process
  */
 describe('SpaceCargoAsset: KYC revert on transfer testing', () => {
-	let userA, creator: SignerWithAddress
-	before('load userA as signerWithAddress', async () => ([, , , userA] = await ethers.getSigners()))
-
+	let kycUserA: SignerWithAddress
+	let kycUserB: SignerWithAddress
+	let nonKycUserC: SignerWithAddress
+	let assetID: BigNumber
 	let cargoContract: CargoAsset
-	let deployer: SignerWithAddress
 	let decimals: number
 
 	before(
-		'load fixtures/parentable`',
-		async () => ({ cargoContract, creator, deployer, decimals } = await waffle.loadFixture(parentable))
+		'load fixtures/kyc`',
+		async () => ({ cargoContract, decimals, kycUserA, kycUserB, assetID } = await waffle.loadFixture(kyc))
 	)
 
-	it('disallows sending balance to non-KYC users', async () =>
+	before('load non kyc addresses', async () => ([, , , , , nonKycUserC] = await ethers.getSigners()))
+
+	it('ok status and balances on transfer to kyc address', async () => {
+		const balanceBefore = BigNumber.from('1420')
+		const transferAmount = BigNumber.from('42')
+
+		expect(await cargoContract.balanceOf(kycUserA.address, assetID)).to.be.eq(balanceBefore)
+
+		const txr = await cargoContract
+			.connect(kycUserA)
+			.transfer(kycUserB.address, assetID, transferAmount)
+			.then(tx => tx.wait())
+		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
+		expect(await cargoContract.balanceOf(kycUserA.address, assetID)).to.be.eq(balanceBefore.sub(transferAmount))
+		expect(await cargoContract.balanceOf(kycUserB.address, assetID)).to.be.eq(transferAmount)
+	})
+
+	it('reverts on tranfer to non-KYC address', async () =>
 		await expect(
-			cargoContract.connect(deployer).send(userA.address, 0, parseUnits('100', decimals))
+			cargoContract.connect(kycUserA).transfer(nonKycUserC.address, 0, parseUnits('100', decimals))
 		).to.be.revertedWith('user not on KYC list'))
 
-	it('disallows sending balance from non-KYC users', async () =>
+	it('reverts on tranfer from non-KYC address', async () =>
 		await expect(
-			cargoContract.connect(userA).send(creator.address, 0, parseUnits('100', decimals))
+			cargoContract.connect(nonKycUserC).transfer(kycUserA.address, 0, parseUnits('100', decimals))
 		).to.be.revertedWith('user not on KYC list'))
 })

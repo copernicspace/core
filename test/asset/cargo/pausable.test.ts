@@ -25,7 +25,7 @@ describe('[test/asset/cargo/pausable.test] SpaceCargo asset: pausable test suite
 	it('cannot send token if paused', async () => {
 		await cargoContract.connect(creator).pause()
 		await expect(
-			cargoContract.connect(creator).send(receiver.address, 0, parseUnits('100', 18))
+			cargoContract.connect(creator).transfer(receiver.address, 0, parseUnits('100', 18))
 		).to.be.revertedWith('Pausable: token is paused')
 	})
 })

@@ -18,7 +18,7 @@ describe('SpaceCargoAsset: KYC revert on transfer testing', () => {
 	let decimals: number
 
 	before(
-		'load fixtures/deploy`',
+		'load fixtures/parentable`',
 		async () => ({ cargoContract, creator, deployer, decimals } = await waffle.loadFixture(parentable))
 	)
 

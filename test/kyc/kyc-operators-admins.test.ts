@@ -1,6 +1,6 @@
 import { waffle } from 'hardhat'
 import { expect } from 'chai'
-import { CargoAsset, CargoFactory, KycRegister } from '../../typechain'
+import { KycRegister } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { parentable } from '../asset/cargo/fixtures/parentable.fixture'

@@ -6,11 +6,10 @@
  * used for better visibility & shortening of CPR tests
  */
 
-import { expect } from 'chai'
-import { CargoAsset, CargoFactory, CargoFactory__factory, KycRegister } from '../../typechain'
+import { CargoAsset, CargoFactory, KycRegister } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
+import { BigNumber } from '@ethersproject/bignumber'
 import { getAssetID } from './getAssetId.helper'
 import contractNames from '../../constants/contract.names'
 import { getCargoAddress } from './cargoAddress'

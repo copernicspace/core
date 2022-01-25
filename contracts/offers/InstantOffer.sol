@@ -55,6 +55,8 @@ contract InstantOffer {
             CargoAsset(asset).isApprovedForAll(msg.sender, address(this)) == true,
             'This contract has no approval to operate sellers assets'
         );
+
+        require(!CargoAsset(asset).paused(), 'Cannot sell paused asset');
         sellID = numOffers++;
         Offer storage offer = offers[sellID];
         offer.asset = asset;
@@ -107,6 +109,7 @@ contract InstantOffer {
         uint256 decimals = asset.decimals();
         uint256 amountPrice = amount * offer.price;
         require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
+        require(!CargoAsset(asset).paused(), 'Cannot buy paused asset');
         money.transferFrom(buyer, offer.seller, amountPrice);
         uint256 uintAmount = amount * (10**decimals);
         asset.sendFrom(offer.seller, buyer, offer.assetID, uintAmount);

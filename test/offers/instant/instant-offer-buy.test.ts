@@ -93,6 +93,19 @@ describe('instant offer: `buy` test suite', () => {
 			// re-add approval
 			await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, true)
 		})
+		it('reverts if asset paused', async () => {
+			// set to paused
+			await cargoContract.connect(creator).pause()
+
+			await expect(
+				instantOffer
+					.connect(creator)
+					.sell(cargoContract.address, rootId, BigNumber.from(1), price, money.address)
+			).to.be.revertedWith('Cannot sell paused asset')
+
+			// set to unpaused
+			await cargoContract.connect(creator).unpause()
+		})
 	})
 
 	describe('toggle isActive status', async () => {
@@ -164,6 +177,15 @@ describe('instant offer: `buy` test suite', () => {
 			await expect(instantOffer.connect(userA).buy(sellID, buyAmountDecimal)).to.be.revertedWith(
 				'Insufficient balance via allowance to purchase'
 			)
+		})
+		it('reverts if asset paused', async () => {
+			// set to paused
+			await cargoContract.connect(creator).pause()
+
+			await expect(instantOffer.connect(userA).buy(sellID, '1')).to.be.revertedWith('Cannot buy paused asset')
+
+			// set to unpaused
+			await cargoContract.connect(creator).unpause()
 		})
 		it('reverts if offer set to inactive', async () => {
 			// set offer to inactive

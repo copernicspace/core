@@ -1,16 +1,19 @@
 // SPDX-License-Identifier: private
 pragma solidity ^0.8.9;
 
-import './CargoAsset.sol';
-import '../../utils/CloneFactory.sol';
 import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import '@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol';
 
-contract CargoFactory is CloneFactory, AccessControl, KycRegister {
+import './CargoAsset.sol';
+import '../../utils/CloneFactory.sol';
+
+contract CargoFactory is CloneFactory, AccessControl {
     // address of deployed contract to clone from
     // this should be deployed `SpaceCargo` address
     address public logicAddress;
+
+    address private factoryOwner;
 
     // kyc register instance
     KycRegister private kycRegister;
@@ -27,6 +30,7 @@ contract CargoFactory is CloneFactory, AccessControl, KycRegister {
     constructor(address _logicAddress) {
         logicAddress = _logicAddress;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        factoryOwner = _msgSender();
     }
 
     function setTemplateAddress(address _logicAddress) public {
@@ -39,22 +43,16 @@ contract CargoFactory is CloneFactory, AccessControl, KycRegister {
         string memory _name,
         uint256 _decimals,
         uint256 _totalSupply,
-        KycRegister _kycRegister
+        address kycRegisterAddress
     ) public {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(FACTORY_CLIENT, _msgSender()),
             'You are not allowed to create new SpaceCargo'
         );
         address clone = createClone(logicAddress);
-        // todo make sure initizle can be called once
-
-        // set up KYC for checks
-        CargoAsset(clone).setupKyc(_kycRegister);
-        // before initialize make sure user is permitted to create cargo (Kyc permissions)
+        CargoAsset(clone).setupKyc(kycRegisterAddress);
         require(CargoAsset(clone).kycRegister().getKycStatusInfo(msg.sender), 'user not on KYC list');
-        // initialize cargo asset
-        CargoAsset(clone).initialize(_uri, _name, _decimals, _totalSupply, _msgSender());
-
+        CargoAsset(clone).initialize(_uri, _name, _decimals, _totalSupply, _msgSender(), factoryOwner);
         deployed.push(clone);
         emit CargoCreated(clone, _msgSender());
     }

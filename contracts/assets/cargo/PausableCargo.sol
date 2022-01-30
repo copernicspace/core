@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: private
 pragma solidity ^0.8.9;
+
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
+
 import '../interfaces/Pausable.sol';
 
 abstract contract PausableCargo is ERC1155, Pausable {

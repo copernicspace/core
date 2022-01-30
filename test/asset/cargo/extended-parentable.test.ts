@@ -6,7 +6,6 @@ import { parentable } from './fixtures/parentable.fixture'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { getAssetID } from '../../helpers/getAssetId.helper'
-import { loadFixture } from '@ethereum-waffle/provider'
 
 /**
  * test suite for {@link parentable}
@@ -39,15 +38,13 @@ describe('[test/asset/cargo/extended-parentable.test] SpaceCargo asset: extended
 		)
 		const cosmosChildAmount = parseUnits('105', 18)
 		let cosmosChildId: BigNumber
-		before(
-			'creates 105 cosmos child from creator to account A',
-			async () =>
-				(cosmosChildId = await cargoContract
-					.connect(creator)
-					.createChild(cosmosChildAmount, rootID, 'CosmosChild', accountA.address)
-					.then(tx => tx.wait())
-					.then(txr => getAssetID(txr)))
-		)
+		before('creates 105 cosmos child from creator to account A', async () => {
+			cosmosChildId = await cargoContract
+				.connect(creator)
+				.createChild(cosmosChildAmount, rootID, 'CosmosChild', accountA.address)
+				.then(tx => tx.wait())
+				.then(txr => getAssetID(txr))
+		})
 		it('has correct creators balance of root asset after `cosmos` child create', async () =>
 			expect(await cargoContract.balanceOf(creator.address, rootID)).to.be.eq(
 				creatorBalance.sub(cosmosChildAmount)

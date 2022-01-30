@@ -8,6 +8,7 @@ contract KycRegister is Context {
     mapping(address => bool) public kycStatus;
     mapping(address => bool) public operatorAccess;
     address public currentAdmin;
+    bool private finalState;
 
     /*
         Admin:

@@ -1,19 +1,20 @@
 // SPDX-License-Identifier: private
 pragma solidity ^0.8.9;
 
+import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 
 import './PausableCargo.sol';
 import './ParentableCargo.sol';
 import '../../utils/GeneratorID.sol';
-import 'hardhat/console.sol';
 import '../../kyc/KycRegister.sol';
 
-contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, GeneratorID, KycRegister {
+contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, GeneratorID, AccessControl {
     constructor(string memory uri) ERC1155(uri) {}
 
     KycRegister public kycRegister;
+    bool private kycExist = false;
 
     /**
      * instead off constructor for CloneFactory
@@ -23,7 +24,8 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         string memory _name,
         uint256 _decimals,
         uint256 _totalSupply,
-        address _owner
+        address _owner,
+        address factoryOwner
     ) external initializer {
         _setURI(_uri);
         decimals = _decimals;
@@ -33,12 +35,22 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         _parents[rootID] = rootID;
         creator = _owner;
         _mint(_owner, rootID, totalSupply, '');
+        _setupRole(DEFAULT_ADMIN_ROLE, factoryOwner);
     }
 
-    // Kyc setup must be called before initialize
-    // (before first transaction -- mint)
-    function _setupKyc(KycRegister _kycRegister) external {
-        kycRegister = _kycRegister;
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, AccessControl) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    function setupKyc(address kycRegisterAddress) external {
+        require(!kycExist, 'can not change KYC register contract');
+        kycRegister = KycRegister(kycRegisterAddress);
+        kycExist = true;
+    }
+
+    function changeKycRegister(address kycRegisterAddress) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), 'You are not allowed to change KYC register');
+        kycRegister = KycRegister(kycRegisterAddress);
     }
 
     uint256 public decimals;
@@ -58,7 +70,6 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         if (to != address(0)) {
             require(kycRegister.getKycStatusInfo(to), 'user not on KYC list');
         }
-        // require(kycRegister.getKycStatusInfo(to) || to == address(0), 'user not on KYC list');
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
@@ -79,7 +90,7 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         _burn(_msgSender(), 0, amount);
     }
 
-    function send(
+    function transfer(
         address to,
         uint256 id,
         uint256 amount
@@ -87,7 +98,7 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         safeTransferFrom(_msgSender(), to, id, amount, '');
     }
 
-    function sendFrom(
+    function transferFrom(
         address from,
         address to,
         uint256 id,

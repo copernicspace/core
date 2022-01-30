@@ -48,7 +48,7 @@ describe('[test/asset/cargo/royalties.test] SpaceCargo asset with royalties: cre
 
 	it('has correct royalties percent', async () => {
 		const actual = await cargoContract.royalties()
-		const expected = BigNumber.from(235)
+		const expected = BigNumber.from(5)
 		expect(expected).to.be.eq(actual)
 	})
 
@@ -62,7 +62,7 @@ describe('[test/asset/cargo/royalties.test] SpaceCargo asset with royalties: cre
 		await expect(
 			cargoFactory
 				.connect(userA)
-				.createCargo('test.revert.com', 'revert test asset', 18, 6000, kycContract.address, 235)
+				.createCargo('test.revert.com', 'revert test asset', 18, 6000, kycContract.address, 5)
 		).to.be.revertedWith('You are not allowed to create new SpaceCargo')
 	})
 

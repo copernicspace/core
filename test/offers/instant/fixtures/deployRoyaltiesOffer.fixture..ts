@@ -27,10 +27,10 @@ export const deployInstantOfferWithRoyalties: Fixture<DeployInstantOffer> = asyn
 	const { deployer, creator, cargoContract, kycContract, totalSupply } = await loadFixture(
 		createCargoAssetWithRoyalties
 	)
-
+	const operatorFee = '3'
 	const instantOffer = await ethers
 		.getContractFactory(contract_names.INSTANT_OFFER)
-		.then(factory => factory.connect(deployer).deploy())
+		.then(factory => factory.connect(deployer).deploy(deployer.address, operatorFee))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract as InstantOffer)
 

@@ -9,7 +9,7 @@ import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { getOfferSellID } from '../../helpers/getOfferId.helper'
 import { deployInstantOfferWithRoyalties } from './fixtures/deployRoyaltiesOffer.fixture.'
 
-describe('[test/offers/instant/royalties-offer.test] Instant offer with royalties: deployOfferRoyalties fixture test suite', () => {
+describe('[test/offers/instant/royalties-offer.test] Instant offer with royalties', () => {
 	let deployer: SignerWithAddress
 	let creator: SignerWithAddress
 	let instantOffer: InstantOffer
@@ -78,7 +78,6 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 
 	let resellOfferId: BigNumberish
 	const resellPrice = parseUnits('5000', 18)
-	const royalties = 235
 	it('userA should be able to create resell offer with royalties included', async () => {
 		// approve offer contract before create sell offer
 		await cargoContract.connect(userA).setApprovalForAll(instantOffer.address, true)
@@ -88,11 +87,12 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 			.sell(cargoContract.address, rootId, buyAmountUint, resellPrice, erc20Mock.address)
 			.then(tx => tx.wait())
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
-		expect(await cargoContract.royalties()).to.be.eq(royalties)
 		resellOfferId = getOfferSellID(txr)
 	})
 
-	it('userB should be able to buy resell offer with royalties supplied to asset creator and platformOperator', async () => {
+	it('userB should be able to buy resell offer with royalties', async () => {
+		const balanceCreatorBefore = await erc20Mock.balanceOf(creator.address)
+		const balanceUserABefore = await erc20Mock.balanceOf(userA.address)
 		expect(await cargoContract.balanceOf(userA.address, rootId)).to.be.eq(buyAmountUint)
 
 		const secondDealTotalPrice = resellPrice.mul(buyAmountDecimal)
@@ -111,14 +111,18 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 		expect(await cargoContract.balanceOf(userB.address, rootId)).to.be.eq(buyAmountUint)
 
 		// check royalties balances of platformOperator and assetCreator (should include firstDeal profit + royalties)
-		const royaltiesAmount = secondDealTotalPrice.mul(royalties).div(BigNumber.from(10000))
-		expect(await erc20Mock.balanceOf(await cargoContract.platformOperator())).to.be.eq(royaltiesAmount.div(2))
+		const platformFee = secondDealTotalPrice.mul(3).div(100)
+		expect(await erc20Mock.balanceOf(await cargoContract.platformOperator())).to.be.eq(platformFee)
 
-		const firstDealTotalPrice = price.mul(buyAmountDecimal)
-		expect(await erc20Mock.balanceOf(creator.address)).to.be.eq(firstDealTotalPrice.add(royaltiesAmount.div(2)))
+		const royaltiesAmount = secondDealTotalPrice.mul(5).div(100)
+		const balanceCreatorAfter = await erc20Mock.balanceOf(creator.address)
+		const expectedDiff = balanceCreatorAfter.sub(balanceCreatorBefore)
+
+		expect(expectedDiff).to.be.eq(royaltiesAmount)
 
 		// check the userA balance as a reseller
-		const userAProfitAfterDeals = secondDealTotalPrice.sub(royaltiesAmount).sub(firstDealTotalPrice)
-		expect(await erc20Mock.balanceOf(userA.address)).to.be.eq(erc20MintAmountForBuyers.add(userAProfitAfterDeals))
+		expect(await erc20Mock.balanceOf(userA.address)).to.be.eq(
+			balanceUserABefore.add(secondDealTotalPrice.sub(royaltiesAmount).sub(platformFee))
+		)
 	})
 })

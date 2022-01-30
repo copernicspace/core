@@ -3,8 +3,15 @@ pragma solidity ^0.8.9;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '../assets/cargo/CargoAsset.sol';
+import '../utils/ERC20Percentage.sol';
 
 contract InstantOffer {
+
+    using ERC20Percentage for uint256;
+
+    address private platformOperator;
+    uint256 private operatorFee;
+    
     event NewOffer(
         address indexed seller,
         address indexed asset,
@@ -29,7 +36,10 @@ contract InstantOffer {
     uint256 private numOffers;
     mapping(uint256 => Offer) private offers;
 
-    constructor() {}
+    constructor(address _platformOperator, uint256 _operatorFee) {
+        platformOperator = _platformOperator;
+        operatorFee = _operatorFee;
+    }
 
     function sell(
         address asset,
@@ -85,19 +95,18 @@ contract InstantOffer {
         uint256 amountPrice = amount * offer.price;
         require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
         address assetCreator = asset.creator();
-        address platformOperator = asset.platformOperator();
         uint128 royalties = asset.royalties();
         
-        if (offer.seller == assetCreator || royalties == 0 || platformOperator == address(0)) {
+        if (offer.seller == assetCreator || royalties == 0) {
             money.transferFrom(buyer, offer.seller, amountPrice);
         } else {
-            uint256 royaltiesAmount = (amountPrice * royalties) / 10000;
-            uint256 royaltiesHalved = royaltiesAmount / 2;
-            uint256 totalPriceWithoutRoyalties = amountPrice - royaltiesAmount;
+            uint256 royaltiesAmount = amountPrice.take(royalties * (10**decimals), decimals);
+            uint256 operatorFeeAmount = amountPrice.take(operatorFee * (10**decimals) , decimals);
+            uint256 totalPriceWithoutRoyaltiesAndFee = amountPrice - royaltiesAmount - operatorFeeAmount;
             
-            money.transferFrom(buyer, platformOperator, royaltiesHalved);
-            money.transferFrom(buyer, assetCreator, royaltiesHalved);
-            money.transferFrom(buyer, offer.seller, totalPriceWithoutRoyalties);
+            money.transferFrom(buyer, assetCreator, royaltiesAmount);
+            money.transferFrom(buyer, platformOperator, operatorFeeAmount);
+            money.transferFrom(buyer, offer.seller, totalPriceWithoutRoyaltiesAndFee);
         }
         
         uint256 uintAmount = amount * (10**decimals);

@@ -64,12 +64,6 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 		await erc20Mock.connect(userA).approve(instantOffer.address, approveAmount)
 		await kycContract.connect(deployer).setKycStatus(userA.address, true)
 
-		const kycAddress = kycContract.address
-		console.log({ kycAddress })
-
-		const kycAddressFromContract = await cargoContract.kycRegister()
-		console.log({ kycAddressFromContract })
-
 		const txr = await instantOffer
 			.connect(userA)
 			.buy(offerId, buyAmountDecimal)

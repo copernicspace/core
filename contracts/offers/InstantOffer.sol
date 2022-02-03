@@ -56,6 +56,10 @@ contract InstantOffer {
             CargoAsset(asset).isApprovedForAll(msg.sender, address(this)) == true,
             'This contract has no approval to operate sellers assets'
         );
+
+        address creator = CargoAsset(asset).creator();
+        require(!CargoAsset(asset).paused() || msg.sender == creator, 'Only creator can sell paused asset');
+
         sellID = numOffers++;
         Offer storage offer = offers[sellID];
         offer.asset = asset;

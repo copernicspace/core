@@ -1,15 +1,15 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers, waffle } from 'hardhat'
-import { deployInstantOffer } from './fixtures/deployInstantOffer.fixture'
-import { CargoAsset, InstantOffer, KycRegister, ERC20Mock } from '../../../typechain'
-import contractNames from '../../../constants/contract.names'
 import { BigNumber, BigNumberish } from 'ethers'
 import { expect } from 'chai'
+import { parseUnits } from '@ethersproject/units'
+import { CargoAsset, InstantOffer, KycRegister, ERC20Mock } from '../../../typechain'
+import contractNames from '../../../constants/contract.names'
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { getOfferSellID } from '../../helpers/getOfferId.helper'
-import { parseUnits } from '@ethersproject/units'
+import { deployInstantOffer } from './fixtures/deployOffer.fixture'
 
-describe('instant offer: `buy` test suite', () => {
+describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture test suite', () => {
 	let deployer: SignerWithAddress
 	let creator: SignerWithAddress
 	let instantOffer: InstantOffer
@@ -23,10 +23,11 @@ describe('instant offer: `buy` test suite', () => {
 
 	before('load userA as signerWithAddress', async () => ([, , userA] = await ethers.getSigners()))
 
+	const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 	before(
 		'load `fixtures/deployInstantOffer`',
 		async () =>
-			({ deployer, creator, instantOffer, cargoContract, kycContract, totalSupply } = await waffle.loadFixture(
+			({ deployer, creator, instantOffer, cargoContract, kycContract, totalSupply } = await loadFixture(
 				deployInstantOffer
 			))
 	)
@@ -56,19 +57,28 @@ describe('instant offer: `buy` test suite', () => {
 
 	const buyAmountDecimal = '100'
 	const buyAmountUint = parseUnits(buyAmountDecimal, 18)
+
 	it('should have success status of buy tx', async () => {
-		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply)
+		const balanceBefore = await cargoContract.balanceOf(creator.address, rootId)
 		const approveAmount = price.mul(buyAmountDecimal)
 		await erc20Mock.connect(userA).mint(parseUnits('10000000', 18))
 		await erc20Mock.connect(userA).approve(instantOffer.address, approveAmount)
 		await kycContract.connect(deployer).setKycStatus(userA.address, true)
 
-		const buyTxr = await instantOffer
+		const txr = await instantOffer
 			.connect(userA)
 			.buy(offerId, buyAmountDecimal)
 			.then(tx => tx.wait())
 
-		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply.sub(buyAmountUint))
-		expect(await cargoContract.balanceOf(userA.address, rootId)).to.be.eq(buyAmountUint)
+		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
+		expect(
+			await cargoContract.balanceOf(creator.address, rootId),
+			'wrong balance of creator after success sell tx'
+		).to.be.eq(balanceBefore.sub(buyAmountUint))
+
+		expect(
+			await cargoContract.balanceOf(userA.address, rootId),
+			'wrong balance of user A, after success buy tx'
+		).to.be.eq(buyAmountUint)
 	})
 })

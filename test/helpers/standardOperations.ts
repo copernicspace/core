@@ -120,7 +120,7 @@ export const create = {
 		// execute:
 		const cargoAddress = await factoryContract
 			.connect(this.localSigner)
-			.createCargo(uri, name, this.localDecimals, totalSupply, this.localKyc.address)
+			.createCargo(uri, name, this.localDecimals, totalSupply, this.localKyc.address, 0, false)
 			.then(tx => tx.wait())
 			.then(txr => getCargoAddress(txr))
 

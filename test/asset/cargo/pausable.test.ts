@@ -5,9 +5,6 @@ import { CargoAsset } from '../../../typechain'
 import { parentable } from './fixtures/parentable.fixture'
 import { parseUnits } from '@ethersproject/units'
 
-/**
- * test suite for {@link parentable}
- */
 describe('[test/asset/cargo/pausable.test] SpaceCargo asset: pausable test suite', () => {
 	let cargoContract: CargoAsset
 	let creator: SignerWithAddress

@@ -3,9 +3,10 @@ import { Fixture } from 'ethereum-waffle'
 import { ethers } from 'hardhat'
 import { CargoAsset, InstantOffer, KycRegister } from '../../../../typechain'
 import contract_names from '../../../../constants/contract.names'
-import { loadFixture } from '../../../asset/cargo/fixtures/fixtureLoader'
 import { createCargoAsset } from '../../../asset/cargo/fixtures/create.fixture'
 import { BigNumber } from 'ethers'
+import { loadFixture } from '../../../helpers/fixtureLoader'
+import { parseUnits } from 'ethers/lib/utils'
 
 export interface DeployInstantOffer {
 	deployer: SignerWithAddress
@@ -26,9 +27,11 @@ export interface DeployInstantOffer {
 export const deployInstantOffer: Fixture<DeployInstantOffer> = async () => {
 	const { deployer, creator, cargoContract, kycContract, totalSupply } = await loadFixture(createCargoAsset)
 
+	const operatorFee = parseUnits('3', await cargoContract.decimals())
+
 	const instantOffer = await ethers
 		.getContractFactory(contract_names.INSTANT_OFFER)
-		.then(factory => factory.connect(deployer).deploy())
+		.then(factory => factory.connect(deployer).deploy(deployer.address, operatorFee))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract as InstantOffer)
 

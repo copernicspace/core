@@ -9,18 +9,16 @@ import './CargoAsset.sol';
 import '../../utils/CloneFactory.sol';
 
 contract CargoFactory is CloneFactory, AccessControl {
-    // address of deployed contract to clone from
-    // this should be deployed `SpaceCargo` address
     address public logicAddress;
+    address public platformOperator;
 
     address private factoryOwner;
 
-    // kyc register instance
     KycRegister private kycRegister;
 
     // role to define managers who can add clients
     bytes32 public constant FACTORY_MANAGER = keccak256('FACTORY_MANAGER');
-    // role to define who can create new cargo
+    // role to define who can create new asset
     bytes32 public constant FACTORY_CLIENT = keccak256('FACTORY_CLIENT');
 
     address[] public deployed;
@@ -31,6 +29,7 @@ contract CargoFactory is CloneFactory, AccessControl {
         logicAddress = _logicAddress;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         factoryOwner = _msgSender();
+        platformOperator = _msgSender();
     }
 
     function setTemplateAddress(address _logicAddress) public {
@@ -39,11 +38,13 @@ contract CargoFactory is CloneFactory, AccessControl {
     }
 
     function createCargo(
-        string memory _uri,
-        string memory _name,
-        uint256 _decimals,
-        uint256 _totalSupply,
-        address kycRegisterAddress
+        string memory uri,
+        string memory name,
+        uint256 decimals,
+        uint256 totalSupply,
+        address kycRegisterAddress,
+        uint256 royalties,
+        bool locked
     ) public {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(FACTORY_CLIENT, _msgSender()),
@@ -51,8 +52,7 @@ contract CargoFactory is CloneFactory, AccessControl {
         );
         address clone = createClone(logicAddress);
         CargoAsset(clone).setupKyc(kycRegisterAddress);
-        require(CargoAsset(clone).kycRegister().getKycStatusInfo(msg.sender), 'user not on KYC list');
-        CargoAsset(clone).initialize(_uri, _name, _decimals, _totalSupply, _msgSender(), factoryOwner);
+        CargoAsset(clone).initialize(uri, name, decimals, totalSupply, _msgSender(), factoryOwner, royalties, locked);
         deployed.push(clone);
         emit CargoCreated(clone, _msgSender());
     }

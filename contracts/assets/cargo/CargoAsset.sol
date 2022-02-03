@@ -11,6 +11,8 @@ import '../../utils/GeneratorID.sol';
 import '../../kyc/KycRegister.sol';
 
 contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, GeneratorID, AccessControl {
+    uint256 public royalties;
+
     constructor(string memory uri) ERC1155(uri) {}
 
     KycRegister public kycRegister;
@@ -25,7 +27,9 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         uint256 _decimals,
         uint256 _totalSupply,
         address _owner,
-        address factoryOwner
+        address _factoryOwner,
+        uint256 _royalties,
+        bool _locked
     ) external initializer {
         _setURI(_uri);
         decimals = _decimals;
@@ -34,8 +38,14 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         _names[rootID] = _name;
         _parents[rootID] = rootID;
         creator = _owner;
+        if (_royalties > 0) {
+            royalties = _royalties;
+        }
         _mint(_owner, rootID, totalSupply, '');
-        _setupRole(DEFAULT_ADMIN_ROLE, factoryOwner);
+        if (_locked) {
+            paused = true;
+        }
+        _setupRole(DEFAULT_ADMIN_ROLE, _factoryOwner);
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, AccessControl) returns (bool) {
@@ -65,10 +75,10 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         bytes memory data
     ) internal virtual override(ERC1155, PausableCargo) {
         if (from != address(0)) {
-            require(kycRegister.getKycStatusInfo(from), 'user not on KYC list');
+            require(kycRegister.getKycStatusInfo(from), 'sender/seller is not on KYC list');
         }
         if (to != address(0)) {
-            require(kycRegister.getKycStatusInfo(to), 'user not on KYC list');
+            require(kycRegister.getKycStatusInfo(to), 'receiver/buyer is not on KYC list');
         }
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }

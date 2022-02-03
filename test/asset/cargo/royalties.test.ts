@@ -5,9 +5,9 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { CargoAsset, CargoFactory, KycRegister } from '../../../typechain'
-import { createCargoAsset } from './fixtures/create.fixture'
+import { createCargoAssetWithRoyalties } from './fixtures/create.fixture'
 
-describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test suite', () => {
+describe('[test/asset/cargo/royalties.test] SpaceCargo asset with royalties: create fixture test suite', () => {
 	let userA, userB, creator: SignerWithAddress
 	before('load userA as signerWithAddress', async () => ([, , userA, userB] = await ethers.getSigners()))
 
@@ -16,7 +16,10 @@ describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test s
 	let kycContract: KycRegister
 	beforeEach(
 		'load fixtures/deploy`',
-		async () => ({ cargoFactory, cargoContract, creator, kycContract } = await waffle.loadFixture(createCargoAsset))
+		async () =>
+			({ cargoFactory, cargoContract, creator, kycContract } = await waffle.loadFixture(
+				createCargoAssetWithRoyalties
+			))
 	)
 
 	it('has correct uri', async () => {
@@ -43,9 +46,10 @@ describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test s
 		expect(expected).to.be.eq(actual)
 	})
 
-	it('has correct royalties', async () => {
+	it('has correct royalties percent', async () => {
 		const actual = await cargoContract.royalties()
-		const expected = BigNumber.from(0)
+		const decimals = await cargoContract.decimals()
+		const expected = parseUnits('5', decimals)
 		expect(expected).to.be.eq(actual)
 	})
 
@@ -53,7 +57,7 @@ describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test s
 		await expect(
 			cargoFactory
 				.connect(userA)
-				.createCargo('test.revert.com', 'revert test asset', 18, 6000, kycContract.address, 0, false)
+				.createCargo('test.revert.com', 'revert test asset', 18, 6000, kycContract.address, 5, false)
 		).to.be.revertedWith('You are not allowed to create new SpaceCargo')
 	})
 

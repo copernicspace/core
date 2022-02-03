@@ -7,14 +7,17 @@ import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
 import contractNames from '../../constants/contract.names'
 import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
 
-describe('[test/kyc/kyc-setup-cargo]: KYC instantiation during root creation', () => {
+describe('[test/kyc/kyc-setup]: KYC instantiation during root creation', () => {
 	let cargoContract: CargoAsset
 	let kycContract: KycRegister
 	let deployer: SignerWithAddress
 
+	// create dedicated fixture laoder, to exclude KYC address changes in fixture chain
+	const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
+
 	before(
 		'load fixtures/parentable`',
-		async () => ({ cargoContract, kycContract, deployer } = await waffle.loadFixture(parentable))
+		async () => ({ cargoContract, kycContract, deployer } = await loadFixture(parentable))
 	)
 
 	it('disallows setupKyc()', async () =>
@@ -38,6 +41,5 @@ describe('[test/kyc/kyc-setup-cargo]: KYC instantiation during root creation', (
 
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		expect(await cargoContract.kycRegister()).to.be.eq(kycContract2.address)
-
 	})
 })

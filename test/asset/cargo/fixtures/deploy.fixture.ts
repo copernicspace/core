@@ -40,6 +40,5 @@ export const deployCargoAsset: Fixture<Deploy> = async () => {
 		.then(factory => factory.connect(deployer).deploy(cargoContractAddress))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract as CargoFactory)
-
 	return { deployer, creator, cargoFactory, cargoContractAddress, kycContract }
 }

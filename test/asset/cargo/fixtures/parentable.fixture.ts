@@ -6,7 +6,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { createCargoAsset, Create } from './create.fixture'
 import { CargoAsset } from '../../../../typechain'
-import { loadFixture } from './fixtureLoader'
+import { loadFixture } from '../../../helpers/fixtureLoader'
 
 export interface Parentable extends Create {
 	deployer: SignerWithAddress

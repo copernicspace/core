@@ -9,7 +9,7 @@ import contract_names from '../../constants/contract.names'
 import { getCargoAddress } from '../helpers/cargoAddress'
 import contractNames from '../../constants/contract.names'
 
-describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
+describe('[test/kyc/kyc-root-creation.test] Root creation & integration with KYC', () => {
 	let userA, creator: SignerWithAddress
 	before('load userA as signerWithAddress', async () => ([, , , userA] = await ethers.getSigners()))
 
@@ -38,7 +38,9 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 				'First rootSpaceCargo',
 				decimals,
 				parseUnits('2000', decimals),
-				kycContract.address
+				kycContract.address,
+				0,
+				false
 			)
 			.then(tx => tx.wait())
 			.then(txr => getCargoAddress(txr))
@@ -84,7 +86,9 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 				'Second rootSpaceCargo',
 				decimals,
 				parseUnits('2000', decimals),
-				secondKYC.address
+				secondKYC.address,
+				0,
+				false
 			)
 			.then(tx => tx.wait())
 			.then(txr => getCargoAddress(txr))
@@ -116,11 +120,13 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 					'Revert rootSpaceCargo',
 					decimals,
 					parseUnits('2000', decimals),
-					kycContract.address
+					kycContract.address,
+					0,
+					false
 				)
-		).to.be.revertedWith('user not on KYC list')
+		).to.be.revertedWith('receiver/buyer is not on KYC list')
 
-		// creator does not kave KYC permissions on secondKYC
+		// creator does not have KYC permissions on secondKYC
 		await expect(
 			cargoFactory
 				.connect(creator)
@@ -129,8 +135,10 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 					'Revert rootSpaceCargo',
 					decimals,
 					parseUnits('2000', decimals),
-					secondKYC.address
+					secondKYC.address,
+					0,
+					false
 				)
-		).to.be.revertedWith('user not on KYC list')
+		).to.be.revertedWith('receiver/buyer is not on KYC list')
 	})
 })

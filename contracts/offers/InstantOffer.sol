@@ -1,10 +1,16 @@
 // SPDX-License-Identifier: private
-pragma solidity 0.8.9;
+pragma solidity ^0.8.9;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '../assets/cargo/CargoAsset.sol';
+import '../utils/ERC20Percentage.sol';
 
 contract InstantOffer {
+    using ERC20Percentage for uint256;
+
+    address public platformOperator;
+    uint256 private operatorFee;
+
     event NewOffer(
         address indexed seller,
         address indexed asset,
@@ -29,7 +35,10 @@ contract InstantOffer {
     uint256 private numOffers;
     mapping(uint256 => Offer) private offers;
 
-    constructor() {}
+    constructor(address _platformOperator, uint256 _operatorFee) {
+        platformOperator = _platformOperator;
+        operatorFee = _operatorFee;
+    }
 
     function sell(
         address asset,
@@ -84,7 +93,21 @@ contract InstantOffer {
         uint256 decimals = asset.decimals();
         uint256 amountPrice = amount * offer.price;
         require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
-        money.transferFrom(buyer, offer.seller, amountPrice);
+        address assetCreator = asset.creator();
+        uint256 royalties = asset.royalties();
+
+        if (offer.seller == assetCreator || royalties == 0) {
+            money.transferFrom(buyer, offer.seller, amountPrice);
+        } else {
+            uint256 royaltiesAmount = amountPrice.take(royalties, decimals);
+            uint256 operatorFeeAmount = amountPrice.take(operatorFee, decimals);
+            uint256 totalPriceWithoutRoyaltiesAndFee = amountPrice - royaltiesAmount - operatorFeeAmount;
+
+            money.transferFrom(buyer, assetCreator, royaltiesAmount);
+            money.transferFrom(buyer, platformOperator, operatorFeeAmount);
+            money.transferFrom(buyer, offer.seller, totalPriceWithoutRoyaltiesAndFee);
+        }
+
         uint256 uintAmount = amount * (10**decimals);
         asset.transferFrom(offer.seller, buyer, offer.assetID, uintAmount);
         emit Buy(buyer, sellID);

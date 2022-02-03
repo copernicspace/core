@@ -112,7 +112,7 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 
 		// check royalties balances of platformOperator and assetCreator (should include firstDeal profit + royalties)
 		const platformFee = secondDealTotalPrice.mul(3).div(100)
-		expect(await erc20Mock.balanceOf(await cargoContract.platformOperator())).to.be.eq(platformFee)
+		expect(await erc20Mock.balanceOf(await instantOffer.platformOperator())).to.be.eq(platformFee)
 
 		const royaltiesAmount = secondDealTotalPrice.mul(5).div(100)
 		const balanceCreatorAfter = await erc20Mock.balanceOf(creator.address)

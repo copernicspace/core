@@ -12,7 +12,6 @@ import '../../kyc/KycRegister.sol';
 
 contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, GeneratorID, AccessControl {
     uint128 public royalties;
-    address public platformOperator;
 
     constructor(string memory uri) ERC1155(uri) {}
 
@@ -29,8 +28,7 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         uint256 _totalSupply,
         address _owner,
         address _factoryOwner,
-        uint128 _royalties,
-        address _platformOperator
+        uint128 _royalties
     ) external initializer {
         _setURI(_uri);
         decimals = _decimals;
@@ -39,9 +37,8 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         _names[rootID] = _name;
         _parents[rootID] = rootID;
         creator = _owner;
-        if (_royalties > 0 && _platformOperator != address(0)) {
+        if (_royalties > 0) {
             royalties = _royalties;
-            platformOperator = _platformOperator;
         }
         _mint(_owner, rootID, totalSupply, '');
         _setupRole(DEFAULT_ADMIN_ROLE, _factoryOwner);

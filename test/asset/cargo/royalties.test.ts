@@ -52,12 +52,6 @@ describe('[test/asset/cargo/royalties.test] SpaceCargo asset with royalties: cre
 		expect(expected).to.be.eq(actual)
 	})
 
-	it('has correct platformOperator address', async () => {
-		const actual = await cargoContract.platformOperator()
-		const expected = await cargoFactory.platformOperator()
-		expect(expected).to.be.eq(actual)
-	})
-
 	it('disallows non-factory-clients from creating cargo', async () => {
 		await expect(
 			cargoFactory

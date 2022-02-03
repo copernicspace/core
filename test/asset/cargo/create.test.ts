@@ -50,11 +50,6 @@ describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test s
 		expect(expected).to.be.eq(actual)
 	})
 
-	it('has no platformOperator address', async () => {
-		const actual = await cargoContract.platformOperator()
-		expect(constants.AddressZero).to.be.eq(actual)
-	})
-
 	it('disallows non-factory-clients from creating cargo', async () => {
 		await expect(
 			cargoFactory

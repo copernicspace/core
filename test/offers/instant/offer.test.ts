@@ -23,10 +23,11 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 
 	before('load userA as signerWithAddress', async () => ([, , userA] = await ethers.getSigners()))
 
+	const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 	before(
 		'load `fixtures/deployInstantOffer`',
 		async () =>
-			({ deployer, creator, instantOffer, cargoContract, kycContract, totalSupply } = await waffle.loadFixture(
+			({ deployer, creator, instantOffer, cargoContract, kycContract, totalSupply } = await loadFixture(
 				deployInstantOffer
 			))
 	)
@@ -58,7 +59,7 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 	const buyAmountUint = parseUnits(buyAmountDecimal, 18)
 
 	it('should have success status of buy tx', async () => {
-		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply)
+		const balanceBefore = await cargoContract.balanceOf(creator.address, rootId)
 		const approveAmount = price.mul(buyAmountDecimal)
 		await erc20Mock.connect(userA).mint(parseUnits('10000000', 18))
 		await erc20Mock.connect(userA).approve(instantOffer.address, approveAmount)
@@ -70,7 +71,14 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 			.then(tx => tx.wait())
 
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
-		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply.sub(buyAmountUint))
-		expect(await cargoContract.balanceOf(userA.address, rootId)).to.be.eq(buyAmountUint)
+		expect(
+			await cargoContract.balanceOf(creator.address, rootId),
+			'wrong balance of creator after success sell tx'
+		).to.be.eq(balanceBefore.sub(buyAmountUint))
+
+		expect(
+			await cargoContract.balanceOf(userA.address, rootId),
+			'wrong balance of user A, after success buy tx'
+		).to.be.eq(buyAmountUint)
 	})
 })

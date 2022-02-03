@@ -62,3 +62,26 @@ export const createCargoAssetWithRoyalties: Fixture<Create> = async () => {
 
 	return { deployer, creator, cargoFactory, cargoContract, totalSupply, decimals, kycContract }
 }
+
+export const createCargoAssetWithFloatRoyalties: Fixture<Create> = async () => {
+	const { deployer, creator, cargoFactory, kycContract } = await loadFixture(deployCargoAsset)
+	const decimals = 18
+	const totalSupply = parseUnits('3500', decimals)
+	const royalties = parseUnits('5.725', decimals)
+
+	await cargoFactory.connect(deployer).addClient(creator.address)
+
+	await kycContract.connect(deployer).setKycStatus(creator.address, true)
+
+	const cargoContractAddress = await cargoFactory
+		.connect(creator)
+		.createCargo('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply, kycContract.address, royalties)
+		.then(tx => tx.wait())
+		.then(txr => getCargoAddress(txr))
+
+	const cargoContract = await ethers
+		.getContractAt(contractNames.CARGO_ASSET, cargoContractAddress)
+		.then(contract => contract as CargoAsset)
+
+	return { deployer, creator, cargoFactory, cargoContract, totalSupply, decimals, kycContract }
+}

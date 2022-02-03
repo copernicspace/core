@@ -23,7 +23,7 @@ abstract contract PausableCargo is ERC1155, Pausable {
         uint256[] memory amounts,
         bytes memory data
     ) internal virtual override {
-        require(!paused, 'Pausable: token is paused');
+        require(!paused || from == creator, 'Pausable: only creator can transfer paused assets');
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 

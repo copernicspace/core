@@ -7,7 +7,7 @@ import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
 import contractNames from '../../constants/contract.names'
 import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
 
-describe('[test/kyc/kyc-setup-cargo]: KYC instantiation during root creation', () => {
+describe('[test/kyc/kyc-setup]: KYC instantiation during root creation', () => {
 	let cargoContract: CargoAsset
 	let kycContract: KycRegister
 	let deployer: SignerWithAddress

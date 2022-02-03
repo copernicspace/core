@@ -51,7 +51,6 @@ contract CargoFactory is CloneFactory, AccessControl {
         );
         address clone = createClone(logicAddress);
         CargoAsset(clone).setupKyc(kycRegisterAddress);
-        require(CargoAsset(clone).kycRegister().getKycStatusInfo(msg.sender), 'user not on KYC list');
         CargoAsset(clone).initialize(uri, name, decimals, totalSupply, _msgSender(),factoryOwner, royalties);
         deployed.push(clone);
         emit CargoCreated(clone, _msgSender());

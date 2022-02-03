@@ -11,7 +11,7 @@ import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
 /**
  * Test suite for checking KycRegister permission change process
  */
-describe('SpaceCargoAsset: KYC revert on transfer testing', () => {
+describe('[test/kyc/kyc-transfers.test]: KYC revert on transfer testing', () => {
 	let kycUserA: SignerWithAddress
 	let kycUserB: SignerWithAddress
 	let nonKycUserC: SignerWithAddress
@@ -41,13 +41,13 @@ describe('SpaceCargoAsset: KYC revert on transfer testing', () => {
 		expect(await cargoContract.balanceOf(kycUserB.address, assetID)).to.be.eq(transferAmount)
 	})
 
-	it('reverts on tranfer to non-KYC address', async () =>
+	it('reverts on transfer to non-KYC address', async () =>
 		await expect(
 			cargoContract.connect(kycUserA).transfer(nonKycUserC.address, 0, parseUnits('100', decimals))
-		).to.be.revertedWith('user not on KYC list'))
+		).to.be.revertedWith('receiver/buyer is not on KYC list'))
 
-	it('reverts on tranfer from non-KYC address', async () =>
+	it('reverts on transfer from non-KYC address', async () =>
 		await expect(
 			cargoContract.connect(nonKycUserC).transfer(kycUserA.address, 0, parseUnits('100', decimals))
-		).to.be.revertedWith('user not on KYC list'))
+		).to.be.revertedWith('sender/seller is not on KYC list'))
 })

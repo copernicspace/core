@@ -9,7 +9,7 @@ import contract_names from '../../constants/contract.names'
 import { getCargoAddress } from '../helpers/cargoAddress'
 import contractNames from '../../constants/contract.names'
 
-describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
+describe('[test/kyc/kyc-root-creation.test] Root creation & integration with KYC', () => {
 	let userA, creator: SignerWithAddress
 	before('load userA as signerWithAddress', async () => ([, , , userA] = await ethers.getSigners()))
 
@@ -121,9 +121,9 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 					kycContract.address,
 					0
 				)
-		).to.be.revertedWith('user not on KYC list')
+		).to.be.revertedWith('receiver/buyer is not on KYC list')
 
-		// creator does not kave KYC permissions on secondKYC
+		// creator does not have KYC permissions on secondKYC
 		await expect(
 			cargoFactory
 				.connect(creator)
@@ -135,6 +135,6 @@ describe('SpaceCargoAsset: Root creation & integration with KYC', () => {
 					secondKYC.address,
 					0
 				)
-		).to.be.revertedWith('user not on KYC list')
+		).to.be.revertedWith('receiver/buyer is not on KYC list')
 	})
 })

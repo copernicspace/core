@@ -9,7 +9,7 @@ import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
 import contractNames from '../../constants/contract.names'
 import { getCargoAddress } from '../helpers/cargoAddress'
 
-describe('SpaceCargoAsset: Child creation & integration with KYC', () => {
+describe('[test/kyc/kyc-child-creation.test] Child creation & integration with KYC', () => {
 	let creator: SignerWithAddress
 	let cargoFactory: CargoFactory
 	let cargoContract: CargoAsset
@@ -54,7 +54,7 @@ describe('SpaceCargoAsset: Child creation & integration with KYC', () => {
 			cargoContract
 				.connect(creator)
 				.createChild(parseUnits('500', cargoContractDecimals), 0, 'child name', creator.address)
-		).to.be.revertedWith('user not on KYC list')
+		).to.be.revertedWith('sender/seller is not on KYC list')
 
 		// re-add creator's KYC permissions
 		await kycContract.connect(deployer).setKycStatus(creator.address, true)

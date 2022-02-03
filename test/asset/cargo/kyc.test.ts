@@ -177,7 +177,7 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 		// create child to receiver (user B)
 		const txr = newCargoContract.connect(creator).createChild(newAmount, 0, 'new-new child', userC.address)
 
-		await expect(txr).to.be.revertedWith('user not on KYC list')
+		await expect(txr).to.be.revertedWith('receiver/buyer is not on KYC list')
 	})
 
 	it('disallows non-operators from setting KYC status', async () => {

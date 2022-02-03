@@ -43,7 +43,7 @@ contract CargoFactory is CloneFactory, AccessControl {
         uint256 decimals,
         uint256 totalSupply,
         address kycRegisterAddress,
-        uint128 royalties
+        uint256 royalties
     ) public {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(FACTORY_CLIENT, _msgSender()),

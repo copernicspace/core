@@ -95,7 +95,7 @@ contract InstantOffer {
         uint256 amountPrice = amount * offer.price;
         require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
         address assetCreator = asset.creator();
-        uint128 royalties = asset.royalties();
+        uint256 royalties = asset.royalties();
         
         if (offer.seller == assetCreator || royalties == 0) {
             money.transferFrom(buyer, offer.seller, amountPrice);

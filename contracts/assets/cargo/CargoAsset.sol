@@ -11,7 +11,7 @@ import '../../utils/GeneratorID.sol';
 import '../../kyc/KycRegister.sol';
 
 contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, GeneratorID, AccessControl {
-    uint128 public royalties;
+    uint256 public royalties;
 
     constructor(string memory uri) ERC1155(uri) {}
 
@@ -28,7 +28,7 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         uint256 _totalSupply,
         address _owner,
         address _factoryOwner,
-        uint128 _royalties
+        uint256 _royalties
     ) external initializer {
         _setURI(_uri);
         decimals = _decimals;

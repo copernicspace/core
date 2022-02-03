@@ -100,8 +100,8 @@ contract InstantOffer {
         if (offer.seller == assetCreator || royalties == 0) {
             money.transferFrom(buyer, offer.seller, amountPrice);
         } else {
-            uint256 royaltiesAmount = amountPrice.take(royalties * (10**decimals), decimals);
-            uint256 operatorFeeAmount = amountPrice.take(operatorFee * (10**decimals) , decimals);
+            uint256 royaltiesAmount = amountPrice.take(royalties, decimals);
+            uint256 operatorFeeAmount = amountPrice.take(operatorFee, decimals);
             uint256 totalPriceWithoutRoyaltiesAndFee = amountPrice - royaltiesAmount - operatorFeeAmount;
             
             money.transferFrom(buyer, assetCreator, royaltiesAmount);

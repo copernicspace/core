@@ -6,6 +6,7 @@ import contract_names from '../../../../constants/contract.names'
 import { createCargoAsset } from '../../../asset/cargo/fixtures/create.fixture'
 import { BigNumber } from 'ethers'
 import { loadFixture } from '../../../helpers/fixtureLoader'
+import { parseUnits } from 'ethers/lib/utils'
 
 export interface DeployInstantOffer {
 	deployer: SignerWithAddress
@@ -26,7 +27,7 @@ export interface DeployInstantOffer {
 export const deployInstantOffer: Fixture<DeployInstantOffer> = async () => {
 	const { deployer, creator, cargoContract, kycContract, totalSupply } = await loadFixture(createCargoAsset)
 
-	const operatorFee = '3'
+	const operatorFee = parseUnits('3', await cargoContract.decimals())
 
 	const instantOffer = await ethers
 		.getContractFactory(contract_names.INSTANT_OFFER)

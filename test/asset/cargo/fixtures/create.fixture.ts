@@ -44,7 +44,7 @@ export const createCargoAssetWithRoyalties: Fixture<Create> = async () => {
 	const { deployer, creator, cargoFactory, kycContract } = await loadFixture(deployCargoAsset)
 	const decimals = 18
 	const totalSupply = parseUnits('3500', decimals)
-	const royalties = '5'
+	const royalties = parseUnits('5', decimals)
 
 	await cargoFactory.connect(deployer).addClient(creator.address)
 

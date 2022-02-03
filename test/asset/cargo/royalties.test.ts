@@ -48,7 +48,8 @@ describe('[test/asset/cargo/royalties.test] SpaceCargo asset with royalties: cre
 
 	it('has correct royalties percent', async () => {
 		const actual = await cargoContract.royalties()
-		const expected = BigNumber.from(5)
+		const decimals = await cargoContract.decimals()
+		const expected = parseUnits('5', decimals)
 		expect(expected).to.be.eq(actual)
 	})
 

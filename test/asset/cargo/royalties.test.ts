@@ -57,7 +57,7 @@ describe('[test/asset/cargo/royalties.test] SpaceCargo asset with royalties: cre
 		await expect(
 			cargoFactory
 				.connect(userA)
-				.createCargo('test.revert.com', 'revert test asset', 18, 6000, kycContract.address, 5)
+				.createCargo('test.revert.com', 'revert test asset', 18, 6000, kycContract.address, 5, false)
 		).to.be.revertedWith('You are not allowed to create new SpaceCargo')
 	})
 

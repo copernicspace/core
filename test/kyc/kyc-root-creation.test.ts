@@ -39,7 +39,8 @@ describe('[test/kyc/kyc-root-creation.test] Root creation & integration with KYC
 				decimals,
 				parseUnits('2000', decimals),
 				kycContract.address,
-				0
+				0,
+				false
 			)
 			.then(tx => tx.wait())
 			.then(txr => getCargoAddress(txr))
@@ -86,7 +87,8 @@ describe('[test/kyc/kyc-root-creation.test] Root creation & integration with KYC
 				decimals,
 				parseUnits('2000', decimals),
 				secondKYC.address,
-				0
+				0,
+				false
 			)
 			.then(tx => tx.wait())
 			.then(txr => getCargoAddress(txr))
@@ -119,7 +121,8 @@ describe('[test/kyc/kyc-root-creation.test] Root creation & integration with KYC
 					decimals,
 					parseUnits('2000', decimals),
 					kycContract.address,
-					0
+					0,
+					false
 				)
 		).to.be.revertedWith('receiver/buyer is not on KYC list')
 
@@ -133,7 +136,8 @@ describe('[test/kyc/kyc-root-creation.test] Root creation & integration with KYC
 					decimals,
 					parseUnits('2000', decimals),
 					secondKYC.address,
-					0
+					0,
+					false
 				)
 		).to.be.revertedWith('receiver/buyer is not on KYC list')
 	})

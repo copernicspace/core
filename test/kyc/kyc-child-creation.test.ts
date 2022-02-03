@@ -76,7 +76,8 @@ describe('[test/kyc/kyc-child-creation.test] Child creation & integration with K
 				cargoContractDecimals,
 				parseUnits('2000', cargoContractDecimals),
 				kycContract.address,
-				0
+				0,
+				false
 			)
 			.then(tx => tx.wait())
 			.then(txr => getCargoAddress(txr))

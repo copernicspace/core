@@ -29,7 +29,7 @@ export const createCargoAsset: Fixture<Create> = async () => {
 
 	const cargoContractAddress = await cargoFactory
 		.connect(creator)
-		.createCargo('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply, kycContract.address, royalties)
+		.createCargo('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply, kycContract.address, royalties, false)
 		.then(tx => tx.wait())
 		.then(txr => getCargoAddress(txr))
 
@@ -52,7 +52,7 @@ export const createCargoAssetWithRoyalties: Fixture<Create> = async () => {
 
 	const cargoContractAddress = await cargoFactory
 		.connect(creator)
-		.createCargo('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply, kycContract.address, royalties)
+		.createCargo('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply, kycContract.address, royalties, false)
 		.then(tx => tx.wait())
 		.then(txr => getCargoAddress(txr))
 
@@ -75,7 +75,7 @@ export const createCargoAssetWithFloatRoyalties: Fixture<Create> = async () => {
 
 	const cargoContractAddress = await cargoFactory
 		.connect(creator)
-		.createCargo('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply, kycContract.address, royalties)
+		.createCargo('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply, kycContract.address, royalties, false)
 		.then(tx => tx.wait())
 		.then(txr => getCargoAddress(txr))
 

@@ -28,7 +28,8 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         uint256 _totalSupply,
         address _owner,
         address _factoryOwner,
-        uint256 _royalties
+        uint256 _royalties,
+        bool _locked
     ) external initializer {
         _setURI(_uri);
         decimals = _decimals;
@@ -41,6 +42,9 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
             royalties = _royalties;
         }
         _mint(_owner, rootID, totalSupply, '');
+        if (_locked) {
+            paused = true;
+        }
         _setupRole(DEFAULT_ADMIN_ROLE, _factoryOwner);
     }
 

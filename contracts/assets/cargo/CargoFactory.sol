@@ -10,7 +10,7 @@ import '../../utils/CloneFactory.sol';
 
 contract CargoFactory is CloneFactory, AccessControl {
     address public logicAddress;
-    address public  platformOperator;
+    address public platformOperator;
 
     address private factoryOwner;
 
@@ -43,7 +43,8 @@ contract CargoFactory is CloneFactory, AccessControl {
         uint256 decimals,
         uint256 totalSupply,
         address kycRegisterAddress,
-        uint256 royalties
+        uint256 royalties,
+        bool locked
     ) public {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(FACTORY_CLIENT, _msgSender()),
@@ -51,7 +52,7 @@ contract CargoFactory is CloneFactory, AccessControl {
         );
         address clone = createClone(logicAddress);
         CargoAsset(clone).setupKyc(kycRegisterAddress);
-        CargoAsset(clone).initialize(uri, name, decimals, totalSupply, _msgSender(),factoryOwner, royalties);
+        CargoAsset(clone).initialize(uri, name, decimals, totalSupply, _msgSender(), factoryOwner, royalties, locked);
         deployed.push(clone);
         emit CargoCreated(clone, _msgSender());
     }

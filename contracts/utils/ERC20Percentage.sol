@@ -10,7 +10,7 @@ library ERC20Percentage {
         uint256 percentage,
         uint256 decimals
     ) internal pure returns (uint256 result) {
-        uint256 normalized = percentage * (10**decimals) / (baseDecimal);
-        result = amount * (normalized) / (10**decimals);
+        uint256 normalized = (percentage * (10**decimals)) / (baseDecimal);
+        result = (amount * (normalized)) / (10**decimals);
     }
 }

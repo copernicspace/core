@@ -4,7 +4,6 @@ import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
-import { constants } from 'ethers'
 import { CargoAsset, CargoFactory, KycRegister } from '../../../typechain'
 import { createCargoAsset } from './fixtures/create.fixture'
 
@@ -54,7 +53,7 @@ describe('[test/asset/cargo/create.test] SpaceCargo asset: create fixture test s
 		await expect(
 			cargoFactory
 				.connect(userA)
-				.createCargo('test.revert.com', 'revert test asset', 18, 6000, kycContract.address, 0)
+				.createCargo('test.revert.com', 'revert test asset', 18, 6000, kycContract.address, 0, false)
 		).to.be.revertedWith('You are not allowed to create new SpaceCargo')
 	})
 

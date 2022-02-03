@@ -87,7 +87,8 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 					cargoContractDecimals,
 					amount,
 					kycContract.address,
-					0
+					0,
+					false
 				)
 		).to.be.revertedWith('not on KYC list')
 	})
@@ -109,7 +110,8 @@ describe('[test/asset/cargo/kyc.test] SpaceCargo asset: kyc test suite', () => {
 				cargoContractDecimals,
 				amount,
 				kycContract.address,
-				royalties
+				royalties,
+				false
 			)
 			.then(tx => tx.wait())
 			.then(txr => getCargoAddress(txr))

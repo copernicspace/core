@@ -32,7 +32,6 @@ describe('[test/kyc/kyc-setup-cargo]: KYC instantiation during root creation', (
 			.then(contract => contract.deployed())
 			.then(deployedContract => deployedContract as KycRegister)
 
-		console.log(kycContract2.address)
 		expect(await cargoContract.kycRegister()).not.to.be.eq(kycContract2.address)
 
 		const txr = await cargoContract

@@ -1,3 +1,5 @@
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { parseUnits } from 'ethers/lib/utils'
 import { ethers } from 'hardhat'
 import ContractNames from '../constants/contract.names'
 
@@ -23,9 +25,11 @@ async function main() {
 		.then(deployedContract => deployedContract.address)
 	console.log('CargoFactory deployed to:', factoryAddress)
 
+	const [deployer] = await ethers.getSigners()
+
 	const instantOfferAddress = await ethers
 		.getContractFactory(ContractNames.INSTANT_OFFER)
-		.then(deployFactory => deployFactory.deploy())
+		.then(deployFactory => deployFactory.deploy(deployer.address, parseUnits('3', 18)))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract.address)
 	console.log('InstantOffer deployed to:', instantOfferAddress)

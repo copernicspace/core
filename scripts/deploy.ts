@@ -1,4 +1,3 @@
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { parseUnits } from 'ethers/lib/utils'
 import { ethers } from 'hardhat'
 import ContractNames from '../constants/contract.names'

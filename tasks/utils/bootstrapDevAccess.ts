@@ -66,22 +66,33 @@ export default task(TASK.NAME, TASK.DESC)
 		const factoryContract = await hre.ethers.getContractAt(contractNames.CARGO_FACTORY, factoryAddress)
 
 		console.log('===========≠≠≠≠≠≠≠≠≠≠===========')
-		console.log(` 👷‍♀️  adding to KYC list ${kycAddress} ...`)
+		console.log(` 🙅‍♀️ adding to KYC list ${kycAddress} ...`)
 		for (const address of kycAddresses) {
 			console.log(`\t  setting KYC status for ${address}`)
-			await kycContract
-				.setKycStatus(address, true)
-				.then(tx => tx.wait())
-				.then(txr => console.log(`\t\t✅ tx.hash: ${txr.transactionHash}\n`))
+			const isKyc = await kycContract.getKycStatusInfo(address)
+			if (isKyc) {
+				console.log(`\t : ❎  already is on KYC list`)
+			} else {
+				await kycContract
+					.setKycStatus(address, true)
+					.then(tx => tx.wait())
+					.then(txr => console.log(`\t\t✅ tx.hash: ${txr.transactionHash}\n`))
+			}
 		}
 
 		console.log('===========≠≠≠≠≠≠≠≠≠≠===========')
-		console.log(` 👷‍♀️  setting ${factoryAddress} factory clients ...\n`)
+		console.log(`👨‍🏭 setting ${factoryAddress} factory clients ...\n`)
 		for (const address of factoryAddresses) {
 			console.log(`\tadding ${address} as factory client`)
-			await factoryContract
-				.addClient(address)
-				.then(tx => tx.wait())
-				.then(txr => console.log(`\t\t✅ tx.hash: ${txr.transactionHash}\n`))
+			const role = await factoryContract.FACTORY_CLIENT()
+			const isClient = await factoryContract.hasRole(role, address)
+			if (isClient) {
+				console.log(`\t : ❎  already has factory client role`)
+			} else {
+				await factoryContract
+					.addClient(address)
+					.then(tx => tx.wait())
+					.then(txr => console.log(`\t\t✅ tx.hash: ${txr.transactionHash}\n`))
+			}
 		}
 	})

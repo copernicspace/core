@@ -15,16 +15,16 @@
   },
   "plugins": ["@typescript-eslint", "prettier"],
   "rules": {
-    "indent": ["error", "tab"],
+    "indent": ["warn", "tab"],
     "max-len": [
-      "error",
+      "warn",
       {
         "code": 120
       }
     ],
-    "linebreak-style": ["error", "unix"],
-    "quotes": ["error", "single"],
-    "semi": ["error", "never"],
-    "prettier/prettier": "error"
+    "linebreak-style": ["warn", "unix"],
+    "quotes": ["warn", "single"],
+    "semi": ["warn", "never"],
+    "prettier/prettier": "warn"
   }
 }

@@ -2,7 +2,6 @@
 pragma solidity ^0.8.9;
 
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
-
 import '../interfaces/Pausable.sol';
 
 abstract contract PausableCargo is ERC1155, Pausable {
@@ -23,7 +22,7 @@ abstract contract PausableCargo is ERC1155, Pausable {
         uint256[] memory amounts,
         bytes memory data
     ) internal virtual override {
-        require(!paused, 'Pausable: token is paused');
+        require(!paused || from == creator, 'PausableCargo: asset is locked');
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 

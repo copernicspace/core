@@ -9,7 +9,7 @@ import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { getOfferSellID } from '../../helpers/getOfferId.helper'
 import { deployInstantOfferWithFloatFeesAndRoyalties } from './fixtures/deployRoyaltiesOffer.fixture.'
 
-describe('[test/offers/instant/royalties-offer.test] Instant offer with royalties', () => {
+describe('[test/offers/instant/float-royalties-offer.test] Instant offer with royalties', () => {
 	let deployer: SignerWithAddress
 	let creator: SignerWithAddress
 	let instantOffer: InstantOffer
@@ -47,9 +47,10 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 		// approve offer contract before create sell offer
 		await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, true)
 
+		const minBuyAmount = parseUnits('100', 18)
 		const txr = await instantOffer
 			.connect(creator)
-			.sell(cargoContract.address, rootId, totalSupply, price, erc20Mock.address)
+			.sell(cargoContract.address, rootId, totalSupply.div(10), minBuyAmount, price, erc20Mock.address)
 			.then(tx => tx.wait())
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		offerId = getOfferSellID(txr)
@@ -57,7 +58,9 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 
 	const buyAmountDecimal = '100'
 	const buyAmountUint = parseUnits(buyAmountDecimal, 18)
+	const minBuyAmountUint = parseUnits(buyAmountDecimal, 18)
 	const erc20MintAmountForBuyers = parseUnits('10000000', 18)
+
 	it('should have success status of buy tx', async () => {
 		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply)
 		const approveAmount = price.mul(buyAmountDecimal)
@@ -84,7 +87,7 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 
 		const txr = await instantOffer
 			.connect(userA)
-			.sell(cargoContract.address, rootId, buyAmountUint, resellPrice, erc20Mock.address)
+			.sell(cargoContract.address, rootId, buyAmountUint, minBuyAmountUint, resellPrice, erc20Mock.address)
 			.then(tx => tx.wait())
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		resellOfferId = getOfferSellID(txr)

@@ -22,12 +22,13 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 	let userA: SignerWithAddress
 	let userB: SignerWithAddress
 
+	const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 	before('load userA and userB as signerWithAddress', async () => ([, , userA, userB] = await ethers.getSigners()))
 
 	before(
 		'load `fixtures/deployInstantOfferWithRoyalties`',
 		async () =>
-			({ deployer, creator, instantOffer, cargoContract, kycContract, totalSupply } = await waffle.loadFixture(
+			({ deployer, creator, instantOffer, cargoContract, kycContract, totalSupply } = await loadFixture(
 				deployInstantOfferWithRoyalties
 			))
 	)
@@ -43,13 +44,14 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 
 	let offerId: BigNumberish
 	const price = parseUnits('4250', 18)
+	const minBuyAmountUint = parseUnits('10', 18)
 	it('should create new offer', async () => {
 		// approve offer contract before create sell offer
 		await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, true)
 
 		const txr = await instantOffer
 			.connect(creator)
-			.sell(cargoContract.address, rootId, totalSupply, price, erc20Mock.address)
+			.sell(cargoContract.address, rootId, totalSupply.div(100), minBuyAmountUint, price, erc20Mock.address)
 			.then(tx => tx.wait())
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		offerId = getOfferSellID(txr)
@@ -84,7 +86,7 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 
 		const txr = await instantOffer
 			.connect(userA)
-			.sell(cargoContract.address, rootId, buyAmountUint, resellPrice, erc20Mock.address)
+			.sell(cargoContract.address, rootId, buyAmountUint, minBuyAmountUint, resellPrice, erc20Mock.address)
 			.then(tx => tx.wait())
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		resellOfferId = getOfferSellID(txr)

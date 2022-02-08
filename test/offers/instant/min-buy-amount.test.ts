@@ -1,15 +1,15 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { ethers, waffle } from 'hardhat'
-import { BigNumber, BigNumberish } from 'ethers'
 import { expect } from 'chai'
-import { parseUnits } from '@ethersproject/units'
-import { CargoAsset, InstantOffer, KycRegister, ERC20Mock } from '../../../typechain'
+import { BigNumber, BigNumberish } from 'ethers'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import { ethers, waffle } from 'hardhat'
 import contractNames from '../../../constants/contract.names'
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
+import { InstantOffer, CargoAsset, KycRegister, ERC20Mock } from '../../../typechain'
 import { getOfferSellID } from '../../helpers/getOfferId.helper'
 import { deployInstantOffer } from './fixtures/deployOffer.fixture'
 
-describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture test suite', () => {
+describe('[test/offers/instant/min-buy-amount.test.ts] InstantOffer: min buy amount', () => {
 	let deployer: SignerWithAddress
 	let creator: SignerWithAddress
 	let instantOffer: InstantOffer
@@ -19,9 +19,9 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 
 	const rootId = 0
 
-	let userA: SignerWithAddress
+	let buyer: SignerWithAddress
 
-	before('load userA as signerWithAddress', async () => ([, , userA] = await ethers.getSigners()))
+	before('load userA as signerWithAddress', async () => ([, , buyer] = await ethers.getSigners()))
 
 	const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 	before(
@@ -32,8 +32,9 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 			))
 	)
 
+	before('add buyer to KYC', async () => await kycContract.connect(deployer).setKycStatus(buyer.address, true))
 	let erc20Mock: ERC20Mock
-	before(' deploy ERC20 Mock', async () => {
+	before('Deploy ERC20 Mock', async () => {
 		erc20Mock = await ethers
 			.getContractFactory(contractNames.ERC20_MOCK)
 			.then(factory => factory.deploy())
@@ -43,42 +44,42 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 
 	let offerId: BigNumberish
 	const price = parseUnits('4250', 18)
+	const amountToSell = parseUnits('1000', 18)
+	const minBuyAmount = parseUnits('100', 18)
 	it('should create new offer', async () => {
 		// approve offer contract before create sell offer
 		await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, true)
-		const minBuyAmount = parseUnits('100', 18)
 		const txr = await instantOffer
 			.connect(creator)
-			.sell(cargoContract.address, rootId, totalSupply.div(100), minBuyAmount, price, erc20Mock.address)
+			.sell(cargoContract.address, rootId, amountToSell, minBuyAmount, price, erc20Mock.address)
 			.then(tx => tx.wait())
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		offerId = getOfferSellID(txr)
 	})
 
-	const buyAmountDecimal = '100'
-	const buyAmountUint = parseUnits(buyAmountDecimal, 18)
+	before('mint mock token', async () => await erc20Mock.connect(buyer).mint(minBuyAmount.mul(price)))
 
-	it('should have success status of buy tx', async () => {
-		const balanceBefore = await cargoContract.balanceOf(creator.address, rootId)
-		const approveAmount = price.mul(buyAmountDecimal)
-		await erc20Mock.connect(userA).mint(parseUnits('10000000', 18))
-		await erc20Mock.connect(userA).approve(instantOffer.address, approveAmount)
-		await kycContract.connect(deployer).setKycStatus(userA.address, true)
+	before(
+		'set allowance',
+		async () => await erc20Mock.connect(buyer).approve(instantOffer.address, minBuyAmount.mul(price))
+	)
 
+    const buyAmount = BigNumber.from('100')
+	it('should revert on buy amount less min', async () =>
+		await expect(instantOffer.connect(buyer).buy(offerId, buyAmount.div(2))).to.be.revertedWith(
+			'Can not buy less than min amount'
+		))
+
+	it('should revert on buy amount less min', async () =>
+		await expect(instantOffer.connect(buyer).buy(offerId, buyAmount.sub(1))).to.be.revertedWith(
+			'Can not buy less than min amount'
+		))
+
+	it('should buy min amount', async () => {
 		const txr = await instantOffer
-			.connect(userA)
-			.buy(offerId, buyAmountDecimal)
+			.connect(buyer)
+			.buy(offerId, buyAmount)
 			.then(tx => tx.wait())
-
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
-		expect(
-			await cargoContract.balanceOf(creator.address, rootId),
-			'wrong balance of creator after success sell tx'
-		).to.be.eq(balanceBefore.sub(buyAmountUint))
-
-		expect(
-			await cargoContract.balanceOf(userA.address, rootId),
-			'wrong balance of user A, after success buy tx'
-		).to.be.eq(buyAmountUint)
 	})
 })

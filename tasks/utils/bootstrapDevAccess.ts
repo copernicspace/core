@@ -25,7 +25,7 @@ const devs = {
 	},
 	stas: {
 		seller: '0xfeAb83188C7A337b48Bc7375C5E43915401F8C4c',
-		buyer: ''
+		buyer: '0x1a7562d160D72DbF39673528960511c0a0735a49'
 	},
 	sasha: {
 		seller: '0xD8Ba5F23ab8B7a07B5EC2500B872D2B94Ee856D0',
@@ -43,7 +43,7 @@ const kycAddresses = [
 	devs.alex.seller,
 	devs.alex.buyer,
 	devs.stas.seller,
-	// devs.stas.buyer,
+	devs.stas.buyer,
 	devs.sasha.seller,
 	devs.sasha.buyer,
 	devs.pylyp.seller,

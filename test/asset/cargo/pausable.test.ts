@@ -18,18 +18,18 @@ describe('[test/asset/cargo/pausable.test] SpaceCargo asset: pausable test suite
 		await expect(cargoContract.connect(receiver).pause()).to.be.revertedWith('unauthorized -- only for creator')
 	})
 
-	describe('transfers when asset `paused()`', async() => {
-		before('load userA and transfer funds', async() => {
+	describe('transfers when asset `paused()`', async () => {
+		before('load userA and transfer funds', async () => {
 			// set up a signer who will send the asset
-			[, , userA] = await ethers.getSigners()
+			;[, , userA] = await ethers.getSigners()
 			await cargoContract.connect(creator).transfer(userA.address, 0, '100')
 		})
 
-		before('pause asset', async() => {
+		before('pause asset', async () => {
 			await cargoContract.connect(creator).pause()
 		})
 
-		it('creator can successfully send tokens if paused', async() => {
+		it('creator can successfully send tokens if paused', async () => {
 			const amount = parseUnits('100', 18)
 
 			const balanceStart = await cargoContract.balanceOf(receiver.address, 0)
@@ -38,13 +38,11 @@ describe('[test/asset/cargo/pausable.test] SpaceCargo asset: pausable test suite
 
 			expect(balanceStart.add(BigNumber.from(amount))).to.be.eq(balanceEnd)
 		})
-	
+
 		it('non-creator cannot send tokens if paused', async () => {
 			await expect(
 				cargoContract.connect(userA).transfer(receiver.address, 0, parseUnits('100', 18))
-			).to.be.revertedWith('Pausable: only creator can transfer paused assets')
+			).to.be.revertedWith('PausableCargo: asset is locked')
 		})
 	})
-
-	
 })

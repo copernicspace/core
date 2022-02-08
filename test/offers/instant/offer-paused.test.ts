@@ -9,7 +9,7 @@ import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { getOfferSellID } from '../../helpers/getOfferId.helper'
 import { deployInstantOffer } from './fixtures/deployOffer.fixture'
 
-describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture test suite', () => {
+describe('[test/offers/instant/offer-paused.test] Instant offer: deployOffer fixture test suite', () => {
 	let deployer: SignerWithAddress
 	let creator: SignerWithAddress
 	let instantOffer: InstantOffer
@@ -67,7 +67,7 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 		it('reverts create offer from non-creator', async () => {
 			await expect(
 				instantOffer.connect(userA).sell(cargoContract.address, 0, '100', price, erc20Mock.address)
-			).to.be.revertedWith('Only creator can sell paused asset')
+			).to.be.revertedWith('PausableCargo: asset is locked')
 		})
 
 		it('successfully creates offer if `msg.sender == creator`', async () => {
@@ -89,7 +89,7 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 			const approveAmount = price.mul(buyAmountDecimal)
 			await erc20Mock.connect(userA).approve(instantOffer.address, approveAmount)
 		})
-        
+
 		it('allows userA to buy asset', async () => {
 			await instantOffer.connect(userA).buy(0, '100')
 			expect(await cargoContract.balanceOf(userA.address, '0')).to.be.eq(
@@ -100,7 +100,7 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 		it('disallows resell from non-creator', async () => {
 			await expect(
 				instantOffer.connect(userA).sell(cargoContract.address, 0, '100', '5000', erc20Mock.address)
-			).to.be.revertedWith('Only creator can sell paused asset')
+			).to.be.revertedWith('PausableCargo: asset is locked')
 		})
 	})
 

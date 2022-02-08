@@ -58,7 +58,7 @@ contract InstantOffer {
         );
 
         address creator = CargoAsset(asset).creator();
-        require(!CargoAsset(asset).paused() || msg.sender == creator, 'Only creator can sell paused asset');
+        require(!CargoAsset(asset).paused() || msg.sender == creator, 'PausableCargo: asset is locked');
 
         sellID = numOffers++;
         Offer storage offer = offers[sellID];

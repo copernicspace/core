@@ -26,6 +26,8 @@ contract InstantOffer {
     struct Offer {
         address asset;
         address seller;
+        uint256 amount;
+        uint256 minAmount;
         uint256 assetID;
         uint256 price;
         address money;
@@ -44,11 +46,12 @@ contract InstantOffer {
         address asset,
         uint256 assetID,
         uint256 amount,
+        uint256 minAmount,
         uint256 price,
         address money
     ) public returns (uint256 sellID) {
         require(
-            CargoAsset(asset).balanceOf(msg.sender, assetID) >= 1,
+            CargoAsset(asset).balanceOf(msg.sender, assetID) >= amount,
             'Failed to create new sell, insuffucient balance'
         );
 
@@ -64,6 +67,8 @@ contract InstantOffer {
         Offer storage offer = offers[sellID];
         offer.asset = asset;
         offer.seller = msg.sender;
+        offer.amount = amount;
+        offer.minAmount = minAmount;
         offer.assetID = assetID;
         offer.price = price;
         offer.money = money;
@@ -92,10 +97,14 @@ contract InstantOffer {
     function buy(uint256 sellID, uint256 amount) public {
         Offer memory offer = offers[sellID];
         CargoAsset asset = CargoAsset(offer.asset);
+        uint256 decimals = asset.decimals();
+
+        require(offer.amount >= amount, 'Not enough asset balance on sale');
+        require(amount >= offer.minAmount, 'Can not buy less than min amount');
         address buyer = msg.sender;
         IERC20 money = IERC20(offer.money);
-        uint256 decimals = asset.decimals();
-        uint256 amountPrice = amount * offer.price;
+        uint256 decimalAmount = amount / (10**decimals);
+        uint256 amountPrice = decimalAmount * offer.price;
         require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
         address assetCreator = asset.creator();
         uint256 royalties = asset.royalties();
@@ -112,8 +121,8 @@ contract InstantOffer {
             money.transferFrom(buyer, offer.seller, totalPriceWithoutRoyaltiesAndFee);
         }
 
-        uint256 uintAmount = amount * (10**decimals);
-        asset.transferFrom(offer.seller, buyer, offer.assetID, uintAmount);
+        offer.amount = offer.amount - amount;
+        asset.transferFrom(offer.seller, buyer, offer.assetID, amount);
         emit Buy(buyer, sellID);
     }
 }

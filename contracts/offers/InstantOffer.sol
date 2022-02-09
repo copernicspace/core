@@ -9,7 +9,7 @@ contract InstantOffer {
     using ERC20Percentage for uint256;
 
     address public platformOperator;
-    uint256 private operatorFee;
+    uint256 public operatorFee;
 
     event NewOffer(
         address indexed seller,

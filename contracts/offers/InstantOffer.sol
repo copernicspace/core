@@ -100,6 +100,7 @@ contract InstantOffer {
         uint256 decimals = asset.decimals();
         uint256 uintAmount = amount * (10**decimals);
 
+        require(offer.amount >= uintAmount, 'Not enought asset balance on sale');
         require(uintAmount >= offer.minAmount, 'Can not buy less than min amount');
         address buyer = msg.sender;
         IERC20 money = IERC20(offer.money);
@@ -120,6 +121,7 @@ contract InstantOffer {
             money.transferFrom(buyer, offer.seller, totalPriceWithoutRoyaltiesAndFee);
         }
 
+        offer.amount = offer.amount - uintAmount;
         asset.transferFrom(offer.seller, buyer, offer.assetID, uintAmount);
         emit Buy(buyer, sellID);
     }

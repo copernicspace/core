@@ -1,7 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { expect } from 'chai'
 import { BigNumber, BigNumberish } from 'ethers'
-import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import { parseUnits } from 'ethers/lib/utils'
 import { ethers, waffle } from 'hardhat'
 import contractNames from '../../../constants/contract.names'
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
@@ -44,8 +44,8 @@ describe('[test/offers/instant/min-buy-amount.test.ts] InstantOffer: min buy amo
 
 	let offerId: BigNumberish
 	const price = parseUnits('4250', 18)
-	const amountToSell = parseUnits('1000', 18)
-	const minBuyAmount = parseUnits('100', 18)
+	const amountToSell = parseUnits('100', 18)
+	const minBuyAmount = parseUnits('10', 18)
 	it('should create new offer', async () => {
 		// approve offer contract before create sell offer
 		await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, true)
@@ -64,7 +64,7 @@ describe('[test/offers/instant/min-buy-amount.test.ts] InstantOffer: min buy amo
 		async () => await erc20Mock.connect(buyer).approve(instantOffer.address, minBuyAmount.mul(price))
 	)
 
-    const buyAmount = BigNumber.from('100')
+	const buyAmount = BigNumber.from('10')
 	it('should revert on buy amount less min', async () =>
 		await expect(instantOffer.connect(buyer).buy(offerId, buyAmount.div(2))).to.be.revertedWith(
 			'Can not buy less than min amount'

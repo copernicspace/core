@@ -57,7 +57,7 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 		offerId = getOfferSellID(txr)
 	})
 
-	const buyAmountDecimal = '100'
+	const buyAmountDecimal = '10'
 	const buyAmountUint = parseUnits(buyAmountDecimal, 18)
 	const erc20MintAmountForBuyers = parseUnits('10000000', 18)
 	it('should have success status of buy tx', async () => {

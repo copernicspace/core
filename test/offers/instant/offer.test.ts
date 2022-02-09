@@ -46,7 +46,7 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 	it('should create new offer', async () => {
 		// approve offer contract before create sell offer
 		await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, true)
-		const minBuyAmount = parseUnits('100', 18)
+		const minBuyAmount = parseUnits('10', 18)
 		const txr = await instantOffer
 			.connect(creator)
 			.sell(cargoContract.address, rootId, totalSupply.div(100), minBuyAmount, price, erc20Mock.address)
@@ -55,7 +55,7 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 		offerId = getOfferSellID(txr)
 	})
 
-	const buyAmountDecimal = '100'
+	const buyAmountDecimal = '10'
 	const buyAmountUint = parseUnits(buyAmountDecimal, 18)
 
 	it('should have success status of buy tx', async () => {

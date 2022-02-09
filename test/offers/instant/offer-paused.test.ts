@@ -8,7 +8,6 @@ import contractNames from '../../../constants/contract.names'
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { getOfferSellID } from '../../helpers/getOfferId.helper'
 import { deployInstantOffer } from './fixtures/deployOffer.fixture'
-import { kyc } from '../../asset/cargo/fixtures/kyc.fixture'
 
 describe('[test/offers/instant/offer-paused.test] Instant offer: paused', () => {
 	let deployer: SignerWithAddress
@@ -52,7 +51,7 @@ describe('[test/offers/instant/offer-paused.test] Instant offer: paused', () => 
 		await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, true)
 		await cargoContract.connect(buyer).setApprovalForAll(instantOffer.address, true)
 
-		const minBuyAmount = parseUnits('100', decimals)
+		const minBuyAmount = parseUnits('10', decimals)
 		const txr = await instantOffer
 			.connect(creator)
 			.sell(cargoContract.address, rootId, totalSupply.div(100), minBuyAmount, price, erc20Mock.address)
@@ -90,15 +89,15 @@ describe('[test/offers/instant/offer-paused.test] Instant offer: paused', () => 
 			await erc20Mock.connect(buyer).mint(parseUnits('100000000', 18))
 		})
 		before('approve buyer buy', async () => {
-			const buyAmountDecimal = '100'
+			const buyAmountDecimal = '10'
 			const approveAmount = price.mul(buyAmountDecimal)
 			await erc20Mock.connect(buyer).approve(instantOffer.address, approveAmount)
 		})
 
 		it('allows buyer to buy asset', async () => {
 			const balanceBefore = await cargoContract.balanceOf(buyer.address, 0)
-			const decimalBuyAmount = '100'
-			await instantOffer.connect(buyer).buy(0, decimalBuyAmount)
+			const decimalBuyAmount = '10'
+			await instantOffer.connect(buyer).buy(offerId, decimalBuyAmount)
 			const balanceAfter = await cargoContract.balanceOf(buyer.address, 0)
 			const expected = parseUnits(decimalBuyAmount, decimals)
 			expect(expected).to.be.eq(balanceAfter.sub(balanceBefore))

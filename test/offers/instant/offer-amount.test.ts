@@ -65,12 +65,12 @@ describe('[test/offers/instant/offer-amount.test.ts] InstantOffer: min buy amoun
 	)
 
 	const buyAmount = parseUnits('35', 18) // 35 is offer.amount
-	it('should revert on buy amount less min', async () =>
+	it('should revert on buy amount exceed available amount', async () =>
 		await expect(instantOffer.connect(buyer).buy(offerId, buyAmount.mul(2))).to.be.revertedWith(
 			'Not enough asset balance on sale'
 		))
 
-	it('should revert on buy amount less min', async () =>
+	it('should revert on buy amount exceed available amount', async () =>
 		await expect(instantOffer.connect(buyer).buy(offerId, buyAmount.add(1))).to.be.revertedWith(
 			'Not enough asset balance on sale'
 		))

@@ -1,3 +1,4 @@
+
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { expect } from 'chai'
 import { BigNumber, BigNumberish } from 'ethers'
@@ -46,7 +47,7 @@ describe('[test/offers/instant/offer-amount.test.ts] InstantOffer: min buy amoun
 	const price = parseUnits('4250', 18)
 	const minBuyAmount = parseUnits('10', 18)
 	it('should create new offer', async () => {
-        	const amountToSell = totalSupply.div('100')
+		const amountToSell = totalSupply.div('100')
 
 		await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, true)
 		const txr = await instantOffer
@@ -64,7 +65,7 @@ describe('[test/offers/instant/offer-amount.test.ts] InstantOffer: min buy amoun
 		async () => await erc20Mock.connect(buyer).approve(instantOffer.address, minBuyAmount.mul(price))
 	)
 
-    const buyAmount = BigNumber.from('35') // 35 is offer.amount
+	const buyAmount = parseUnits('35', 18) // 35 is offer.amount
 	it('should revert on buy amount less min', async () =>
 		await expect(instantOffer.connect(buyer).buy(offerId, buyAmount.mul(2))).to.be.revertedWith(
 			'Not enough asset balance on sale'

@@ -64,7 +64,7 @@ describe('[test/offers/instant/min-buy-amount.test.ts] InstantOffer: min buy amo
 		async () => await erc20Mock.connect(buyer).approve(instantOffer.address, minBuyAmount.mul(price))
 	)
 
-	const buyAmount = BigNumber.from('10')
+	const buyAmount = parseUnits('10', 18)
 	it('should revert on buy amount less min', async () =>
 		await expect(instantOffer.connect(buyer).buy(offerId, buyAmount.div(2))).to.be.revertedWith(
 			'Can not buy less than min amount'

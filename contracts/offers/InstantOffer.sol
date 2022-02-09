@@ -98,13 +98,13 @@ contract InstantOffer {
         Offer memory offer = offers[sellID];
         CargoAsset asset = CargoAsset(offer.asset);
         uint256 decimals = asset.decimals();
-        uint256 uintAmount = amount * (10**decimals);
 
-        require(offer.amount >= uintAmount, 'Not enough asset balance on sale');
-        require(uintAmount >= offer.minAmount, 'Can not buy less than min amount');
+        require(offer.amount >= amount, 'Not enough asset balance on sale');
+        require(amount >= offer.minAmount, 'Can not buy less than min amount');
         address buyer = msg.sender;
         IERC20 money = IERC20(offer.money);
-        uint256 amountPrice = amount * offer.price;
+        uint256 decimalAmount = amount / (10**decimals);
+        uint256 amountPrice = decimalAmount * offer.price;
         require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
         address assetCreator = asset.creator();
         uint256 royalties = asset.royalties();
@@ -121,8 +121,8 @@ contract InstantOffer {
             money.transferFrom(buyer, offer.seller, totalPriceWithoutRoyaltiesAndFee);
         }
 
-        offer.amount = offer.amount - uintAmount;
-        asset.transferFrom(offer.seller, buyer, offer.assetID, uintAmount);
+        offer.amount = offer.amount - amount;
+        asset.transferFrom(offer.seller, buyer, offer.assetID, amount);
         emit Buy(buyer, sellID);
     }
 }

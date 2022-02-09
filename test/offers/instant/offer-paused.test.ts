@@ -96,11 +96,10 @@ describe('[test/offers/instant/offer-paused.test] Instant offer: paused', () => 
 
 		it('allows buyer to buy asset', async () => {
 			const balanceBefore = await cargoContract.balanceOf(buyer.address, 0)
-			const decimalBuyAmount = '10'
-			await instantOffer.connect(buyer).buy(offerId, decimalBuyAmount)
+			const buyAmount = parseUnits('10', 18)
+			await instantOffer.connect(buyer).buy(offerId, buyAmount)
 			const balanceAfter = await cargoContract.balanceOf(buyer.address, 0)
-			const expected = parseUnits(decimalBuyAmount, decimals)
-			expect(expected).to.be.eq(balanceAfter.sub(balanceBefore))
+			expect(buyAmount).to.be.eq(balanceAfter.sub(balanceBefore))
 		})
 
 		it('disallows resell from non-creator', async () => {

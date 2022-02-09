@@ -55,30 +55,28 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 		offerId = getOfferSellID(txr)
 	})
 
-	const buyAmountDecimal = '10'
-	const buyAmountUint = parseUnits(buyAmountDecimal, 18)
-
+	const buyAmount = parseUnits('10', 18)
 	it('should have success status of buy tx', async () => {
 		const balanceBefore = await cargoContract.balanceOf(creator.address, rootId)
-		const approveAmount = price.mul(buyAmountDecimal)
+		const approveAmount = price.mul(buyAmount)
 		await erc20Mock.connect(userA).mint(parseUnits('10000000', 18))
 		await erc20Mock.connect(userA).approve(instantOffer.address, approveAmount)
 		await kycContract.connect(deployer).setKycStatus(userA.address, true)
 
 		const txr = await instantOffer
 			.connect(userA)
-			.buy(offerId, buyAmountDecimal)
+			.buy(offerId, buyAmount)
 			.then(tx => tx.wait())
 
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		expect(
 			await cargoContract.balanceOf(creator.address, rootId),
 			'wrong balance of creator after success sell tx'
-		).to.be.eq(balanceBefore.sub(buyAmountUint))
+		).to.be.eq(balanceBefore.sub(buyAmount))
 
 		expect(
 			await cargoContract.balanceOf(userA.address, rootId),
 			'wrong balance of user A, after success buy tx'
-		).to.be.eq(buyAmountUint)
+		).to.be.eq(buyAmount)
 	})
 })

@@ -34,8 +34,11 @@ const devs = {
 	pylyp: {
 		seller: '0xBc62A9BbCd85E45B085601e589d267ef587b4De4',
 		buyer: '0x305934Fe9173D1251E3687ecEb6073420C96CBfE'
-	},
-	blake : {
+	}
+}
+
+const bizDevs = {
+	blake: {
 		seller: '0x1E7f48F1682a7bdC3B04a5379df4017ad563c710',
 		buyer: '0x04Ae5D507C004992b4b4c72aea5f09dEcB284C43'
 	},
@@ -56,8 +59,10 @@ const kycAddresses = [
 	devs.sasha.buyer,
 	devs.pylyp.seller,
 	devs.pylyp.buyer,
-	devs.blake.seller,
-	devs.blake.buyer
+	bizDevs.blake.seller,
+	bizDevs.blake.buyer,
+	bizDevs.gb.seller,
+	bizDevs.gb.buyer
 ]
 
 const factoryAddresses = [
@@ -66,7 +71,8 @@ const factoryAddresses = [
 	devs.stas.seller,
 	devs.sasha.seller,
 	devs.pylyp.seller,
-	devs.blake.seller
+	bizDevs.blake.seller,
+	bizDevs.gb.seller
 ]
 
 export default task(TASK.NAME, TASK.DESC)
@@ -79,31 +85,35 @@ export default task(TASK.NAME, TASK.DESC)
 		console.log('===========≠≠≠≠≠≠≠≠≠≠===========')
 		console.log(` 🙅‍♀️ adding to KYC list ${kycAddress} ...`)
 		for (const address of kycAddresses) {
-			console.log(`\t  setting KYC status for ${address}`)
-			const isKyc = await kycContract.getKycStatusInfo(address)
-			if (isKyc) {
-				console.log(`\t : ❎  already is on KYC list`)
-			} else {
-				await kycContract
-					.setKycStatus(address, true)
-					.then(tx => tx.wait())
-					.then(txr => console.log(`\t\t✅ tx.hash: ${txr.transactionHash}\n`))
+			if (address !== '') {
+				console.log(`\t  setting KYC status for ${address}`)
+				const isKyc = await kycContract.getKycStatusInfo(address)
+				if (isKyc) {
+					console.log(`\t : ❎  already is on KYC list`)
+				} else {
+					await kycContract
+						.setKycStatus(address, true)
+						.then(tx => tx.wait())
+						.then(txr => console.log(`\t\t✅ tx.hash: ${txr.transactionHash}\n`))
+				}
 			}
 		}
 
 		console.log('===========≠≠≠≠≠≠≠≠≠≠===========')
 		console.log(`👨‍🏭 setting ${factoryAddress} factory clients ...\n`)
 		for (const address of factoryAddresses) {
-			console.log(`\tadding ${address} as factory client`)
-			const role = await factoryContract.FACTORY_CLIENT()
-			const isClient = await factoryContract.hasRole(role, address)
-			if (isClient) {
-				console.log(`\t : ❎  already has factory client role`)
-			} else {
-				await factoryContract
-					.addClient(address)
-					.then(tx => tx.wait())
-					.then(txr => console.log(`\t\t✅ tx.hash: ${txr.transactionHash}\n`))
+			if (address !== '') {
+				console.log(`\tadding ${address} as factory client`)
+				const role = await factoryContract.FACTORY_CLIENT()
+				const isClient = await factoryContract.hasRole(role, address)
+				if (isClient) {
+					console.log(`\t : ❎  already has factory client role`)
+				} else {
+					await factoryContract
+						.addClient(address)
+						.then(tx => tx.wait())
+						.then(txr => console.log(`\t\t✅ tx.hash: ${txr.transactionHash}\n`))
+				}
 			}
 		}
 	})

@@ -34,6 +34,14 @@ const devs = {
 	pylyp: {
 		seller: '0xBc62A9BbCd85E45B085601e589d267ef587b4De4',
 		buyer: '0x305934Fe9173D1251E3687ecEb6073420C96CBfE'
+	},
+	blake : {
+		seller: '0x1E7f48F1682a7bdC3B04a5379df4017ad563c710',
+		buyer: '0x04Ae5D507C004992b4b4c72aea5f09dEcB284C43'
+	},
+	gb: {
+		seller: '',
+		buyer: '0x04Ae5D507C004992b4b4c72aea5f09dEcB284C43'
 	}
 }
 
@@ -47,7 +55,9 @@ const kycAddresses = [
 	devs.sasha.seller,
 	devs.sasha.buyer,
 	devs.pylyp.seller,
-	devs.pylyp.buyer
+	devs.pylyp.buyer,
+	devs.blake.seller,
+	devs.blake.buyer
 ]
 
 const factoryAddresses = [
@@ -55,7 +65,8 @@ const factoryAddresses = [
 	devs.alex.seller,
 	devs.stas.seller,
 	devs.sasha.seller,
-	devs.pylyp.seller
+	devs.pylyp.seller,
+	devs.blake.seller
 ]
 
 export default task(TASK.NAME, TASK.DESC)

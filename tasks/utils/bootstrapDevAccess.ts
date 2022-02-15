@@ -37,6 +37,13 @@ const devs = {
 	}
 }
 
+const testers = {
+	oleg: {
+		seller: '0x61Ef32e333C1aaa648371462Fe81f9710Ae86E0a',
+		buyer: '0xD7FfDb4ed0ab71fbAc17a3d8b92aA0B251787dF4'
+	}
+}
+
 const bizDevs = {
 	blake: {
 		seller: '0x1E7f48F1682a7bdC3B04a5379df4017ad563c710',
@@ -59,6 +66,8 @@ const kycAddresses = [
 	devs.sasha.buyer,
 	devs.pylyp.seller,
 	devs.pylyp.buyer,
+	testers.oleg.buyer,
+	testers.oleg.seller,
 	bizDevs.blake.seller,
 	bizDevs.blake.buyer,
 	bizDevs.gb.seller,
@@ -71,6 +80,7 @@ const factoryAddresses = [
 	devs.stas.seller,
 	devs.sasha.seller,
 	devs.pylyp.seller,
+	testers.oleg.seller,
 	bizDevs.blake.seller,
 	bizDevs.gb.seller
 ]

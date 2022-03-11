@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: private
 pragma solidity ^0.8.9;
 
-import '@openzeppelin/contracts/utils/Context.sol';
-
 import '../interfaces/Parentable.sol';
 
-abstract contract ParentableCargo is Parentable, Context {
+abstract contract ParentableCargo is Parentable {
     mapping(uint256 => uint256) internal _parents;
     mapping(uint256 => string) internal _names;
 

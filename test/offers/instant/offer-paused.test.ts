@@ -3,7 +3,7 @@ import { ethers, waffle } from 'hardhat'
 import { BigNumber, BigNumberish } from 'ethers'
 import { expect } from 'chai'
 import { parseUnits } from '@ethersproject/units'
-import { CargoAsset, InstantOffer, KycRegister, ERC20Mock } from '../../../typechain'
+import { InstantOffer, KycRegister, ERC20Mock, PayloadAsset } from '../../../typechain'
 import contractNames from '../../../constants/contract.names'
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { getOfferSellID } from '../../helpers/getOfferId.helper'
@@ -13,7 +13,7 @@ describe('[test/offers/instant/offer-paused.test] Instant offer: paused', () => 
 	let deployer: SignerWithAddress
 	let creator: SignerWithAddress
 	let instantOffer: InstantOffer
-	let cargoContract: CargoAsset
+	let payloadAsset: PayloadAsset
 	let kycContract: KycRegister
 	let totalSupply: BigNumber
 
@@ -26,12 +26,12 @@ describe('[test/offers/instant/offer-paused.test] Instant offer: paused', () => 
 	before(
 		'load `fixtures/deployInstantOffer`',
 		async () =>
-			({ deployer, creator, instantOffer, cargoContract, kycContract, totalSupply } = await loadFixture(
+			({ deployer, creator, instantOffer, payloadAsset, kycContract, totalSupply } = await loadFixture(
 				deployInstantOffer
 			))
 	)
 	let decimals: BigNumber
-	before('get decimals', async () => (decimals = await cargoContract.decimals()))
+	before('get decimals', async () => (decimals = await payloadAsset.decimals()))
 
 	let erc20Mock: ERC20Mock
 	before('deploy ERC20 Mock', async () => {
@@ -48,13 +48,13 @@ describe('[test/offers/instant/offer-paused.test] Instant offer: paused', () => 
 	let offerId: BigNumberish
 
 	before('create a new offer', async () => {
-		await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, true)
-		await cargoContract.connect(buyer).setApprovalForAll(instantOffer.address, true)
+		await payloadAsset.connect(creator).setApprovalForAll(instantOffer.address, true)
+		await payloadAsset.connect(buyer).setApprovalForAll(instantOffer.address, true)
 
 		const minBuyAmount = parseUnits('10', decimals)
 		const txr = await instantOffer
 			.connect(creator)
-			.sell(cargoContract.address, rootId, totalSupply.div(100), minBuyAmount, price, erc20Mock.address)
+			.sell(payloadAsset.address, rootId, totalSupply.div(100), minBuyAmount, price, erc20Mock.address)
 			.then(tx => tx.wait())
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		offerId = getOfferSellID(txr)
@@ -62,22 +62,24 @@ describe('[test/offers/instant/offer-paused.test] Instant offer: paused', () => 
 
 	describe('offer creation when asset paused', async () => {
 		before('transfer funds to buyer', async () => {
-			await cargoContract.connect(creator).transfer(buyer.address, 0, parseUnits('100', decimals))
+			await payloadAsset
+				.connect(creator)
+				.safeTransferFrom(creator.address, buyer.address, 0, parseUnits('100', decimals), '0x')
 		})
 		before('pause asset', async () => {
-			await cargoContract.connect(creator).pause()
+			await payloadAsset.connect(creator).pause()
 		})
 
 		it('reverts create offer from non-creator', async () => {
 			await expect(
-				instantOffer.connect(buyer).sell(cargoContract.address, 0, '100', '100', price, erc20Mock.address)
-			).to.be.revertedWith('PausableCargo: asset is locked')
+				instantOffer.connect(buyer).sell(payloadAsset.address, 0, '100', '100', price, erc20Mock.address)
+			).to.be.revertedWith('Pausable: asset is locked')
 		})
 
 		it('successfully creates offer if `msg.sender == creator`', async () => {
 			const createOfferTx = await instantOffer
 				.connect(creator)
-				.sell(cargoContract.address, 0, '100', '10', price, erc20Mock.address)
+				.sell(payloadAsset.address, 0, '100', '10', price, erc20Mock.address)
 				.then(tx => tx.wait())
 
 			expect(await createOfferTx.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
@@ -95,30 +97,30 @@ describe('[test/offers/instant/offer-paused.test] Instant offer: paused', () => 
 		})
 
 		it('allows buyer to buy asset', async () => {
-			const balanceBefore = await cargoContract.balanceOf(buyer.address, 0)
+			const balanceBefore = await payloadAsset.balanceOf(buyer.address, 0)
 			const buyAmount = parseUnits('10', 18)
 			await instantOffer.connect(buyer).buy(offerId, buyAmount)
-			const balanceAfter = await cargoContract.balanceOf(buyer.address, 0)
+			const balanceAfter = await payloadAsset.balanceOf(buyer.address, 0)
 			expect(buyAmount).to.be.eq(balanceAfter.sub(balanceBefore))
 		})
 
 		it('disallows resell from non-creator', async () => {
-			await cargoContract.connect(creator).transfer(buyer.address, 0, '100')
+			await payloadAsset.connect(creator).safeTransferFrom(creator.address ,buyer.address, 0, '100', '0x')
 			await expect(
-				instantOffer.connect(buyer).sell(cargoContract.address, 0, '100', '100', '5000', erc20Mock.address)
-			).to.be.revertedWith('PausableCargo: asset is locked')
+				instantOffer.connect(buyer).sell(payloadAsset.address, 0, '100', '100', '5000', erc20Mock.address)
+			).to.be.revertedWith('Pausable: asset is locked')
 		})
 	})
 
 	describe('offer creation when asset NOT paused', async () => {
 		before('unpause asset', async () => {
-			await cargoContract.connect(creator).unpause()
+			await payloadAsset.connect(creator).unpause()
 		})
 
 		it('successfully creates offer from any user', async () => {
 			const createOfferTx = await instantOffer
 				.connect(buyer)
-				.sell(cargoContract.address, 0, '100', '100', price, erc20Mock.address)
+				.sell(payloadAsset.address, 0, '100', '100', price, erc20Mock.address)
 				.then(tx => tx.wait())
 
 			expect(await createOfferTx.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)

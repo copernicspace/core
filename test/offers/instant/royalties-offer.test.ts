@@ -3,7 +3,7 @@ import { ethers, waffle } from 'hardhat'
 import { BigNumber, BigNumberish } from 'ethers'
 import { expect } from 'chai'
 import { parseUnits } from '@ethersproject/units'
-import { CargoAsset, InstantOffer, KycRegister, ERC20Mock } from '../../../typechain'
+import { PayloadAsset, InstantOffer, KycRegister, ERC20Mock } from '../../../typechain'
 import contractNames from '../../../constants/contract.names'
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { getOfferSellID } from '../../helpers/getOfferId.helper'
@@ -14,7 +14,7 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 	let deployer: SignerWithAddress
 	let creator: SignerWithAddress
 	let instantOffer: InstantOffer
-	let cargoContract: CargoAsset
+	let payloadAsset: PayloadAsset
 	let kycContract: KycRegister
 	let totalSupply: BigNumber
 
@@ -29,7 +29,7 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 	before(
 		'load `fixtures/deployInstantOfferWithRoyalties`',
 		async () =>
-			({ deployer, creator, instantOffer, cargoContract, kycContract, totalSupply } = await loadFixture(
+			({ deployer, creator, instantOffer, payloadAsset, kycContract, totalSupply } = await loadFixture(
 				deployInstantOfferWithRoyalties
 			))
 	)
@@ -48,11 +48,11 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 	const minBuyAmountUint = parseUnits('10', 18)
 	it('should create new offer', async () => {
 		// approve offer contract before create sell offer
-		await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, true)
+		await payloadAsset.connect(creator).setApprovalForAll(instantOffer.address, true)
 
 		const txr = await instantOffer
 			.connect(creator)
-			.sell(cargoContract.address, rootId, totalSupply.div(100), minBuyAmountUint, price, erc20Mock.address)
+			.sell(payloadAsset.address, rootId, totalSupply.div(100), minBuyAmountUint, price, erc20Mock.address)
 			.then(tx => tx.wait())
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		offerId = getOfferSellID(txr)
@@ -61,7 +61,7 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 	const buyAmount = parseUnits('10', 18)
 	const erc20MintAmountForBuyers = parseUnits('10000000', 18)
 	it('should have success status of buy tx', async () => {
-		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply)
+		expect(await payloadAsset.balanceOf(creator.address, rootId)).to.be.eq(totalSupply)
 		const approveAmount = formatUnits(price.mul(buyAmount)).replace('.0', '')
 		await erc20Mock.connect(userA).mint(erc20MintAmountForBuyers)
 		await erc20Mock.connect(userA).approve(instantOffer.address, approveAmount)
@@ -73,8 +73,8 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 			.then(tx => tx.wait())
 
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
-		expect(await cargoContract.balanceOf(creator.address, rootId)).to.be.eq(totalSupply.sub(buyAmount))
-		expect(await cargoContract.balanceOf(userA.address, rootId)).to.be.eq(buyAmount)
+		expect(await payloadAsset.balanceOf(creator.address, rootId)).to.be.eq(totalSupply.sub(buyAmount))
+		expect(await payloadAsset.balanceOf(userA.address, rootId)).to.be.eq(buyAmount)
 		expect(await erc20Mock.balanceOf(creator.address)).to.be.eq(approveAmount)
 	})
 
@@ -82,11 +82,11 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 	const resellPrice = parseUnits('5000', 18)
 	it('userA should be able to create resell offer with royalties included', async () => {
 		// approve offer contract before create sell offer
-		await cargoContract.connect(userA).setApprovalForAll(instantOffer.address, true)
+		await payloadAsset.connect(userA).setApprovalForAll(instantOffer.address, true)
 
 		const txr = await instantOffer
 			.connect(userA)
-			.sell(cargoContract.address, rootId, buyAmount, minBuyAmountUint, resellPrice, erc20Mock.address)
+			.sell(payloadAsset.address, rootId, buyAmount, minBuyAmountUint, resellPrice, erc20Mock.address)
 			.then(tx => tx.wait())
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		resellOfferId = getOfferSellID(txr)
@@ -95,7 +95,7 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 	it('userB should be able to buy resell offer with royalties', async () => {
 		const balanceCreatorBefore = await erc20Mock.balanceOf(creator.address)
 		const balanceUserABefore = await erc20Mock.balanceOf(userA.address)
-		expect(await cargoContract.balanceOf(userA.address, rootId)).to.be.eq(buyAmount)
+		expect(await payloadAsset.balanceOf(userA.address, rootId)).to.be.eq(buyAmount)
 
 		const secondDealTotalPrice = BigNumber.from(formatUnits(resellPrice.mul(buyAmount), 18).replace('.0', ''))
 		await erc20Mock.connect(userB).mint(erc20MintAmountForBuyers)
@@ -109,8 +109,8 @@ describe('[test/offers/instant/royalties-offer.test] Instant offer with royaltie
 
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		// check the balance of transfered asset tokens
-		expect(await cargoContract.balanceOf(userA.address, rootId)).to.be.eq(0)
-		expect(await cargoContract.balanceOf(userB.address, rootId)).to.be.eq(buyAmount)
+		expect(await payloadAsset.balanceOf(userA.address, rootId)).to.be.eq(0)
+		expect(await payloadAsset.balanceOf(userB.address, rootId)).to.be.eq(buyAmount)
 
 		// check royalties balances of platformOperator and assetCreator (should include firstDeal profit + royalties)
 		const platformFee = secondDealTotalPrice.mul(3).div(100)

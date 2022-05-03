@@ -1,25 +1,27 @@
-import { waffle } from 'hardhat'
-import { expect } from 'chai'
-import { CargoAsset, CargoFactory, KycRegister } from '../../typechain'
-import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { parseUnits } from '@ethersproject/units'
+import { ethers, waffle } from 'hardhat'
+import { expect } from 'chai'
+
+import { KycRegister, PayloadAsset, PayloadFactory } from '../../typechain'
 import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
 import contract_names from '../../constants/contract.names'
-import { getCargoAddress } from '../helpers/cargoAddress'
+import { getPayloadAddress } from '../helpers/cargoAddress'
 import contractNames from '../../constants/contract.names'
 
 describe('[test/kyc/kyc-root-creation.test] Root creation & integration with KYC', () => {
-	let userA, creator: SignerWithAddress
+	let userA: SignerWithAddress
 	before('load userA as signerWithAddress', async () => ([, , , userA] = await ethers.getSigners()))
 
-	let cargoFactory: CargoFactory
+	let payloadFactory: PayloadFactory
+	let creator: SignerWithAddress
 	let kycContract: KycRegister
 	let deployer: SignerWithAddress
 	let decimals: number
 	before(
 		'load fixtures/parentable',
-		async () => ({ cargoFactory, creator, kycContract, deployer, decimals } = await waffle.loadFixture(parentable))
+		async () =>
+			({ payloadFactory, creator, kycContract, deployer, decimals } = await waffle.loadFixture(parentable))
 	)
 
 	/**
@@ -28,12 +30,12 @@ describe('[test/kyc/kyc-root-creation.test] Root creation & integration with KYC
 	 *      as the cargo created in fixtures
 	 */
 
-	let cargoContractA: CargoAsset
+	let cargoContractA: PayloadAsset
 	let cargoContractAaddress: string
 	before('create root cargo contract [with starting KYC]', async () => {
-		cargoContractAaddress = await cargoFactory
+		cargoContractAaddress = await payloadFactory
 			.connect(creator)
-			.createCargo(
+			.create(
 				'first.test.uri.com',
 				'First rootSpaceCargo',
 				decimals,
@@ -43,11 +45,11 @@ describe('[test/kyc/kyc-root-creation.test] Root creation & integration with KYC
 				false
 			)
 			.then(tx => tx.wait())
-			.then(txr => getCargoAddress(txr))
+			.then(txr => getPayloadAddress(txr))
 
 		cargoContractA = await ethers
-			.getContractAt(contractNames.CARGO_ASSET, cargoContractAaddress)
-			.then(contract => contract as CargoAsset)
+			.getContractAt(contractNames.PAYLOAD_ASSET, cargoContractAaddress)
+			.then(contract => contract as PayloadAsset)
 	})
 
 	it('connected correct [first] KYC Register', async () => {
@@ -63,7 +65,7 @@ describe('[test/kyc/kyc-root-creation.test] Root creation & integration with KYC
 
 	let secondKYC: KycRegister
 	let cargoContractBaddress
-	let cargoContractB: CargoAsset
+	let cargoContractB: PayloadAsset
 	before('create root cargo contract [with new KYC]', async () => {
 		// create a new instance of KYC contact
 		secondKYC = await ethers
@@ -73,15 +75,15 @@ describe('[test/kyc/kyc-root-creation.test] Root creation & integration with KYC
 			.then(deployedContract => deployedContract as KycRegister)
 
 		// give factory permissions
-		await cargoFactory.connect(deployer).addClient(userA.address)
+		await payloadFactory.connect(deployer).addClient(userA.address)
 
 		// add userA to secondKYC permissions
 		await secondKYC.connect(deployer).setKycStatus(userA.address, true)
 
 		// when creating a new contract, specify override KYC
-		cargoContractBaddress = await cargoFactory
+		cargoContractBaddress = await payloadFactory
 			.connect(userA)
-			.createCargo(
+			.create(
 				'second.test.uri.com',
 				'Second rootSpaceCargo',
 				decimals,
@@ -91,11 +93,11 @@ describe('[test/kyc/kyc-root-creation.test] Root creation & integration with KYC
 				false
 			)
 			.then(tx => tx.wait())
-			.then(txr => getCargoAddress(txr))
+			.then(txr => getPayloadAddress(txr))
 
 		cargoContractB = await ethers
-			.getContractAt(contractNames.CARGO_ASSET, cargoContractBaddress)
-			.then(contract => contract as CargoAsset)
+			.getContractAt(contractNames.PAYLOAD_ASSET, cargoContractBaddress)
+			.then(contract => contract as PayloadAsset)
 	})
 
 	it('connected correct [second] KYC Register', async () => {
@@ -113,9 +115,9 @@ describe('[test/kyc/kyc-root-creation.test] Root creation & integration with KYC
 	it('disallows creating root cargo if not KYC permitted', async () => {
 		// userA does not have KYC permissions on starting KYC
 		await expect(
-			cargoFactory
+			payloadFactory
 				.connect(userA)
-				.createCargo(
+				.create(
 					'revert.test.uri.com',
 					'Revert rootSpaceCargo',
 					decimals,
@@ -128,9 +130,9 @@ describe('[test/kyc/kyc-root-creation.test] Root creation & integration with KYC
 
 		// creator does not have KYC permissions on secondKYC
 		await expect(
-			cargoFactory
+			payloadFactory
 				.connect(creator)
-				.createCargo(
+				.create(
 					'revert.test.uri.com',
 					'Revert rootSpaceCargo',
 					decimals,

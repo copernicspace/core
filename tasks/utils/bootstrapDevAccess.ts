@@ -90,7 +90,7 @@ export default task(TASK.NAME, TASK.DESC)
 	.addParam(TASK.PARAMS.KYC_ADDRESS, TASK.PARAMS.KYC_ADDRESS_DESC)
 	.setAction(async ({ kycAddress, factoryAddress }, hre) => {
 		const kycContract = await hre.ethers.getContractAt(contractNames.KYC_REGISTER, kycAddress)
-		const factoryContract = await hre.ethers.getContractAt(contractNames.CARGO_FACTORY, factoryAddress)
+		const factoryContract = await hre.ethers.getContractAt(contractNames.PAYLOAD_FACTORY, factoryAddress)
 
 		console.log('===========≠≠≠≠≠≠≠≠≠≠===========')
 		console.log(` 🙅‍♀️ adding to KYC list ${kycAddress} ...`)

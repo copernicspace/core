@@ -2,7 +2,6 @@
 pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/utils/Context.sol';
-import 'hardhat/console.sol';
 
 contract KycRegister is Context {
     mapping(address => bool) public kycStatus;

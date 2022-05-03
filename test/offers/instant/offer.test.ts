@@ -3,7 +3,7 @@ import { ethers, waffle } from 'hardhat'
 import { BigNumber, BigNumberish } from 'ethers'
 import { expect } from 'chai'
 import { parseUnits } from '@ethersproject/units'
-import { CargoAsset, InstantOffer, KycRegister, ERC20Mock } from '../../../typechain'
+import { PayloadAsset, InstantOffer, KycRegister, ERC20Mock } from '../../../typechain'
 import contractNames from '../../../constants/contract.names'
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { getOfferSellID } from '../../helpers/getOfferId.helper'
@@ -13,7 +13,7 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 	let deployer: SignerWithAddress
 	let creator: SignerWithAddress
 	let instantOffer: InstantOffer
-	let cargoContract: CargoAsset
+	let payloadAsset: PayloadAsset
 	let kycContract: KycRegister
 	let totalSupply: BigNumber
 
@@ -27,7 +27,7 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 	before(
 		'load `fixtures/deployInstantOffer`',
 		async () =>
-			({ deployer, creator, instantOffer, cargoContract, kycContract, totalSupply } = await loadFixture(
+			({ deployer, creator, instantOffer, payloadAsset, kycContract, totalSupply } = await loadFixture(
 				deployInstantOffer
 			))
 	)
@@ -45,11 +45,11 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 	const price = parseUnits('4250', 18)
 	it('should create new offer', async () => {
 		// approve offer contract before create sell offer
-		await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, true)
+		await payloadAsset.connect(creator).setApprovalForAll(instantOffer.address, true)
 		const minBuyAmount = parseUnits('10', 18)
 		const txr = await instantOffer
 			.connect(creator)
-			.sell(cargoContract.address, rootId, totalSupply.div(100), minBuyAmount, price, erc20Mock.address)
+			.sell(payloadAsset.address, rootId, totalSupply.div(100), minBuyAmount, price, erc20Mock.address)
 			.then(tx => tx.wait())
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		offerId = getOfferSellID(txr)
@@ -57,7 +57,7 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 
 	const buyAmount = parseUnits('10', 18)
 	it('should have success status of buy tx', async () => {
-		const balanceBefore = await cargoContract.balanceOf(creator.address, rootId)
+		const balanceBefore = await payloadAsset.balanceOf(creator.address, rootId)
 		const approveAmount = price.mul(buyAmount)
 		await erc20Mock.connect(userA).mint(parseUnits('10000000', 18))
 		await erc20Mock.connect(userA).approve(instantOffer.address, approveAmount)
@@ -70,12 +70,12 @@ describe('[test/offers/instant/offer.test] Instant offer: deployOffer fixture te
 
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		expect(
-			await cargoContract.balanceOf(creator.address, rootId),
+			await payloadAsset.balanceOf(creator.address, rootId),
 			'wrong balance of creator after success sell tx'
 		).to.be.eq(balanceBefore.sub(buyAmount))
 
 		expect(
-			await cargoContract.balanceOf(userA.address, rootId),
+			await payloadAsset.balanceOf(userA.address, rootId),
 			'wrong balance of user A, after success buy tx'
 		).to.be.eq(buyAmount)
 	})

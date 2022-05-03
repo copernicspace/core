@@ -5,46 +5,54 @@ import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 
-import './PausableCargo.sol';
-import './ParentableCargo.sol';
-import '../../utils/GeneratorID.sol';
-import '../../kyc/KycRegister.sol';
+import '../../abstract/ParentableWithName.sol';
+import '../../abstract/PausableAsset.sol';
+import '../../abstract/Royalties.sol';
+import '../../abstract/Decimals.sol';
+import '../../abstract/KYC.sol';
 
-contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, GeneratorID, AccessControl {
-    uint256 public royalties;
+import '../../../utils/GeneratorID.sol';
 
+contract PayloadAsset is
+    ERC1155,
+    Initializable,
+    AccessControl,
+    PausableAsset,
+    ParentableWithName,
+    GeneratorID,
+    Royalties,
+    // Creator, is inherited via linerization from `PausableAsset`
+    Decimals,
+    KYC
+{
     constructor(string memory uri) ERC1155(uri) {}
 
-    KycRegister public kycRegister;
-    bool private kycExist = false;
-
-    /**
-     * instead off constructor for CloneFactory
-     */
     function initialize(
         string memory _uri,
         string memory _name,
         uint256 _decimals,
         uint256 _totalSupply,
-        address _owner,
+        address _creator,
         address _factoryOwner,
         uint256 _royalties,
         bool _locked
     ) external initializer {
         _setURI(_uri);
-        decimals = _decimals;
+
+        setDecimals(_decimals);
+
         totalSupply = _totalSupply;
         uint256 rootID = 0;
-        _names[rootID] = _name;
-        _parents[rootID] = rootID;
-        creator = _owner;
+        setName(rootID, _name);
+        // set parent id to itself, because it is root asset
+        setParent(rootID, rootID);
+        setCreator(_creator);
+
         if (_royalties > 0) {
-            royalties = _royalties;
+            _setRoyalties(_royalties);
         }
-        _mint(_owner, rootID, totalSupply, '');
-        if (_locked) {
-            paused = true;
-        }
+        _mint(_creator, rootID, totalSupply, '');
+        _setPause(_locked);
         _setupRole(DEFAULT_ADMIN_ROLE, _factoryOwner);
     }
 
@@ -52,18 +60,6 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         return super.supportsInterface(interfaceId);
     }
 
-    function setupKyc(address kycRegisterAddress) external {
-        require(!kycExist, 'can not change KYC register contract');
-        kycRegister = KycRegister(kycRegisterAddress);
-        kycExist = true;
-    }
-
-    function changeKycRegister(address kycRegisterAddress) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), 'You are not allowed to change KYC register');
-        kycRegister = KycRegister(kycRegisterAddress);
-    }
-
-    uint256 public decimals;
     uint256 public totalSupply;
 
     function _beforeTokenTransfer(
@@ -73,7 +69,7 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) internal virtual override(ERC1155, PausableCargo) {
+    ) internal virtual override(ERC1155, PausableAsset) {
         if (from != address(0)) {
             require(kycRegister.getKycStatusInfo(from), 'sender/seller is not on KYC list');
         }
@@ -88,32 +84,15 @@ contract CargoAsset is ERC1155, PausableCargo, ParentableCargo, Initializable, G
         uint256 pid,
         string memory name,
         address to
-    ) external override(Parentable) onlyCreator {
+    ) external onlyCreator {
         uint256 id = generateId();
-        _names[id] = name;
+        setName(id, name);
         _burn(_msgSender(), pid, amount);
         _mint(to, id, amount, '');
         emit NewParent(id, pid, amount);
     }
 
-    function burn(uint256 amount) external onlyCreator {
+    function burn(uint256 amount) external {
         _burn(_msgSender(), 0, amount);
-    }
-
-    function transfer(
-        address to,
-        uint256 id,
-        uint256 amount
-    ) public {
-        safeTransferFrom(_msgSender(), to, id, amount, '');
-    }
-
-    function transferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 amount
-    ) public {
-        safeTransferFrom(from, to, id, amount, '');
     }
 }

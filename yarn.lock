@@ -591,10 +591,10 @@
     "@types/sinon-chai" "^3.2.3"
     "@types/web3" "1.0.19"
 
-"@openzeppelin/contracts@^4.3.2":
-  version "4.4.2"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.4.2.tgz#4e889c9c66e736f7de189a53f8ba5b8d789425c2"
-  integrity sha512-NyJV7sJgoGYqbtNUWgzzOGW4T6rR19FmX1IJgXGdapGPWsuMelGJn9h03nos0iqfforCbCB0iYIR0MtIuIFLLw==
+"@openzeppelin/contracts@^4.6.0":
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.6.0.tgz#c91cf64bc27f573836dba4122758b4743418c1b3"
+  integrity sha512-8vi4d50NNya/bQqCmaVzvHNmwHvS0OBKb7HNtuNwEE3scXWrP31fKQoGxNMT+KbzmrNZzatE3QK5p2gFONI/hg==
 
 "@optionality.io/clone-factory@^0.2.1":
   version "0.2.1"
@@ -4704,6 +4704,11 @@ hardhat-gas-reporter@^1.0.4:
     array-uniq "1.0.3"
     eth-gas-reporter "^0.2.24"
     sha1 "^1.1.1"
+
+hardhat-log-remover@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/hardhat-log-remover/-/hardhat-log-remover-2.0.2.tgz#6014fe2c515ced1e0eaa7a4d854e37695aaac61a"
+  integrity sha512-TvEWOisQmZUZ7Mlb7s4XYS/MxgZzjFJSjDI8v3uTcrD6aaXy1QtomW6D6WNsISEWtwwRlSntOGpHQwFjrz2MCw==
 
 hardhat-tracer@^1.0.0-alpha.6:
   version "1.0.0-alpha.6"

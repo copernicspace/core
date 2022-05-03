@@ -6,17 +6,17 @@
  * used for better visibility & shortening of CPR tests
  */
 
-import { CargoAsset, CargoFactory, KycRegister } from '../../typechain'
+import { PayloadAsset, PayloadFactory, KycRegister } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { getAssetID } from './getAssetId.helper'
 import contractNames from '../../constants/contract.names'
-import { getCargoAddress } from './cargoAddress'
+import { getPayloadAddress } from './cargoAddress'
 import contract_names from '../../constants/contract.names'
 
-let factoryContract: CargoFactory
-let cargoContract: CargoAsset
+let payloadFactory: PayloadFactory
+let payloadAsset: PayloadAsset
 let contractDecimals: BigNumber
 let kycRegisterContract: KycRegister
 let signer: SignerWithAddress
@@ -29,11 +29,11 @@ export const global = {
 	 */
 
 	set: {
-		factoryContract(factory: CargoFactory) {
-			factoryContract = factory
+		payloadFactory(factory: PayloadFactory) {
+			payloadFactory = factory
 		},
-		cargoAsset(asset: CargoAsset) {
-			cargoContract = asset
+		cargoAsset(asset: PayloadAsset) {
+			payloadAsset = asset
 		},
 		kycContract(kycRegister: KycRegister) {
 			kycRegisterContract = kycRegister
@@ -47,11 +47,11 @@ export const global = {
 	},
 
 	get: {
-		factoryContract() {
-			return factoryContract
+		payloadFactory() {
+			return payloadFactory
 		},
 		cargoAsset() {
-			return cargoContract
+			return payloadAsset
 		},
 		kycContract() {
 			return kycRegisterContract
@@ -97,8 +97,8 @@ export const create = {
 		this.localKyc = kycContract
 		return this
 	},
-	onContract(_cargoContract: CargoAsset) {
-		this.localAsset = _cargoContract
+	onContract(_payloadAsset: PayloadAsset) {
+		this.localAsset = _payloadAsset
 		return this
 	},
 
@@ -118,15 +118,15 @@ export const create = {
 			this.localKyc = kycRegisterContract
 		}
 		// execute:
-		const cargoAddress = await factoryContract
+		const cargoAddress = await payloadFactory
 			.connect(this.localSigner)
-			.createCargo(uri, name, this.localDecimals, totalSupply, this.localKyc.address, 0, false)
+			.create(uri, name, this.localDecimals, totalSupply, this.localKyc.address, 0, false)
 			.then(tx => tx.wait())
-			.then(txr => getCargoAddress(txr))
+			.then(txr => getPayloadAddress(txr))
 
 		const cargoAsset = ethers
-			.getContractAt(contractNames.CARGO_ASSET, cargoAddress)
-			.then(contract => contract as CargoAsset)
+			.getContractAt(contractNames.PAYLOAD_ASSET, cargoAddress)
+			.then(contract => contract as PayloadAsset)
 
 		// clear local parameters
 		this.localSigner = null
@@ -148,7 +148,7 @@ export const create = {
 		}
 		if (this.localAsset == null) {
 			// use global state
-			this.localAsset = cargoContract
+			this.localAsset = payloadAsset
 		}
 		// execute:
 		const childAsset = await this.localAsset

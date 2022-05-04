@@ -4,11 +4,12 @@ pragma solidity ^0.8.9;
 import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import '@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol';
+import '@openzeppelin/contracts/proxy/Clones.sol';
 
-import './CargoAsset.sol';
-import '../../utils/CloneFactory.sol';
+import './PayloadAsset.sol';
+import '../../abstract/KYC.sol';
 
-contract CargoFactory is CloneFactory, AccessControl {
+contract PayloadFactory is AccessControl {
     address public logicAddress;
     address public platformOperator;
 
@@ -37,7 +38,7 @@ contract CargoFactory is CloneFactory, AccessControl {
         logicAddress = _logicAddress;
     }
 
-    function createCargo(
+    function create(
         string memory uri,
         string memory name,
         uint256 decimals,
@@ -48,33 +49,43 @@ contract CargoFactory is CloneFactory, AccessControl {
     ) public {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(FACTORY_CLIENT, _msgSender()),
-            'You are not allowed to create new SpaceCargo'
+            'You are not allowed to create new SpaceAsset:Payload'
         );
-        address clone = createClone(logicAddress);
-        CargoAsset(clone).setupKyc(kycRegisterAddress);
-        CargoAsset(clone).initialize(uri, name, decimals, totalSupply, _msgSender(), factoryOwner, royalties, locked);
+        address clone = Clones.clone(logicAddress);
+
+        KYC(clone).setupKyc(kycRegisterAddress);
+
+        PayloadAsset(clone).initialize(uri, name, decimals, totalSupply, _msgSender(), factoryOwner, royalties, locked);
+
         deployed.push(clone);
+
         emit CargoCreated(clone, _msgSender());
     }
 
-    function addManager(address manager) external {
+    function addManager(address target) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), 'Only factory owner can add managers');
-        grantRole(FACTORY_MANAGER, manager);
+        grantRole(FACTORY_MANAGER, target);
     }
 
-    function addClient(address client) external {
+    function revokeManage(address target) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), 'Only factory owner can add managers');
+        revokeRole(FACTORY_MANAGER, target);
+        (FACTORY_MANAGER, target);
+    }
+
+    function addClient(address target) external {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(FACTORY_MANAGER, _msgSender()),
             'Only factory owner & managers can add clients'
         );
-        grantRole(FACTORY_CLIENT, client);
+        grantRole(FACTORY_CLIENT, target);
     }
 
-    function revokeClient(address client) external {
+    function revokeClient(address target) external {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(FACTORY_MANAGER, _msgSender()),
             'Only factory owner & managers can add clients'
         );
-        revokeRole(FACTORY_CLIENT, client);
+        revokeRole(FACTORY_CLIENT, target);
     }
 }

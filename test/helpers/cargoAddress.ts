@@ -7,7 +7,7 @@ import { ContractReceipt } from 'ethers'
  * @param txr transaction receipt
  * @returns address of new cargo contract created via factory
  */
-export const getCargoAddress = (txr: ContractReceipt): string =>
+export const getPayloadAddress = (txr: ContractReceipt): string =>
 	txr.events
 		.filter(e => e.event === 'CargoCreated')
 		.map(e => e.args.newCargoAddress as string)

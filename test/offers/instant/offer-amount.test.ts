@@ -5,7 +5,7 @@ import { parseUnits } from 'ethers/lib/utils'
 import { ethers, waffle } from 'hardhat'
 import contractNames from '../../../constants/contract.names'
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
-import { InstantOffer, CargoAsset, KycRegister, ERC20Mock } from '../../../typechain'
+import { InstantOffer, KycRegister, ERC20Mock, PayloadAsset } from '../../../typechain'
 import { getOfferSellID } from '../../helpers/getOfferId.helper'
 import { deployInstantOffer } from './fixtures/deployOffer.fixture'
 
@@ -13,7 +13,7 @@ describe('[test/offers/instant/offer-amount.test.ts] InstantOffer: min buy amoun
 	let deployer: SignerWithAddress
 	let creator: SignerWithAddress
 	let instantOffer: InstantOffer
-	let cargoContract: CargoAsset
+	let payloadAsset: PayloadAsset
 	let kycContract: KycRegister
 	let totalSupply: BigNumber
 
@@ -27,7 +27,7 @@ describe('[test/offers/instant/offer-amount.test.ts] InstantOffer: min buy amoun
 	before(
 		'load `fixtures/deployInstantOffer`',
 		async () =>
-			({ deployer, creator, instantOffer, cargoContract, kycContract, totalSupply } = await loadFixture(
+			({ deployer, creator, instantOffer, payloadAsset, kycContract, totalSupply } = await loadFixture(
 				deployInstantOffer
 			))
 	)
@@ -48,10 +48,10 @@ describe('[test/offers/instant/offer-amount.test.ts] InstantOffer: min buy amoun
 	it('should create new offer', async () => {
 		const amountToSell = totalSupply.div('100')
 
-		await cargoContract.connect(creator).setApprovalForAll(instantOffer.address, true)
+		await payloadAsset.connect(creator).setApprovalForAll(instantOffer.address, true)
 		const txr = await instantOffer
 			.connect(creator)
-			.sell(cargoContract.address, rootId, amountToSell, minBuyAmount, price, erc20Mock.address)
+			.sell(payloadAsset.address, rootId, amountToSell, minBuyAmount, price, erc20Mock.address)
 			.then(tx => tx.wait())
 		expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)
 		offerId = getOfferSellID(txr)

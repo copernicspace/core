@@ -1,30 +1,30 @@
 import { waffle } from 'hardhat'
 import { expect } from 'chai'
-import { CargoAsset, CargoFactory, KycRegister } from '../../typechain'
+import { PayloadAsset, PayloadFactory, KycRegister } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
 import contractNames from '../../constants/contract.names'
-import { getCargoAddress } from '../helpers/cargoAddress'
+import { getPayloadAddress } from '../helpers/cargoAddress'
 
 describe('[test/kyc/kyc-child-creation.test] Child creation & integration with KYC', () => {
 	let creator: SignerWithAddress
-	let cargoFactory: CargoFactory
-	let cargoContract: CargoAsset
+	let payloadFactory: PayloadFactory
+	let payloadAsset: PayloadAsset
 	let kycContract: KycRegister
 	let deployer: SignerWithAddress
-	let cargoContractDecimals: BigNumber
+	let payloadAssetDecimals: BigNumber
 
 	before(
 		'load fixtures/parentable',
 		async () =>
-			({ cargoFactory, cargoContract, creator, kycContract, deployer } = await waffle.loadFixture(parentable))
+			({ payloadAsset, payloadFactory, creator, kycContract, deployer } = await waffle.loadFixture(parentable))
 	)
 
 	before('get decimals', async () => {
-		cargoContractDecimals = await cargoContract.decimals()
+		payloadAssetDecimals = await payloadAsset.decimals()
 	})
 
 	/**
@@ -34,9 +34,9 @@ describe('[test/kyc/kyc-child-creation.test] Child creation & integration with K
 
 	it('allows creating new child asset if KYC permitted', async () => {
 		await expect(
-			cargoContract
+			payloadAsset
 				.connect(creator)
-				.createChild(parseUnits('500', cargoContractDecimals), 0, 'child name', creator.address)
+				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address)
 		).to.not.be.reverted
 	})
 
@@ -51,9 +51,9 @@ describe('[test/kyc/kyc-child-creation.test] Child creation & integration with K
 		await kycContract.connect(deployer).setKycStatus(creator.address, false)
 
 		await expect(
-			cargoContract
+			payloadAsset
 				.connect(creator)
-				.createChild(parseUnits('500', cargoContractDecimals), 0, 'child name', creator.address)
+				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address)
 		).to.be.revertedWith('sender/seller is not on KYC list')
 
 		// re-add creator's KYC permissions
@@ -65,33 +65,33 @@ describe('[test/kyc/kyc-child-creation.test] Child creation & integration with K
 	 * 		Check if can create child based on other root with same KYC
 	 */
 
-	let cargoContractAaddress
-	let cargoContractA: CargoAsset
+	let payloadAssetAaddress
+	let payloadAssetA: PayloadAsset
 	before('create new root cargo contract [with starting KYC]', async () => {
-		cargoContractAaddress = await cargoFactory
+		payloadAssetAaddress = await payloadFactory
 			.connect(creator)
-			.createCargo(
+			.create(
 				'second.test.uri.com',
 				'Second rootSpaceCargo',
-				cargoContractDecimals,
-				parseUnits('2000', cargoContractDecimals),
+				payloadAssetDecimals,
+				parseUnits('2000', payloadAssetDecimals),
 				kycContract.address,
 				0,
 				false
 			)
 			.then(tx => tx.wait())
-			.then(txr => getCargoAddress(txr))
+			.then(txr => getPayloadAddress(txr))
 
-		cargoContractA = await ethers
-			.getContractAt(contractNames.CARGO_ASSET, cargoContractAaddress)
-			.then(contract => contract as CargoAsset)
+		payloadAssetA = await ethers
+			.getContractAt(contractNames.PAYLOAD_ASSET, payloadAssetAaddress)
+			.then(contract => contract as PayloadAsset)
 	})
 
 	it('allows creating new child asset [on new root] if KYC permitted', async () => {
 		await expect(
-			cargoContractA
+			payloadAssetA
 				.connect(creator)
-				.createChild(parseUnits('500', cargoContractDecimals), 0, 'child name', creator.address)
+				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address)
 		).to.not.be.reverted
 	})
 })

@@ -2,7 +2,12 @@
 pragma solidity ^0.8.9;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import '../assets/cargo/CargoAsset.sol';
+import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
+import '@openzeppelin/contracts/security/Pausable.sol';
+
+import '../assets/abstract/Royalties.sol';
+import '../assets/abstract/Decimals.sol';
+import '../assets/abstract/Creator.sol';
 import '../utils/ERC20Percentage.sol';
 
 contract InstantOffer {
@@ -51,17 +56,17 @@ contract InstantOffer {
         address money
     ) public returns (uint256 sellID) {
         require(
-            CargoAsset(asset).balanceOf(msg.sender, assetID) >= amount,
+            IERC1155(asset).balanceOf(msg.sender, assetID) >= amount,
             'Failed to create new sell, insuffucient balance'
         );
-
         require(
-            CargoAsset(asset).isApprovedForAll(msg.sender, address(this)) == true,
+            IERC1155(asset).isApprovedForAll(msg.sender, address(this)) == true,
             'This contract has no approval to operate sellers assets'
         );
 
-        address creator = CargoAsset(asset).creator();
-        require(msg.sender == creator || !CargoAsset(asset).paused(), 'PausableCargo: asset is locked');
+        address creator = Creator(asset).creator();
+        
+        require(msg.sender == creator || !Pausable(asset).paused(), 'Pausable: asset is locked');
 
         sellID = numOffers++;
         Offer storage offer = offers[sellID];
@@ -96,8 +101,7 @@ contract InstantOffer {
      */
     function buy(uint256 sellID, uint256 amount) public {
         Offer memory offer = offers[sellID];
-        CargoAsset asset = CargoAsset(offer.asset);
-        uint256 decimals = asset.decimals();
+        uint256 decimals = Decimals(offer.asset).decimals();
 
         require(offer.amount >= amount, 'Not enough asset balance on sale');
         require(amount >= offer.minAmount, 'Can not buy less than min amount');
@@ -106,23 +110,23 @@ contract InstantOffer {
         uint256 decimalAmount = amount / (10**decimals);
         uint256 amountPrice = decimalAmount * offer.price;
         require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
-        address assetCreator = asset.creator();
-        uint256 royalties = asset.royalties();
+        address assetOwner = Creator(offer.asset).creator();
+        uint256 royalties = Royalties(offer.asset).royalties();
 
-        if (offer.seller == assetCreator || royalties == 0) {
+        if (offer.seller == assetOwner || royalties == 0) {
             money.transferFrom(buyer, offer.seller, amountPrice);
         } else {
             uint256 royaltiesAmount = amountPrice.take(royalties, decimals);
             uint256 operatorFeeAmount = amountPrice.take(operatorFee, decimals);
             uint256 totalPriceWithoutRoyaltiesAndFee = amountPrice - royaltiesAmount - operatorFeeAmount;
 
-            money.transferFrom(buyer, assetCreator, royaltiesAmount);
+            money.transferFrom(buyer, assetOwner, royaltiesAmount);
             money.transferFrom(buyer, platformOperator, operatorFeeAmount);
             money.transferFrom(buyer, offer.seller, totalPriceWithoutRoyaltiesAndFee);
         }
 
         offer.amount = offer.amount - amount;
-        asset.transferFrom(offer.seller, buyer, offer.assetID, amount);
+        ERC1155(offer.asset).safeTransferFrom(offer.seller, buyer, offer.assetID, amount, '');
         emit Buy(buyer, sellID);
     }
 }

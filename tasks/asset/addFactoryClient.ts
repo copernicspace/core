@@ -1,13 +1,13 @@
 import { task } from 'hardhat/config'
 
 export const ADD_CLIENT_TASK = {
-	NAME: 'cargoFactory:addClient',
+	NAME: 'payloadFactory:addClient',
 	DESC: 'add address to factory client',
-	CONTRACT_NAME: 'CargoFactory',
+	CONTRACT_NAME: 'PayloadFactory',
 
 	PARAMS: {
 		FACTORY_ADDRESS: 'factory',
-		FACTORY_ADDRESS_DESC: 'address of deployed cargo factory',
+		FACTORY_ADDRESS_DESC: 'address of deployed payload factory',
 
 		CLIENT_ADDRESS: 'client',
 		CLIENT_ADDRESS_DESC: 'address of new client to add to the factory'

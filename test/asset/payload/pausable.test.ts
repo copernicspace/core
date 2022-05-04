@@ -7,7 +7,7 @@ import { expect } from 'chai'
 import { parentable } from './fixtures/parentable.fixture'
 import { PayloadAsset } from '../../../typechain'
 
-describe('[test/asset/cargo/pausable.test] SpaceCargo asset: pausable test suite', () => {
+describe('[test/asset/payload/pausable.test] SpacePayload asset: pausable test suite', () => {
 	let payloadAsset: PayloadAsset
 	let creator: SignerWithAddress, receiver: SignerWithAddress
 

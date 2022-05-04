@@ -7,7 +7,7 @@ import { expect } from 'chai'
 import { createPayloadAssetPaused } from './fixtures/create.fixture'
 import { KycRegister, PayloadAsset } from '../../../typechain'
 
-describe('[test/asset/cargo/create-pausable.test] `PayloadAsset`: pausable test suite', () => {
+describe('[test/asset/payload/create-pausable.test] `PayloadAsset`: pausable test suite', () => {
 	let payloadAsset: PayloadAsset
 	let deployer, creator, receiver: SignerWithAddress
 	let kycContract: KycRegister

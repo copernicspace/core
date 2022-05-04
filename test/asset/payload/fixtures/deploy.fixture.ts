@@ -14,7 +14,7 @@ export interface Deploy {
 /**
  * This fixture deploys:
  * * payload asset contract
- * * clone cargo factory
+ * * clone payload factory
  *
  * for test suite @see `test/asset/deploy/deploy.test.ts`
  *
@@ -23,7 +23,7 @@ export interface Deploy {
 
 export const deployPayloadAsset: Fixture<Deploy> = async () => {
 	const [deployer, creator]: SignerWithAddress[] = await ethers.getSigners()
-	const cargoContractAddress = await ethers
+	const payloadContractAddress = await ethers
 		.getContractFactory(contract_names.PAYLOAD_ASSET)
 		.then(factory => factory.connect(deployer).deploy(''))
 		.then(contract => contract.deployed())
@@ -37,8 +37,8 @@ export const deployPayloadAsset: Fixture<Deploy> = async () => {
 
 	const payloadFactory = await ethers
 		.getContractFactory(contract_names.PAYLOAD_FACTORY)
-		.then(factory => factory.connect(deployer).deploy(cargoContractAddress))
+		.then(factory => factory.connect(deployer).deploy(payloadContractAddress))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract as PayloadFactory)
-	return { deployer, creator, payloadFactory, cargoContractAddress, kycContract }
+	return { deployer, creator, payloadFactory, payloadContractAddress, kycContract }
 }

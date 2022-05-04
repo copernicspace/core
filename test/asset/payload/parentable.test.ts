@@ -6,7 +6,7 @@ import { expect } from 'chai'
 import { parentable } from './fixtures/parentable.fixture'
 import { PayloadAsset } from '../../../typechain'
 
-describe('[test/asset/cargo/parentable.test] `PayloadAsset`: parentable fixture test suite', () => {
+describe('[test/asset/payload/parentable.test] `PayloadAsset`: parentable fixture test suite', () => {
 	let payloadAsset: PayloadAsset
 	let creator: SignerWithAddress
 	let receiver: SignerWithAddress
@@ -44,11 +44,11 @@ describe('[test/asset/cargo/parentable.test] `PayloadAsset`: parentable fixture 
 	})
 
 	it('check name', async () =>
-		expect(await payloadAsset.getFullName(childID)).to.be.eq('rootSpaceCargoName/childSpaceCargoName'))
+		expect(await payloadAsset.getFullName(childID)).to.be.eq('rootSpacePayloadName/childSpacePayloadName'))
 
 	it('check getName()', async () => {
 		const actual = await payloadAsset.getName(childID)
-		expect('childSpaceCargoName').to.be.eq(actual)
+		expect('childSpacePayloadName').to.be.eq(actual)
 	})
 
 	it('check getParent()', async () => {

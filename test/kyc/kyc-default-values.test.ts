@@ -2,9 +2,9 @@ import { waffle } from 'hardhat'
 import { expect } from 'chai'
 import { KycRegister } from '../../typechain'
 import { ethers } from 'hardhat'
-import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
+import { parentable } from '../asset/payload/fixtures/parentable.fixture'
 
-describe('SpaceCargoAsset: KYC default values', () => {
+describe('SpacePayloadAsset: KYC default values', () => {
 	/**
 	 * Test suite for checking KycRegister permission change process
 	 */

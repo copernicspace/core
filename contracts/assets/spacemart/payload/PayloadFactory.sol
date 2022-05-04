@@ -24,7 +24,7 @@ contract PayloadFactory is AccessControl {
 
     address[] public deployed;
 
-    event CargoCreated(address indexed newCargoAddress, address indexed creator);
+    event PayloadCreated(address indexed newAddress, address indexed creator);
 
     constructor(address _logicAddress) {
         logicAddress = _logicAddress;
@@ -59,7 +59,7 @@ contract PayloadFactory is AccessControl {
 
         deployed.push(clone);
 
-        emit CargoCreated(clone, _msgSender());
+        emit PayloadCreated(clone, _msgSender());
     }
 
     function addManager(address target) external {

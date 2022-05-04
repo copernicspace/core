@@ -21,7 +21,7 @@ export interface Parentable extends Create {
  * 		* send 500 of child asset from `creator` to `receiver`
  *
  * //todo link below doe not work ;(
- * @see {@link test/asset/cargo/parentable.test.ts}
+ * @see {@link test/asset/payload/parentable.test.ts}
  * for test suite of this fixture's expected state
  * @returns blockchain state with result of fixture actions
  */
@@ -30,8 +30,8 @@ export const parentable: Fixture<Parentable> = async () => {
 		createPayloadAsset
 	)
 	const [, , receiver]: SignerWithAddress[] = await ethers.getSigners()
-	const cargoContractDecimals = await payloadAsset.decimals()
-	const amount = parseUnits('500', cargoContractDecimals)
+	const payloadContractDecimals = await payloadAsset.decimals()
+	const amount = parseUnits('500', payloadContractDecimals)
 
 	await kycContract.connect(deployer).setKycStatus(creator.address, true)
 	await kycContract.connect(deployer).setKycStatus(receiver.address, true)
@@ -39,7 +39,7 @@ export const parentable: Fixture<Parentable> = async () => {
 	// create child to receiver
 	const childID = await payloadAsset
 		.connect(creator)
-		.createChild(amount, 0, 'childSpaceCargoName', receiver.address)
+		.createChild(amount, 0, 'childSpacePayloadName', receiver.address)
 		.then(tx => tx.wait())
 		.then(txr => getAssetID(txr))
 

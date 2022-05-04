@@ -5,9 +5,9 @@ import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
-import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
+import { parentable } from '../asset/payload/fixtures/parentable.fixture'
 import contractNames from '../../constants/contract.names'
-import { getPayloadAddress } from '../helpers/cargoAddress'
+import { getPayloadAddress } from '../helpers/payloadAddress'
 
 describe('[test/kyc/kyc-child-creation.test] Child creation & integration with KYC', () => {
 	let creator: SignerWithAddress
@@ -67,12 +67,12 @@ describe('[test/kyc/kyc-child-creation.test] Child creation & integration with K
 
 	let payloadAssetAaddress
 	let payloadAssetA: PayloadAsset
-	before('create new root cargo contract [with starting KYC]', async () => {
+	before('create new root payload contract [with starting KYC]', async () => {
 		payloadAssetAaddress = await payloadFactory
 			.connect(creator)
 			.create(
 				'second.test.uri.com',
-				'Second rootSpaceCargo',
+				'Second rootSpacePayload',
 				payloadAssetDecimals,
 				parseUnits('2000', payloadAssetDecimals),
 				kycContract.address,

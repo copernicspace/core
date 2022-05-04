@@ -6,7 +6,7 @@ import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
-describe('[test/asset/cargo/deploy.test] CargoFactory for asset: deploy fixture test suite', () => {
+describe('[test/asset/payload/deploy.test] PayloadFactory for asset: deploy fixture test suite', () => {
 	let user: SignerWithAddress
 	before('load userA as signerWithAddress', async () => ([, , user] = await ethers.getSigners()))
 
@@ -22,11 +22,11 @@ describe('[test/asset/cargo/deploy.test] CargoFactory for asset: deploy fixture 
 			.wait()
 			.then(txr => expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)))
 
-	it('reverts on `createCargo`, if user is not a factory client', async () =>
+	it('reverts on `createPayload`, if user is not a factory client', async () =>
 		await expect(
 			payloadFactory
 				.connect(user)
-				.create('test.uri.com', 'TestSpaceCargoName', 18, '3500', kycContract.address, 0, false)
+				.create('test.uri.com', 'TestSpacePayloadName', 18, '3500', kycContract.address, 0, false)
 		).to.be.revertedWith('You are not allowed to create new SpaceAsset:Payload'))
 
 	it('reverts if addClient called from non manager', async () => {

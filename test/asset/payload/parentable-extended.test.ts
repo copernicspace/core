@@ -7,7 +7,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { getAssetID } from '../../helpers/getAssetId.helper'
 
-describe('[test/asset/cargo/extended-parentable.test] `PayloadAsset`: extended parentable fixture test suite', () => {
+describe('[test/asset/payload/extended-parentable.test] `PayloadAsset`: extended parentable fixture test suite', () => {
 	let payloadAsset: PayloadAsset
 	let creator: SignerWithAddress
 	let kycContract: KycRegister

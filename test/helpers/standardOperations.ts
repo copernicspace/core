@@ -12,7 +12,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { getAssetID } from './getAssetId.helper'
 import contractNames from '../../constants/contract.names'
-import { getPayloadAddress } from './cargoAddress'
+import { getPayloadAddress } from './payloadAddress'
 import contract_names from '../../constants/contract.names'
 
 let payloadFactory: PayloadFactory
@@ -32,7 +32,7 @@ export const global = {
 		payloadFactory(factory: PayloadFactory) {
 			payloadFactory = factory
 		},
-		cargoAsset(asset: PayloadAsset) {
+		payloadAsset(asset: PayloadAsset) {
 			payloadAsset = asset
 		},
 		kycContract(kycRegister: KycRegister) {
@@ -50,7 +50,7 @@ export const global = {
 		payloadFactory() {
 			return payloadFactory
 		},
-		cargoAsset() {
+		payloadAsset() {
 			return payloadAsset
 		},
 		kycContract() {
@@ -118,14 +118,14 @@ export const create = {
 			this.localKyc = kycRegisterContract
 		}
 		// execute:
-		const cargoAddress = await payloadFactory
+		const payloadAddress = await payloadFactory
 			.connect(this.localSigner)
 			.create(uri, name, this.localDecimals, totalSupply, this.localKyc.address, 0, false)
 			.then(tx => tx.wait())
 			.then(txr => getPayloadAddress(txr))
 
-		const cargoAsset = ethers
-			.getContractAt(contractNames.PAYLOAD_ASSET, cargoAddress)
+		const payloadAsset = ethers
+			.getContractAt(contractNames.PAYLOAD_ASSET, payloadAddress)
 			.then(contract => contract as PayloadAsset)
 
 		// clear local parameters
@@ -134,7 +134,7 @@ export const create = {
 		this.localKyc = null
 
 		// return asset instance
-		return cargoAsset
+		return payloadAsset
 	},
 
 	async child(pid: BigNumber, name: string, supply: BigNumber) {

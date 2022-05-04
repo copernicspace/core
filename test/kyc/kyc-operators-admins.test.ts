@@ -3,9 +3,9 @@ import { expect } from 'chai'
 import { KycRegister } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
+import { parentable } from '../asset/payload/fixtures/parentable.fixture'
 
-describe('SpaceCargoAsset: KYC instantiation during root creation', () => {
+describe('SpacePayloadAsset: KYC instantiation during root creation', () => {
 	/**
 	 * Test suite for checking KycRegister permission change process
 	 */

@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import { PayloadAsset, KycRegister } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { parentable } from '../asset/cargo/fixtures/parentable.fixture'
+import { parentable } from '../asset/payload/fixtures/parentable.fixture'
 import contractNames from '../../constants/contract.names'
 import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
 
@@ -25,7 +25,7 @@ describe('[test/kyc/kyc-setup]: KYC instantiation during root creation', () => {
 			'can not change KYC register contract'
 		))
 
-	it('changes cargo kycRegister from factory owner', async () => {
+	it('changes payload kycRegister from factory owner', async () => {
 		const kycContract2 = await ethers
 			.getContractFactory(contractNames.KYC_REGISTER)
 			.then(factory => factory.connect(deployer).deploy())

@@ -5,7 +5,7 @@ import { ethers } from 'hardhat'
 
 import { deployPayloadAsset, Deploy } from './deploy.fixture'
 import contractNames from '../../../../constants/contract.names'
-import { getPayloadAddress } from '../../../helpers/cargoAddress'
+import { getPayloadAddress } from '../../../helpers/payloadAddress'
 import { PayloadAsset } from '../../../../typechain'
 import { loadFixture } from '../../../helpers/fixtureLoader'
 
@@ -25,14 +25,14 @@ export const createPayloadAsset: Fixture<Create> = async () => {
 
 	await kycContract.connect(deployer).setKycStatus(creator.address, true)
 
-	const cargoContractAddress = await payloadFactory
+	const payloadContractAddress = await payloadFactory
 		.connect(creator)
-		.create('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply, kycContract.address, royalties, false)
+		.create('test.uri.com', 'rootSpacePayloadName', decimals, totalSupply, kycContract.address, royalties, false)
 		.then(tx => tx.wait())
 		.then(txr => getPayloadAddress(txr))
 
 	const payloadAsset = await ethers
-		.getContractAt(contractNames.PAYLOAD_ASSET, cargoContractAddress)
+		.getContractAt(contractNames.PAYLOAD_ASSET, payloadContractAddress)
 		.then(contract => contract as PayloadAsset)
 
 	return { deployer, creator, payloadFactory, kycContract, payloadAsset, totalSupply, decimals }
@@ -47,20 +47,20 @@ export const createPayloadAssetPaused: Fixture<Create> = async () => {
 	await payloadFactory.connect(deployer).addClient(creator.address)
 	await kycContract.connect(deployer).setKycStatus(creator.address, true)
 
-	const cargoContractAddress = await payloadFactory
+	const payloadContractAddress = await payloadFactory
 		.connect(creator)
-		.create('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply, kycContract.address, royalties, true)
+		.create('test.uri.com', 'rootSpacePayloadName', decimals, totalSupply, kycContract.address, royalties, true)
 		.then(tx => tx.wait())
 		.then(txr => getPayloadAddress(txr))
 
 	const payloadAsset = await ethers
-		.getContractAt(contractNames.PAYLOAD_ASSET, cargoContractAddress)
+		.getContractAt(contractNames.PAYLOAD_ASSET, payloadContractAddress)
 		.then(contract => contract as PayloadAsset)
 
 	return { deployer, creator, payloadFactory, kycContract, payloadAsset, totalSupply, decimals }
 }
 
-export const createCargoAssetWithRoyalties: Fixture<Create> = async () => {
+export const createPayloadAssetWithRoyalties: Fixture<Create> = async () => {
 	const { deployer, creator, payloadFactory, kycContract } = await loadFixture(deployPayloadAsset)
 	const decimals = 18
 	const totalSupply = parseUnits('3500', decimals)
@@ -70,20 +70,20 @@ export const createCargoAssetWithRoyalties: Fixture<Create> = async () => {
 
 	await kycContract.connect(deployer).setKycStatus(creator.address, true)
 
-	const cargoContractAddress = await payloadFactory
+	const payloadContractAddress = await payloadFactory
 		.connect(creator)
-		.create('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply, kycContract.address, royalties, false)
+		.create('test.uri.com', 'rootSpacePayloadName', decimals, totalSupply, kycContract.address, royalties, false)
 		.then(tx => tx.wait())
 		.then(txr => getPayloadAddress(txr))
 
 	const payloadAsset = await ethers
-		.getContractAt(contractNames.PAYLOAD_ASSET, cargoContractAddress)
+		.getContractAt(contractNames.PAYLOAD_ASSET, payloadContractAddress)
 		.then(contract => contract as PayloadAsset)
 
 	return { deployer, creator, payloadFactory, kycContract, payloadAsset, totalSupply, decimals }
 }
 
-export const createCargoAssetWithFloatRoyalties: Fixture<Create> = async () => {
+export const createPayloadAssetWithFloatRoyalties: Fixture<Create> = async () => {
 	const { deployer, creator, payloadFactory, kycContract } = await loadFixture(deployPayloadAsset)
 	const decimals = 18
 	const totalSupply = parseUnits('3500', decimals)
@@ -93,14 +93,14 @@ export const createCargoAssetWithFloatRoyalties: Fixture<Create> = async () => {
 
 	await kycContract.connect(deployer).setKycStatus(creator.address, true)
 
-	const cargoContractAddress = await payloadFactory
+	const payloadContractAddress = await payloadFactory
 		.connect(creator)
-		.create('test.uri.com', 'rootSpaceCargoName', decimals, totalSupply, kycContract.address, royalties, false)
+		.create('test.uri.com', 'rootSpacePayloadName', decimals, totalSupply, kycContract.address, royalties, false)
 		.then(tx => tx.wait())
 		.then(txr => getPayloadAddress(txr))
 
 	const payloadAsset = await ethers
-		.getContractAt(contractNames.PAYLOAD_ASSET, cargoContractAddress)
+		.getContractAt(contractNames.PAYLOAD_ASSET, payloadContractAddress)
 		.then(contract => contract as PayloadAsset)
 
 	return { deployer, creator, payloadFactory, kycContract, payloadAsset, totalSupply, decimals }

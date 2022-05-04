@@ -21,7 +21,7 @@ export const kyc: Fixture<KYC> = async () => {
 	await parentableFixture.kycContract.connect(deployer).setKycStatus(kycUserA.address, true)
 	await parentableFixture.kycContract.connect(deployer).setKycStatus(kycUserB.address, true)
 
-	// add cargo balance to kycUserA
+	// add payload balance to kycUserA
 	const creator = parentableFixture.creator
 	const assetID = await parentableFixture.payloadAsset
 		.connect(creator)

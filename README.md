@@ -43,13 +43,13 @@ To add KYC address:
 hh --network mumbai kycRegister:setStatus --kyc $ `KYC_ADDRESS --status true --client $USER_ADDRESS
 ```
 
-### Cargo factory client
+### Payload factory client
 
-For any user to be able to create space cargo - his address has to be granted client role on cargo factory contract;
+For any user to be able to create space payload - his address has to be granted client role on payload factory contract;
 
 To grant client role:
 
 ```
-hh --network mumbai cargoFactory:addClient --factory $CARGO_FACTORY_ADDRESS --client $USER_ADDRESS
+hh --network mumbai payloadFactory:addClient --factory $PAYLOAD_FACTORY_ADDRESS --client $USER_ADDRESS
 ```
 

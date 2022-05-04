@@ -1,13 +1,13 @@
 import { task } from 'hardhat/config'
 
 export const REVOKE_CLIENT_TASK = {
-	NAME: 'cargoFactory:revokeClient',
+	NAME: 'payloadFactory:revokeClient',
 	DESC: 'revoke client role from address at factory client',
-	CONTRACT_NAME: 'CargoFactory',
+	CONTRACT_NAME: 'PayloadFactory',
 
 	PARAMS: {
 		FACTORY_ADDRESS: 'factory',
-		FACTORY_ADDRESS_DESC: 'address of deployed cargo factory',
+		FACTORY_ADDRESS_DESC: 'address of deployed payload factory',
 
 		CLIENT_ADDRESS: 'client',
 		CLIENT_ADDRESS_DESC: 'address of client to revole clioent role from factory'

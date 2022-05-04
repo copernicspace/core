@@ -5,21 +5,23 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { KycRegister, PayloadAsset, PayloadFactory } from '../../../typechain'
-import { createPayloadAsset } from './fixtures/create.fixture'
+import { createPayloadAssetWithRoyalties } from './fixtures/create.fixture'
 
-describe('[test/asset/cargo/create.test] `PayloadAsset`: create fixture test suite', () => {
-	let userA, userB, creator: SignerWithAddress
+describe('[test/asset/payload/royalties.test] SpacePayload asset with royalties: create fixture test suite', () => {
+	let userA: SignerWithAddress, userB: SignerWithAddress
 
+	before('load userA as signerWithAddress', async () => ([, , userA, userB] = await ethers.getSigners()))
+	let creator: SignerWithAddress
 	let payloadFactory: PayloadFactory
 	let payloadAsset: PayloadAsset
 	let kycContract: KycRegister
 
-	before('load userA and userB', async () => ([, , userA, userB] = await ethers.getSigners()))
-
 	beforeEach(
-		'load fixtures/create::createPayloadAsset`',
+		'load fixtures/deploy`',
 		async () =>
-			({ payloadFactory, payloadAsset, creator, kycContract } = await waffle.loadFixture(createPayloadAsset))
+			({ payloadFactory, payloadAsset, creator, kycContract } = await waffle.loadFixture(
+				createPayloadAssetWithRoyalties
+			))
 	)
 
 	it('has correct uri', async () => {
@@ -30,7 +32,7 @@ describe('[test/asset/cargo/create.test] `PayloadAsset`: create fixture test sui
 
 	it('has correct name', async () => {
 		const actual = await payloadAsset.getName(0)
-		const expected = 'rootSpaceCargoName'
+		const expected = 'rootSpacePayloadName'
 		expect(expected).to.be.eq(actual)
 	})
 
@@ -46,17 +48,18 @@ describe('[test/asset/cargo/create.test] `PayloadAsset`: create fixture test sui
 		expect(expected).to.be.eq(actual)
 	})
 
-	it('has correct royalties', async () => {
+	it('has correct royalties percent', async () => {
 		const actual = await payloadAsset.royalties()
-		const expected = BigNumber.from(0)
+		const decimals = await payloadAsset.decimals()
+		const expected = parseUnits('5', decimals)
 		expect(expected).to.be.eq(actual)
 	})
 
-	it('disallows non-factory-clients from creating cargo', async () => {
+	it('disallows non-factory-clients from creating payload', async () => {
 		await expect(
 			payloadFactory
 				.connect(userA)
-				.create('test.revert.com', 'revert test asset', 18, 6000, kycContract.address, 0, false)
+				.create('test.revert.com', 'revert test asset', 18, 6000, kycContract.address, 5, false)
 		).to.be.revertedWith('You are not allowed to create new SpaceAsset:Payload')
 	})
 

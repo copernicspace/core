@@ -11,18 +11,18 @@ async function main() {
 	console.log('KycRegister deployed to:', kycAddress)
 
 	const assetAddress = await ethers
-		.getContractFactory(ContractNames.CARGO_ASSET)
-		.then(deployFactory => deployFactory.deploy('copernicspace.com'))
+		.getContractFactory(ContractNames.PAYLOAD_ASSET)
+		.then(deployFactory => deployFactory.deploy('app.copernicspace.com/assets'))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract.address)
-	console.log('CargoAsset deployed to:', assetAddress)
+	console.log('PayloadAsset deployed to:', assetAddress)
 
 	const factoryAddress = await ethers
-		.getContractFactory(ContractNames.CARGO_FACTORY)
+		.getContractFactory(ContractNames.PAYLOAD_FACTORY)
 		.then(deployFactory => deployFactory.deploy(assetAddress))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract.address)
-	console.log('CargoFactory deployed to:', factoryAddress)
+	console.log('PayloadFactory deployed to:', factoryAddress)
 
 	const [deployer] = await ethers.getSigners()
 

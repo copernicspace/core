@@ -4,7 +4,7 @@ import { PayloadAsset } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { parseUnits } from 'ethers/lib/utils'
-import { kyc } from '../asset/cargo/fixtures/kyc.fixture'
+import { kyc } from '../asset/payload/fixtures/kyc.fixture'
 import { BigNumber } from '@ethersproject/bignumber'
 import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
 

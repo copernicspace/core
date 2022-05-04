@@ -3,10 +3,10 @@ import ContractNames from '../constants/contract.names'
 
 async function main() {
 	const assetAddress = await ethers
-		.getContractFactory(ContractNames.CARGO_ASSET)
-		.then(deployFactory => deployFactory.deploy('copernicspace.com'))
+		.getContractFactory(ContractNames.PAYLOAD_ASSET)
+		.then(deployFactory => deployFactory.deploy('app.copernicspace.com/assets'))
 		.then(asset => asset.address)
-	console.log('Asset deployed to:', assetAddress)
+	console.log('SpacePayload asset deployed to:', assetAddress)
 }
 
 main()

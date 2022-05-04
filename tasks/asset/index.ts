@@ -1,5 +1,5 @@
-export * from './cargoFactory.deploy'
-export * from './cargoAsset.deploy'
+export * from './payloadFactory.deploy'
+export * from './payloadAsset.deploy'
 export * from './bootstrap'
 export * from './addFactoryClient'
 export * from './revokeFactoryClient'

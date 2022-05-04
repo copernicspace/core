@@ -5,9 +5,9 @@ import { BigNumber } from 'ethers'
 import { InstantOffer, KycRegister, PayloadAsset } from '../../../../typechain'
 import contract_names from '../../../../constants/contract.names'
 import {
-	createCargoAssetWithFloatRoyalties,
-	createCargoAssetWithRoyalties
-} from '../../../asset/cargo/fixtures/create.fixture'
+	createPayloadAssetWithFloatRoyalties,
+	createPayloadAssetWithRoyalties
+} from '../../../asset/payload/fixtures/create.fixture'
 import { loadFixture } from '../../../helpers/fixtureLoader'
 import { parseUnits } from 'ethers/lib/utils'
 
@@ -29,7 +29,7 @@ export interface DeployInstantOffer {
 
 export const deployInstantOfferWithRoyalties: Fixture<DeployInstantOffer> = async () => {
 	const { deployer, creator, payloadAsset, kycContract, totalSupply } = await loadFixture(
-		createCargoAssetWithRoyalties
+		createPayloadAssetWithRoyalties
 	)
 	const operatorFee = parseUnits('3', await payloadAsset.decimals())
 	const instantOffer = await ethers
@@ -43,7 +43,7 @@ export const deployInstantOfferWithRoyalties: Fixture<DeployInstantOffer> = asyn
 
 export const deployInstantOfferWithFloatFeesAndRoyalties: Fixture<DeployInstantOffer> = async () => {
 	const { deployer, creator, payloadAsset, kycContract, totalSupply } = await loadFixture(
-		createCargoAssetWithFloatRoyalties
+		createPayloadAssetWithFloatRoyalties
 	)
 	const operatorFee = parseUnits('3.255', await payloadAsset.decimals())
 	const instantOffer = await ethers

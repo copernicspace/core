@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import { PayloadAsset, KycRegister } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { parentable } from '../asset/payload/fixtures/parentable.fixture'
+import { parentable } from '../asset/spacemart/payload/fixtures/parentable.fixture'
 import contractNames from '../../constants/contract.names'
 import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
 

@@ -2,7 +2,7 @@ import { waffle } from 'hardhat'
 import { expect } from 'chai'
 import { KycRegister } from '../../typechain'
 import { ethers } from 'hardhat'
-import { parentable } from '../asset/payload/fixtures/parentable.fixture'
+import { parentable } from '../asset/spacemart/payload/fixtures/parentable.fixture'
 
 describe('SpacePayloadAsset: KYC default values', () => {
 	/**

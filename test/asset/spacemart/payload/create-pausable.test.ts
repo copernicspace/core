@@ -5,7 +5,7 @@ import { BigNumber } from 'ethers'
 import { expect } from 'chai'
 
 import { createPayloadAssetPaused } from './fixtures/create.fixture'
-import { KycRegister, PayloadAsset } from '../../../typechain'
+import { KycRegister, PayloadAsset } from '../../../../typechain'
 
 describe('[test/asset/payload/create-pausable.test] `PayloadAsset`: pausable test suite', () => {
 	let payloadAsset: PayloadAsset

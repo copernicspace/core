@@ -7,7 +7,7 @@ import contract_names from '../../../../constants/contract.names'
 import {
 	createPayloadAssetWithFloatRoyalties,
 	createPayloadAssetWithRoyalties
-} from '../../../asset/payload/fixtures/create.fixture'
+} from '../../../asset/spacemart/payload/fixtures/create.fixture'
 import { loadFixture } from '../../../helpers/fixtureLoader'
 import { parseUnits } from 'ethers/lib/utils'
 

@@ -4,8 +4,8 @@ import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
-import { KycRegister, PayloadAsset, PayloadFactory } from '../../../typechain'
 import { createPayloadAsset } from './fixtures/create.fixture'
+import { KycRegister, PayloadAsset, PayloadFactory } from '../../../../typechain'
 
 describe('[test/asset/payload/create.test] `PayloadAsset`: create fixture test suite', () => {
 	let userA, userB, creator: SignerWithAddress

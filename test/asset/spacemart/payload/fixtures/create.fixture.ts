@@ -4,10 +4,10 @@ import { Fixture } from 'ethereum-waffle'
 import { ethers } from 'hardhat'
 
 import { deployPayloadAsset, Deploy } from './deploy.fixture'
-import contractNames from '../../../../constants/contract.names'
-import { getPayloadAddress } from '../../../helpers/payloadAddress'
-import { PayloadAsset } from '../../../../typechain'
-import { loadFixture } from '../../../helpers/fixtureLoader'
+import contractNames from '../../../../../constants/contract.names'
+import { getPayloadAddress } from '../../../../helpers/payloadAddress'
+import { PayloadAsset } from '../../../../../typechain'
+import { loadFixture } from '../../../../helpers/fixtureLoader'
 
 export interface Create extends Deploy {
 	payloadAsset: PayloadAsset

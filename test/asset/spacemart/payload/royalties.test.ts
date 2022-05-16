@@ -4,7 +4,7 @@ import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
-import { KycRegister, PayloadAsset, PayloadFactory } from '../../../typechain'
+import { KycRegister, PayloadAsset, PayloadFactory } from '../../../../typechain'
 import { createPayloadAssetWithRoyalties } from './fixtures/create.fixture'
 
 describe('[test/asset/payload/royalties.test] SpacePayload asset with royalties: create fixture test suite', () => {

@@ -5,7 +5,7 @@ import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
-import { parentable } from '../asset/payload/fixtures/parentable.fixture'
+import { parentable } from '../asset/spacemart/payload/fixtures/parentable.fixture'
 import contractNames from '../../constants/contract.names'
 import { getPayloadAddress } from '../helpers/payloadAddress'
 

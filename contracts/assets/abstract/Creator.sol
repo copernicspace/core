@@ -8,7 +8,7 @@ abstract contract Creator {
 
     bool private creatorSet = false;
 
-    function setCreator(address _creator) internal {
+    function _setCreator(address _creator) internal {
         require(!creatorSet, 'creator already was set');
         creator = _creator;
         creatorSet = true;

@@ -5,6 +5,7 @@ import { expect } from 'chai'
 
 import { parentable } from './fixtures/parentable.fixture'
 import { PayloadAsset } from '../../../typechain'
+import { getAssetID } from '../../helpers/getAssetId.helper'
 
 describe('[test/asset/payload/parentable.test] `PayloadAsset`: parentable fixture test suite', () => {
 	let payloadAsset: PayloadAsset
@@ -73,5 +74,16 @@ describe('[test/asset/payload/parentable.test] `PayloadAsset`: parentable fixtur
 		const actual = await payloadAsset.uri(childID)
 		const expected = 'test.uri.com'
 		expect(expected).to.be.eq(actual)
+	})
+
+	it('create grandChild', async () => {
+		const tx = await payloadAsset.connect(creator).createChild(100, '0', ' test', creator.address)
+		const newChildId = await tx.wait().then(txr => getAssetID(txr))
+		expect(newChildId).to.be.eq(2)
+
+		const gtx = await payloadAsset.connect(creator).createChild(100, newChildId, 'nameGrandChild', creator.address)
+		const grandChildId  = await gtx.wait().then(txr => getAssetID(txr))
+		const actual = await payloadAsset.getParent(grandChildId)
+		expect(actual).to.be.eq(2)
 	})
 })

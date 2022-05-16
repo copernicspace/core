@@ -87,6 +87,7 @@ contract PayloadAsset is
     ) external onlyCreator {
         uint256 id = generateId();
         setName(id, name);
+        setParent(id, pid);
         _burn(_msgSender(), pid, amount);
         _mint(to, id, amount, '');
         emit NewParent(id, pid, amount);

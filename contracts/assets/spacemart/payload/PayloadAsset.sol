@@ -39,14 +39,14 @@ contract PayloadAsset is
     ) external initializer {
         _setURI(_uri);
 
-        setDecimals(_decimals);
+        _setDecimals(_decimals);
 
         totalSupply = _totalSupply;
         uint256 rootID = 0;
-        setName(rootID, _name);
+        _setName(rootID, _name);
         // set parent id to itself, because it is root asset
-        setParent(rootID, rootID);
-        setCreator(_creator);
+        _setParent(rootID, rootID);
+        _setCreator(_creator);
 
         if (_royalties > 0) {
             _setRoyalties(_royalties);
@@ -86,11 +86,10 @@ contract PayloadAsset is
         address to
     ) external onlyCreator {
         uint256 id = generateId();
-        setName(id, name);
-        setParent(id, pid);
+        _setName(id, name);
+        _setParent(id, pid);
         _burn(_msgSender(), pid, amount);
         _mint(to, id, amount, '');
-        emit NewParent(id, pid, amount);
     }
 
     function burn(uint256 amount) external {

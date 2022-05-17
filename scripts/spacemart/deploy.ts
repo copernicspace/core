@@ -1,6 +1,6 @@
 import { parseUnits } from 'ethers/lib/utils'
 import { ethers } from 'hardhat'
-import ContractNames from '../constants/contract.names'
+import ContractNames from '../../constants/contract.names'
 
 async function main() {
 	const kycAddress = await ethers

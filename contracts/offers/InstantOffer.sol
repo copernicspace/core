@@ -114,6 +114,7 @@ contract InstantOffer {
         uint256 royalties = Royalties(offer.asset).royalties();
 
         if (offer.seller == assetOwner || royalties == 0) {
+            //todo add operator fee!
             money.transferFrom(buyer, offer.seller, amountPrice);
         } else {
             uint256 royaltiesAmount = amountPrice.take(royalties, decimals);

@@ -105,7 +105,7 @@ describe('[test/offers/instant/offer-paused.test] Instant offer: paused', () => 
 		})
 
 		it('disallows resell from non-creator', async () => {
-			await payloadAsset.connect(creator).safeTransferFrom(creator.address ,buyer.address, 0, '100', '0x')
+			await payloadAsset.connect(creator).safeTransferFrom(creator.address, buyer.address, 0, '100', '0x')
 			await expect(
 				instantOffer.connect(buyer).sell(payloadAsset.address, 0, '100', '100', '5000', erc20Mock.address)
 			).to.be.revertedWith('Pausable: asset is locked')

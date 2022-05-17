@@ -82,7 +82,7 @@ describe('[test/asset/payload/parentable.test] `PayloadAsset`: parentable fixtur
 		expect(newChildId).to.be.eq(2)
 
 		const gtx = await payloadAsset.connect(creator).createChild(100, newChildId, 'nameGrandChild', creator.address)
-		const grandChildId  = await gtx.wait().then(txr => getAssetID(txr))
+		const grandChildId = await gtx.wait().then(txr => getAssetID(txr))
 		const actual = await payloadAsset.getParent(grandChildId)
 		expect(actual).to.be.eq(2)
 	})

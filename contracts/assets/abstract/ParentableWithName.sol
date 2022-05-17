@@ -19,7 +19,7 @@ abstract contract ParentableWithName is IParentableWithName {
         _names[id] = name;
     }
 
-    function getName(uint256 id) public view override(IParentableWithName) virtual returns (string memory) {
+    function getName(uint256 id) public view virtual override(IParentableWithName) returns (string memory) {
         return _names[id];
     }
 

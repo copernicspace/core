@@ -35,7 +35,7 @@ const devs = {
 		seller: '0xBc62A9BbCd85E45B085601e589d267ef587b4De4',
 		buyer: '0x305934Fe9173D1251E3687ecEb6073420C96CBfE'
 	},
-	jerzy : {
+	jerzy: {
 		seller: '0xD378748946A7DfCa8303beF5eb2F6ba762acd525',
 		buyer: ''
 	}

@@ -70,4 +70,9 @@ hh --network mumbai payloadFactory:addClient --factory $PAYLOAD_FACTORY_ADDRESS 
 ### Spaceibles
 
 #### deploy asset 
+
     hh --network polygon run scripts/spaceibles/asset.deploy.ts
+
+#### mint
+
+    hh --network mumbai spaceibles:mint --address $SPACEIBLE_ASSET_ADDRESS --balance 1 --cid testCidHash123 --royalties **0**

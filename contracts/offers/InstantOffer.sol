@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: private
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.13;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
@@ -114,6 +114,7 @@ contract InstantOffer {
         uint256 royalties = Royalties(offer.asset).royalties();
 
         if (offer.seller == assetOwner || royalties == 0) {
+            //todo add operator fee!
             money.transferFrom(buyer, offer.seller, amountPrice);
         } else {
             uint256 royaltiesAmount = amountPrice.take(royalties, decimals);

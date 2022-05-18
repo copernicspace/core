@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: private
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.13;
 
 import '@openzeppelin/contracts/access/AccessControl.sol';
 import '../../kyc/KycRegister.sol';

@@ -2,8 +2,8 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Fixture } from 'ethereum-waffle'
 import { BigNumber } from 'ethers'
 import { ethers } from 'hardhat'
-import { loadFixture } from '../../../helpers/fixtureLoader'
-import { getAssetID } from '../../../helpers/getAssetId.helper'
+import { loadFixture } from '../../../../helpers/fixtureLoader'
+import { getAssetID } from '../../../../helpers/getAssetId.helper'
 import { parentable, Parentable } from './parentable.fixture'
 
 export interface KYC extends Parentable {

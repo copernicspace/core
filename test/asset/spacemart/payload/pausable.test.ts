@@ -5,7 +5,7 @@ import { waffle } from 'hardhat'
 import { expect } from 'chai'
 
 import { parentable } from './fixtures/parentable.fixture'
-import { PayloadAsset } from '../../../typechain'
+import { PayloadAsset } from '../../../../typechain'
 
 describe('[test/asset/payload/pausable.test] SpacePayload asset: pausable test suite', () => {
 	let payloadAsset: PayloadAsset

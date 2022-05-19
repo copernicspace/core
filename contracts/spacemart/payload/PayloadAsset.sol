@@ -5,13 +5,12 @@ import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 
-import '../../abstract/ParentableWithName.sol';
-import '../../abstract/PausableAsset.sol';
-import '../../abstract/Royalties.sol';
-import '../../abstract/Decimals.sol';
-import '../../abstract/KYC.sol';
-
-import '../../../utils/GeneratorID.sol';
+import '../../common/abstract/ParentableWithName.sol';
+import '../../common/abstract/PausableAsset.sol';
+import '../../common/abstract/Royalties.sol';
+import '../../common/abstract/Decimals.sol';
+import '../../common/abstract/KYC.sol';
+import '../../utils/GeneratorID.sol';
 
 contract PayloadAsset is
     ERC1155,
@@ -69,13 +68,16 @@ contract PayloadAsset is
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) internal virtual override(ERC1155, PausableAsset) {
+    ) internal virtual override(ERC1155) {
         if (from != address(0)) {
             require(kycRegister.getKycStatusInfo(from), 'sender/seller is not on KYC list');
         }
         if (to != address(0)) {
             require(kycRegister.getKycStatusInfo(to), 'receiver/buyer is not on KYC list');
         }
+
+        require(operator == creator || from == creator || !paused(), 'Pausable: asset is locked');
+
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 

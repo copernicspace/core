@@ -5,9 +5,9 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import '@openzeppelin/contracts/security/Pausable.sol';
 
-import '../assets/abstract/Royalties.sol';
-import '../assets/abstract/Decimals.sol';
-import '../assets/abstract/Creator.sol';
+import '../common/abstract/Royalties.sol';
+import '../common/abstract/Decimals.sol';
+import '../common/abstract/Creator.sol';
 import '../utils/ERC20Percentage.sol';
 
 contract InstantOffer {

@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: private
 pragma solidity ^0.8.13;
 
-import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
-import '@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol';
+import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/proxy/Clones.sol';
 
+import '../../common/abstract/KYC.sol';
 import './PayloadAsset.sol';
-import '../../abstract/KYC.sol';
 
 contract PayloadFactory is AccessControl {
     address public logicAddress;

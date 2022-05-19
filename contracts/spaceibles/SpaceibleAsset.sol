@@ -6,7 +6,6 @@ import '@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol';
 import '../utils/GeneratorID.sol';
 
 contract SpaceibleAsset is ERC1155URIStorage, GeneratorID {
-
     event Royalties(uint256 indexed id, uint256 indexed royalties);
 
     mapping(uint256 => uint256) private _royalties;
@@ -15,7 +14,12 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID {
         _setBaseURI(uri);
     }
 
-    function mint(string memory cid, uint256 balance, uint256 royalties, bytes memory data) public {
+    function mint(
+        string memory cid,
+        uint256 balance,
+        uint256 royalties,
+        bytes memory data
+    ) public {
         uint256 id = generateId();
         _mint(msg.sender, id, balance, data);
         _setURI(id, cid);

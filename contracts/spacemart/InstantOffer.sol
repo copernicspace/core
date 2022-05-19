@@ -65,7 +65,7 @@ contract InstantOffer {
         );
 
         address creator = Creator(asset).creator();
-        
+
         require(msg.sender == creator || !Pausable(asset).paused(), 'Pausable: asset is locked');
 
         sellID = numOffers++;

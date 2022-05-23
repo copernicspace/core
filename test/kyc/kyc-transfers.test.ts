@@ -4,14 +4,14 @@ import { PayloadAsset } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { parseUnits } from 'ethers/lib/utils'
-import { kyc } from '../asset/spacemart/payload/fixtures/kyc.fixture'
+import { kyc } from '../spacemart/payload/fixtures/kyc.fixture'
 import { BigNumber } from '@ethersproject/bignumber'
 import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
 
 /**
  * Test suite for checking KycRegister permission change process
  */
-describe('[test/kyc/kyc-transfers.test]: KYC revert on transfer testing', () => {
+describe.skip('[kyc/kyc-transfers.test]: KYC revert on transfer testing', () => {
 	let kycUserA: SignerWithAddress
 	let kycUserB: SignerWithAddress
 	let nonKycUserC: SignerWithAddress

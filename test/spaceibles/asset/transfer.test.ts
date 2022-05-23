@@ -7,7 +7,7 @@ import { SpaceibleAsset } from '../../../typechain'
 import { BigNumber, ContractReceipt, ContractTransaction } from 'ethers'
 import { getAssetID } from '../../helpers/getAssetId.helper'
 
-describe('[asset/spaceible/transfer.test]', () => {
+describe('[spaceibles/asset/transfer]', () => {
 	let user: SignerWithAddress, anotherUser: SignerWithAddress
 	let spaceibleAsset: SpaceibleAsset
 	let mintTx: ContractTransaction
@@ -15,8 +15,8 @@ describe('[asset/spaceible/transfer.test]', () => {
 	let assetId: BigNumber
 	let userBalanceBefore: BigNumber, anotherUserBalanceBefore: BigNumber
 
-	before('load `user` and `anotherUser` signers', async () => ([, user, anotherUser] = await ethers.getSigners()))
-	before('load fixture/deploy', async () => ({ spaceibleAsset } = await waffle.loadFixture(deploySpaceibleAsset)))
+	before('load `user` and `anotherUser`', async () => ([, user, anotherUser] = await ethers.getSigners()))
+	before('load fixtures/deploy', async () => ({ spaceibleAsset } = await waffle.loadFixture(deploySpaceibleAsset)))
 
 	describe('transfer single asset', async () => {
 		// mint constants
@@ -33,18 +33,12 @@ describe('[asset/spaceible/transfer.test]', () => {
 			mintTxr = await mintTx.wait()
 		})
 
-		before('get new asset id from transaction receipt', () => (assetId = getAssetID(mintTxr)))
+		before('get new asset id from `mint` transaction receipt', () => (assetId = getAssetID(mintTxr)))
 
 		before('safe user balances before transfer tx', async () => {
 			userBalanceBefore = await spaceibleAsset.balanceOf(user.address, assetId)
 			anotherUserBalanceBefore = await spaceibleAsset.balanceOf(anotherUser.address, assetId)
 		})
-
-		it('should have correct `user` balance before transfer tx', async () =>
-			expect(userBalanceBefore).to.be.eq(mintBalance))
-
-		it('should have correct `anotherUser` balance before transfer tx', async () =>
-			expect(anotherUserBalanceBefore).to.be.eq(0))
 
 		before(
 			'send `safeTransferFrom` transaction to transfer 1 asset from `user` to `anotherUser` ',
@@ -53,6 +47,12 @@ describe('[asset/spaceible/transfer.test]', () => {
 					.connect(user)
 					.safeTransferFrom(user.address, anotherUser.address, assetId, amount, data)
 		)
+
+		it('should have correct `user` balance before transfer tx', async () =>
+			expect(userBalanceBefore).to.be.eq(mintBalance))
+
+		it('should have correct `anotherUser` balance before transfer tx', async () =>
+			expect(anotherUserBalanceBefore).to.be.eq(0))
 
 		it('should have correct `user` balance before transfer tx', async () =>
 			expect(userBalanceBefore).to.be.eq(mintBalance))

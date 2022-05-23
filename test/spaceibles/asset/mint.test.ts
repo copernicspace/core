@@ -8,7 +8,7 @@ import { SpaceibleAsset } from '../../../typechain'
 import { BigNumber, ContractReceipt, ContractTransaction } from 'ethers'
 import { getAssetID } from '../../helpers/getAssetId.helper'
 
-describe('[asset/spaceible/mint.test]', () => {
+describe('[spaceibles/asset/mint]', () => {
 	let deployer: SignerWithAddress
 	let user: SignerWithAddress
 	let spaceibleAsset: SpaceibleAsset

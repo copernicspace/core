@@ -54,19 +54,16 @@ describe('[spaceibles/asset/transfer]', () => {
 		it('should have correct `anotherUser` balance before transfer tx', async () =>
 			expect(anotherUserBalanceBefore).to.be.eq(0))
 
-		it('should have correct `user` balance before transfer tx', async () =>
-			expect(userBalanceBefore).to.be.eq(mintBalance))
-
 		it('should have correct `user` balance after transfer tx', async () => {
-			expect(await spaceibleAsset.balanceOf(user.address, assetId)).not.to.be.eq(userBalanceBefore)
-			expect(await spaceibleAsset.balanceOf(user.address, assetId)).to.be.eq(userBalanceBefore.sub(amount))
+			const userBalanceAfter = await spaceibleAsset.balanceOf(user.address, assetId)
+			expect(userBalanceAfter).not.to.be.eq(userBalanceBefore)
+			expect(userBalanceAfter).to.be.eq(userBalanceBefore.sub(amount))
 		})
 
 		it('should have correct `anotherUser` balance after transfer tx', async () => {
-			expect(await spaceibleAsset.balanceOf(anotherUser.address, assetId)).not.to.be.eq(anotherUserBalanceBefore)
-			expect(await spaceibleAsset.balanceOf(anotherUser.address, assetId)).to.be.eq(
-				anotherUserBalanceBefore.add(amount)
-			)
+			const anotherUserBalanceAfter = await spaceibleAsset.balanceOf(anotherUser.address, assetId)
+			expect(anotherUserBalanceAfter).not.to.be.eq(anotherUserBalanceBefore)
+			expect(anotherUserBalanceAfter).to.be.eq(anotherUserBalanceBefore.add(amount))
 		})
 	})
 
@@ -92,12 +89,6 @@ describe('[spaceibles/asset/transfer]', () => {
 			anotherUserBalanceBefore = await spaceibleAsset.balanceOf(anotherUser.address, assetId)
 		})
 
-		it('should have correct `user` balance before transfer tx', async () =>
-			expect(userBalanceBefore).to.be.eq(mintBalance))
-
-		it('should have correct `anotherUser` balance before transfer tx', async () =>
-			expect(anotherUserBalanceBefore).to.be.eq(0))
-
 		before(
 			'send `safeTransferFrom` transaction to transfer 1 asset from `user` to `anotherUser` ',
 			async () =>
@@ -109,16 +100,19 @@ describe('[spaceibles/asset/transfer]', () => {
 		it('should have correct `user` balance before transfer tx', async () =>
 			expect(userBalanceBefore).to.be.eq(mintBalance))
 
+		it('should have correct `anotherUser` balance before transfer tx', async () =>
+			expect(anotherUserBalanceBefore).to.be.eq(0))
+
 		it('should have correct `user` balance after transfer tx', async () => {
-			expect(await spaceibleAsset.balanceOf(user.address, assetId)).not.to.be.eq(userBalanceBefore)
-			expect(await spaceibleAsset.balanceOf(user.address, assetId)).to.be.eq(userBalanceBefore.sub(amount))
+			const userBalanceAfter = await spaceibleAsset.balanceOf(user.address, assetId)
+			expect(userBalanceAfter).not.to.be.eq(userBalanceBefore)
+			expect(userBalanceAfter).to.be.eq(userBalanceBefore.sub(amount))
 		})
 
 		it('should have correct `anotherUser` balance after transfer tx', async () => {
-			expect(await spaceibleAsset.balanceOf(anotherUser.address, assetId)).not.to.be.eq(anotherUserBalanceBefore)
-			expect(await spaceibleAsset.balanceOf(anotherUser.address, assetId)).to.be.eq(
-				anotherUserBalanceBefore.add(amount)
-			)
+			const anotherUserBalanceAfter = await spaceibleAsset.balanceOf(anotherUser.address, assetId)
+			expect(anotherUserBalanceAfter).not.to.be.eq(anotherUserBalanceBefore)
+			expect(anotherUserBalanceAfter).to.be.eq(anotherUserBalanceBefore.add(amount))
 		})
 	})
 })

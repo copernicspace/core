@@ -6,5 +6,7 @@ export default {
 	ERC20_MOCK: 'ERC20Mock',
 
 	// Spaceibles
-	SPACEIBLE_ASSET: 'SpaceibleAsset'
+	SPACEIBLE_ASSET: 'SpaceibleAsset',
+	SPACEIBLE_OFFER: 'SpaceibleOffer'
+
 }

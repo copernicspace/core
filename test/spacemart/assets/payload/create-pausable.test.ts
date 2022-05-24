@@ -5,9 +5,9 @@ import { BigNumber } from 'ethers'
 import { expect } from 'chai'
 
 import { createPayloadAssetPaused } from './fixtures/create.fixture'
-import { KycRegister, PayloadAsset } from '../../../typechain'
+import { KycRegister, PayloadAsset } from '../../../../typechain'
 
-describe('[spacemart/payload/payload/create-pausable.test] `PayloadAsset`: pausable test suite', () => {
+describe('[spacemart/assets/payload/payload/create-pausable.test] `PayloadAsset`: pausable test suite', () => {
 	let payloadAsset: PayloadAsset
 	let deployer, creator, receiver: SignerWithAddress
 	let kycContract: KycRegister

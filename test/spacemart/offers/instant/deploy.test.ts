@@ -4,7 +4,7 @@ import { TX_RECEIPT_STATUS } from '../../../../constants/tx-receipt-status'
 import { InstantOffer } from '../../../../typechain'
 import { deployInstantOffer } from './fixtures/deployOffer.fixture'
 
-describe('[offers/instant/deploy.test]', () => {
+describe('[spacemart/offers/instant/deploy.test]', () => {
 	let instantOffer: InstantOffer
 	before('load `fixtures/deployInstantOffer`', async () => ({ instantOffer } = await waffle.loadFixture(deployInstantOffer)))
 

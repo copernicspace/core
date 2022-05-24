@@ -1,13 +1,13 @@
 import { ethers, waffle } from 'hardhat'
 import { expect } from 'chai'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { KycRegister, PayloadAsset } from '../../../typechain'
+import { KycRegister, PayloadAsset } from '../../../../typechain'
 import { parentable } from './fixtures/parentable.fixture'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
-import { getAssetID } from '../../helpers/getAssetId.helper'
+import { getAssetID } from '../../../helpers/getAssetId.helper'
 
-describe('[spacemart/payload/payload/parentable-extended] extended parentable payload asset test suite', () => {
+describe('[spacemart/assets/payload/payload/parentable-extended] extended parentable payload asset test suite', () => {
 	let payloadAsset: PayloadAsset
 	let creator: SignerWithAddress
 	let kycContract: KycRegister

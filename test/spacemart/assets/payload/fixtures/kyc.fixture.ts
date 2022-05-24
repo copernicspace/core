@@ -2,7 +2,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Fixture } from 'ethereum-waffle'
 import { BigNumber } from 'ethers'
 import { ethers } from 'hardhat'
-import { getAssetID } from '../../../helpers/getAssetId.helper'
+import { getAssetID } from '../../../../helpers/getAssetId.helper'
 import { loadFixtureState0 } from './deploy.fixture'
 import { parentable, Parentable } from './parentable.fixture'
 

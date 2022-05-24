@@ -9,7 +9,7 @@ import { TX_RECEIPT_STATUS } from '../../../../constants/tx-receipt-status'
 import { getOfferSellID } from '../../../helpers/getOfferId.helper'
 import { deployInstantOffer } from './fixtures/deployOffer.fixture'
 
-describe('[offers/instant/offer-paused.test] Instant offer: paused', () => {
+describe('[spacemart/offers/instant/offer-paused.test] Instant offer: paused', () => {
 	let deployer: SignerWithAddress
 	let creator: SignerWithAddress
 	let instantOffer: InstantOffer

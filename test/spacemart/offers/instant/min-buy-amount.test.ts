@@ -9,7 +9,7 @@ import { InstantOffer, KycRegister, ERC20Mock, PayloadAsset } from '../../../../
 import { getOfferSellID } from '../../../helpers/getOfferId.helper'
 import { deployInstantOffer } from './fixtures/deployOffer.fixture'
 
-describe('[offers/instant/min-buy-amount.test.ts] InstantOffer: min buy amount', () => {
+describe('[spacemart/offers/instant/min-buy-amount.test.ts] InstantOffer: min buy amount', () => {
 	let deployer: SignerWithAddress
 	let creator: SignerWithAddress
 	let instantOffer: InstantOffer

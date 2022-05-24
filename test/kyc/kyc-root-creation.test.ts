@@ -4,7 +4,7 @@ import { ethers, waffle } from 'hardhat'
 import { expect } from 'chai'
 
 import { KycRegister, PayloadAsset, PayloadFactory } from '../../typechain'
-import { parentable } from '../spacemart/payload/fixtures/parentable.fixture'
+import { parentable } from '../spacemart/assets/payload/fixtures/parentable.fixture'
 import contract_names from '../../constants/contract.names'
 import { getPayloadAddress } from '../helpers/payloadAddress'
 import contractNames from '../../constants/contract.names'

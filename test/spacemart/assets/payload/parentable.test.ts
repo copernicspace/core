@@ -4,8 +4,8 @@ import { waffle } from 'hardhat'
 import { expect } from 'chai'
 
 import { parentable } from './fixtures/parentable.fixture'
-import { PayloadAsset } from '../../../typechain'
-import { getAssetID } from '../../helpers/getAssetId.helper'
+import { PayloadAsset } from '../../../../typechain'
+import { getAssetID } from '../../../helpers/getAssetId.helper'
 
 describe('[asset/payload/parentable.test] `PayloadAsset`: parentable fixture test suite', () => {
 	let payloadAsset: PayloadAsset

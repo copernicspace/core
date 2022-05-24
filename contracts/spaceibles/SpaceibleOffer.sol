@@ -52,11 +52,6 @@ contract SpaceibleOffer is GeneratorID {
             'This contract has no approval to operate sellers assets'
         );
 
-        require(
-            msg.sender == Creator(assetAddress).creator() || !Pausable(assetAddress).paused(),
-            'Pausable: asset is locked or msg.sender is not a creator'
-        );
-
         id = generateId();
 
         Offer storage offer = offers[id];

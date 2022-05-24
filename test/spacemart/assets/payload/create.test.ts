@@ -5,9 +5,9 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { createPayloadAsset } from './fixtures/create.fixture'
-import { KycRegister, PayloadAsset, PayloadFactory } from '../../../typechain'
+import { KycRegister, PayloadAsset, PayloadFactory } from '../../../../typechain'
 
-describe('[spacemart/payload/payload/create.test] `PayloadAsset`: create fixture test suite', () => {
+describe('[spacemart/assets/payload/payload/create.test] `PayloadAsset`: create fixture test suite', () => {
 	let userA, userB, creator: SignerWithAddress
 
 	let payloadFactory: PayloadFactory

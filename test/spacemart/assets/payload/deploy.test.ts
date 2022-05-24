@@ -1,11 +1,11 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers, waffle } from 'hardhat'
 import { expect } from 'chai'
-import { PayloadFactory, KycRegister } from '../../../typechain'
+import { PayloadFactory, KycRegister } from '../../../../typechain'
 import { deployPayloadAsset } from './fixtures/deploy.fixture'
-import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
+import { TX_RECEIPT_STATUS } from '../../../../constants/tx-receipt-status'
 
-describe('[spacemart/payload/payload/deploy.test] PayloadFactory for asset: deploy fixture test suite', () => {
+describe('[spacemart/assets/payload/payload/deploy.test] PayloadFactory for asset: deploy fixture test suite', () => {
 	let user: SignerWithAddress
 	before('load userA as signerWithAddress', async () => ([, , user] = await ethers.getSigners()))
 

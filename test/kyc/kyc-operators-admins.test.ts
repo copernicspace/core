@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import { KycRegister } from '../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { parentable } from '../spacemart/payload/fixtures/parentable.fixture'
+import { parentable } from '../spacemart/assets/payload/fixtures/parentable.fixture'
 
 describe.skip('SpacePayloadAsset: KYC instantiation during root creation', () => {
 	/**

@@ -1,16 +1,16 @@
 import { waffle } from 'hardhat'
 import { expect } from 'chai'
-import { PayloadAsset, PayloadFactory, KycRegister } from '../../../typechain'
+import { PayloadAsset, PayloadFactory, KycRegister } from '../../../../typechain'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
-import { getAssetID } from '../../helpers/getAssetId.helper'
+import { getAssetID } from '../../../helpers/getAssetId.helper'
 import { parseUnits } from '@ethersproject/units'
 import { parentable } from './fixtures/parentable.fixture'
-import contractNames from '../../../constants/contract.names'
-import { getPayloadAddress } from '../../helpers/payloadAddress'
+import contractNames from '../../../../constants/contract.names'
+import { getPayloadAddress } from '../../../helpers/payloadAddress'
 
-describe('[spacemart/payload/payload/kyc.test] `SpacePayload`: kyc test suite', () => {
+describe('[spacemart/assets/payload/payload/kyc.test] `SpacePayload`: kyc test suite', () => {
 	let userA, userB, userC, creator: SignerWithAddress
 	before('load userA as signerWithAddress', async () => ([, , , userA, userB, userC] = await ethers.getSigners()))
 

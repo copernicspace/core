@@ -1,11 +1,11 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Fixture } from 'ethereum-waffle'
-import { ethers, waffle } from 'hardhat'
-import { getAssetID } from '../../../helpers/getAssetId.helper'
+import { ethers } from 'hardhat'
+import { getAssetID } from '../../../../helpers/getAssetId.helper'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { createPayloadAsset, Create } from './create.fixture'
-import { loadFixtureState0, loadFixtureState1 } from './deploy.fixture'
+import { loadFixtureState0 } from './deploy.fixture'
 
 export interface Parentable extends Create {
 	receiver: SignerWithAddress // address who got the child asset

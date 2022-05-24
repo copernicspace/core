@@ -10,7 +10,7 @@ import { getOfferSellID } from '../../../helpers/getOfferId.helper'
 import { deployInstantOfferWithFloatFeesAndRoyalties } from './fixtures/deployRoyaltiesOffer.fixture.'
 import { formatUnits } from 'ethers/lib/utils'
 
-describe('[offers/instant/float-royalties-offer.test] Instant offer with royalties', () => {
+describe('[spacemart/offers/instant/float-royalties-offer.test] Instant offer with royalties', () => {
 	let deployer: SignerWithAddress
 	let creator: SignerWithAddress
 	let instantOffer: InstantOffer

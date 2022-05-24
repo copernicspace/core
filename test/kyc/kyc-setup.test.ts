@@ -1,23 +1,19 @@
-import { waffle } from 'hardhat'
 import { expect } from 'chai'
 import { PayloadAsset, KycRegister } from '../../typechain'
-import { ethers } from 'hardhat'
+import { ethers, waffle } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { parentable } from '../asset/spacemart/payload/fixtures/parentable.fixture'
+import { parentable } from '../spacemart/assets/payload/fixtures/parentable.fixture'
 import contractNames from '../../constants/contract.names'
 import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
 
-describe('[test/kyc/kyc-setup]: KYC instantiation during root creation', () => {
+describe.skip('[kyc/kyc-setup]: KYC instantiation during root creation', () => {
 	let payloadAsset: PayloadAsset
 	let kycContract: KycRegister
 	let deployer: SignerWithAddress
 
-	// create dedicated fixture laoder, to exclude KYC address changes in fixture chain
-	const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
-
 	before(
 		'load fixtures/parentable`',
-		async () => ({ payloadAsset, kycContract, deployer } = await loadFixture(parentable))
+		async () => ({ payloadAsset, kycContract, deployer } = await waffle.loadFixture(parentable))
 	)
 
 	it('disallows setupKyc()', async () =>

@@ -1,15 +1,14 @@
-import { waffle } from 'hardhat'
 import { expect } from 'chai'
 import { PayloadAsset, PayloadFactory, KycRegister } from '../../typechain'
-import { ethers } from 'hardhat'
+import { ethers, waffle } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
-import { parentable } from '../asset/spacemart/payload/fixtures/parentable.fixture'
+import { parentable } from '../spacemart/assets/payload/fixtures/parentable.fixture'
 import contractNames from '../../constants/contract.names'
 import { getPayloadAddress } from '../helpers/payloadAddress'
 
-describe('[test/kyc/kyc-child-creation.test] Child creation & integration with KYC', () => {
+describe.skip('[kyc/kyc-child-creation] Child creation & integration with KYC', () => {
 	let creator: SignerWithAddress
 	let payloadFactory: PayloadFactory
 	let payloadAsset: PayloadAsset

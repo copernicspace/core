@@ -6,7 +6,6 @@ import '@openzeppelin/contracts/security/Pausable.sol';
 import './Creator.sol';
 
 abstract contract PausableAsset is Pausable, Creator {
-
     function _setPause(bool isPause) internal {
         if (isPause) {
             _pause();

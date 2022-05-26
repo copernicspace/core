@@ -21,15 +21,16 @@ contract SpaceibleOffer is GeneratorID {
         address money;
     }
 
-    address public platformOperator;
+    address public operator;
     uint256 public operatorFee;
+
     mapping(uint256 => Offer) private offers;
 
     event NewOffer(uint256 indexed id);
-    event Buy(uint256 indexed id, uint256 amount, uint256 royalties, uint256 platformFee);
+    event Buy(uint256 indexed id, uint256 amount, uint256 sellerFee, uint256 royaltiesFee, uint256 platformFee);
 
-    constructor(address _platformOperator, uint256 _operatorFee) {
-        platformOperator = _platformOperator;
+    constructor(address _operator, uint256 _operatorFee) {
+        operator = _operator;
         operatorFee = _operatorFee;
     }
 
@@ -84,30 +85,29 @@ contract SpaceibleOffer is GeneratorID {
         Offer memory offer = offers[id];
         SpaceibleAsset asset = SpaceibleAsset(offer.assetAddress);
         require(offer.amount >= amount, 'Not enough asset balance on sale');
-        address buyer = msg.sender;
         IERC20 money = IERC20(offer.money);
         uint256 amountPrice = amount * offer.price;
-        require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
+        require(money.allowance(msg.sender, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
         uint256 royalties = asset.getRoyalties(offer.assetId);
         address creator = asset.getCreator(offer.assetId);
 
-        uint256 royaltiesAmount;
+        uint256 royaltiesFeeAmount;
         if (royalties == 0 || offer.seller == creator) {
-            royaltiesAmount = 0;
+            royaltiesFeeAmount = 0;
         } else {
-            royaltiesAmount = amount * royalties / 1e4;
+            royaltiesFeeAmount = amount * royalties / 1e4;
         }
         uint256 operatorFeeAmount = amountPrice * operatorFee / 1e4;
 
-        uint256 totalPriceWithoutRoyaltiesAndFee = amountPrice - royaltiesAmount - operatorFeeAmount;
+        uint256 sellerFeeAmount = amountPrice - royaltiesFeeAmount - operatorFeeAmount;
 
-        money.transferFrom(buyer, creator, royaltiesAmount);
-        money.transferFrom(buyer, platformOperator, operatorFeeAmount);
-        money.transferFrom(buyer, offer.seller, totalPriceWithoutRoyaltiesAndFee);
+        money.transferFrom(msg.sender, creator, royaltiesFeeAmount);
+        money.transferFrom(msg.sender, operator, operatorFeeAmount);
+        money.transferFrom(msg.sender, offer.seller, sellerFeeAmount);
 
         offer.amount = offer.amount - amount;
-        asset.safeTransferFrom(offer.seller, buyer, offer.assetId, amount, '');
+        asset.safeTransferFrom(offer.seller, msg.sender, offer.assetId, amount, '');
 
-        emit Buy(id, amount, royaltiesAmount, operatorFeeAmount);
+        emit Buy(id, amount, sellerFeeAmount, royaltiesFeeAmount, operatorFeeAmount);
     }
 }

@@ -131,7 +131,6 @@ describe('[spaceibles/offer/buy]', () => {
 		before('asset buy tx', async () => (buyTx = await spaceibleOffer.connect(buyer).buy(offer.id, 1)))
 		before('asset buy tx receipt', async () => (buyTxr = await buyTx.wait()))
 
-
 		before('safe balances after buy tx', async () => {
 			operatorMoneyBalanceAfter = await money.balanceOf(deployer.address)
 
@@ -143,6 +142,7 @@ describe('[spaceibles/offer/buy]', () => {
 		})
 
 		const expected = {
+			sellerMoneyBalanceAfter: parseUnits('97', moneyDecimals),
 			sellerAssetBalanceAfter: 99,
 			buyerAssetBalanceAfter: 1,
 			royaltiesAmount: 0,
@@ -166,8 +166,13 @@ describe('[spaceibles/offer/buy]', () => {
 		it('should have correct `buy` event data', async () => {
 			await expect(buyTx)
 				.to.emit(spaceibleOffer, 'Buy')
-				.withArgs(offer.id, buyAmount, expected.royaltiesAmount, expected.platformFeeAmount)
-
+				.withArgs(
+					offer.id,
+					buyAmount,
+					expected.sellerMoneyBalanceAfter,
+					expected.royaltiesAmount,
+					expected.platformFeeAmount
+				)
 		})
 	})
 })

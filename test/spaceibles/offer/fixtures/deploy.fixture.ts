@@ -14,7 +14,7 @@ export const deploySpaceibleOffer: Fixture<Deploy> = async () => {
 
 	const spaceibleOffer = await ethers
 		.getContractFactory(contractNames.SPACEIBLE_OFFER)
-		.then(factory => factory.deploy(deployer.address, 3000))
+		.then(factory => factory.deploy(deployer.address, 300))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract as SpaceibleOffer)
 

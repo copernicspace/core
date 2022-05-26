@@ -2,18 +2,15 @@
 pragma solidity ^0.8.13;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
-import '@openzeppelin/contracts/security/Pausable.sol';
+import '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
 
-import '../common/abstract/Royalties.sol';
-import '../common/abstract/Decimals.sol';
-import '../common/abstract/Creator.sol';
+import './SpaceibleAsset.sol';
 import '../utils/ERC20Percentage.sol';
 import '../utils/GeneratorID.sol';
 
 contract SpaceibleOffer is GeneratorID {
     using ERC20Percentage for uint256;
-    
+
     struct Offer {
         uint256 id;
         address seller;
@@ -24,14 +21,16 @@ contract SpaceibleOffer is GeneratorID {
         address money;
     }
 
-    address public platformOperator;
+    address public operator;
     uint256 public operatorFee;
+
     mapping(uint256 => Offer) private offers;
 
     event NewOffer(uint256 indexed id);
+    event Buy(uint256 indexed id, uint256 amount, uint256 sellerFee, uint256 royaltiesFee, uint256 platformFee);
 
-    constructor(address _platformOperator, uint256 _operatorFee) {
-        platformOperator = _platformOperator;
+    constructor(address _operator, uint256 _operatorFee) {
+        operator = _operator;
         operatorFee = _operatorFee;
     }
 
@@ -57,7 +56,7 @@ contract SpaceibleOffer is GeneratorID {
         Offer storage offer = offers[id];
         offer.id = id;
         offer.seller = msg.sender;
-        offer.assetAddress = assetAddress;        
+        offer.assetAddress = assetAddress;
         offer.assetId = assetId;
         offer.amount = price;
         offer.price = price;
@@ -82,36 +81,33 @@ contract SpaceibleOffer is GeneratorID {
         return (offer.seller, offer.assetAddress, offer.assetId, offer.amount, offer.price, offer.money);
     }
 
-    //todo refactor `buy`
-    // function buy(uint256 sellID, uint256 amount) public {
-    //     Offer memory offer = offers[sellID];
-    //     uint256 decimals = Decimals(offer.asset).decimals();
+    function buy(uint256 id, uint256 amount) public {
+        Offer memory offer = offers[id];
+        SpaceibleAsset asset = SpaceibleAsset(offer.assetAddress);
+        require(offer.amount >= amount, 'Not enough asset balance on sale');
+        IERC20 money = IERC20(offer.money);
+        uint256 amountPrice = amount * offer.price;
+        require(money.allowance(msg.sender, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
+        uint256 royalties = asset.getRoyalties(offer.assetId);
+        address creator = asset.getCreator(offer.assetId);
 
-    //     require(offer.amount >= amount, 'Not enough asset balance on sale');
-    //     require(amount >= offer.minAmount, 'Can not buy less than min amount');
-    //     address buyer = msg.sender;
-    //     IERC20 money = IERC20(offer.money);
-    //     uint256 decimalAmount = amount / (10**decimals);
-    //     uint256 amountPrice = decimalAmount * offer.price;
-    //     require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
-    //     address assetOwner = Creator(offer.asset).creator();
-    //     uint256 royalties = Royalties(offer.asset).royalties();
+        uint256 royaltiesFeeAmount;
+        if (royalties == 0 || offer.seller == creator) {
+            royaltiesFeeAmount = 0;
+        } else {
+            royaltiesFeeAmount = amount * royalties / 1e4;
+        }
+        uint256 operatorFeeAmount = amountPrice * operatorFee / 1e4;
 
-    //     if (offer.seller == assetOwner || royalties == 0) {
-    //         //todo add operator fee!
-    //         money.transferFrom(buyer, offer.seller, amountPrice);
-    //     } else {
-    //         uint256 royaltiesAmount = amountPrice.take(royalties, decimals);
-    //         uint256 operatorFeeAmount = amountPrice.take(operatorFee, decimals);
-    //         uint256 totalPriceWithoutRoyaltiesAndFee = amountPrice - royaltiesAmount - operatorFeeAmount;
+        uint256 sellerFeeAmount = amountPrice - royaltiesFeeAmount - operatorFeeAmount;
 
-    //         money.transferFrom(buyer, assetOwner, royaltiesAmount);
-    //         money.transferFrom(buyer, platformOperator, operatorFeeAmount);
-    //         money.transferFrom(buyer, offer.seller, totalPriceWithoutRoyaltiesAndFee);
-    //     }
+        money.transferFrom(msg.sender, creator, royaltiesFeeAmount);
+        money.transferFrom(msg.sender, operator, operatorFeeAmount);
+        money.transferFrom(msg.sender, offer.seller, sellerFeeAmount);
 
-    //     offer.amount = offer.amount - amount;
-    //     ERC1155(offer.asset).safeTransferFrom(offer.seller, buyer, offer.assetId, amount, '');
-    //     // emit Buy(buyer, sellID);
-    // }
+        offer.amount = offer.amount - amount;
+        asset.safeTransferFrom(offer.seller, msg.sender, offer.assetId, amount, '');
+
+        emit Buy(id, amount, sellerFeeAmount, royaltiesFeeAmount, operatorFeeAmount);
+    }
 }

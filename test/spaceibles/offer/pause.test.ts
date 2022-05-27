@@ -76,9 +76,12 @@ describe('[spaceibles/offer/pause]', () => {
 
 		before('assign new sell offer id', async () => (offer.id = getOfferId(sellTxr)))
 
-		it('should revert on `pause` tx if user is not creator of the offer', async () =>
+		it('should revert on `pause` tx if user is not offer seller', async () =>
 			await expect(spaceibleOffer.connect(user).pause(offer.id)).to.be.revertedWith(
 				'Only offer seller can pause'
 			))
+
+		it('should not revert on `pause` tx if user is seller', async () =>
+			await expect(spaceibleOffer.connect(seller).pause(offer.id)).not.to.be.reverted)
 	})
 })

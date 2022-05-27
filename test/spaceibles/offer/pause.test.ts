@@ -83,5 +83,10 @@ describe('[spaceibles/offer/pause]', () => {
 
 		it('should not revert on `pause` tx if user is seller', async () =>
 			await expect(spaceibleOffer.connect(seller).pause(offer.id)).not.to.be.reverted)
+
+		it('should set paused status after tx', async () => {
+			const pauseTx = await spaceibleOffer.connect(seller).pause(offer.id)
+			await expect(pauseTx).to.emit(spaceibleOffer, 'Pause').withArgs(offer.id)
+		})
 	})
 })

@@ -28,6 +28,7 @@ contract SpaceibleOffer is GeneratorID {
 
     event NewOffer(uint256 indexed id);
     event Buy(uint256 indexed id, uint256 amount, uint256 sellerFee, uint256 royaltiesFee, uint256 platformFee);
+    event Pause(uint256 indexed id);
 
     constructor(address _operator, uint256 _operatorFee) {
         operator = _operator;
@@ -117,5 +118,6 @@ contract SpaceibleOffer is GeneratorID {
     function pause(uint256 id) public {
         Offer memory offer = _offers[id];
         require(msg.sender == offer.seller, 'Only offer seller can pause');
+        emit Pause(id);
     }
 }

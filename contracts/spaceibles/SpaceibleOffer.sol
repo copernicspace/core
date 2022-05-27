@@ -24,7 +24,7 @@ contract SpaceibleOffer is GeneratorID {
     address public operator;
     uint256 public operatorFee;
 
-    mapping(uint256 => Offer) private offers;
+    mapping(uint256 => Offer) private _offers;
 
     event NewOffer(uint256 indexed id);
     event Buy(uint256 indexed id, uint256 amount, uint256 sellerFee, uint256 royaltiesFee, uint256 platformFee);
@@ -53,7 +53,7 @@ contract SpaceibleOffer is GeneratorID {
 
         id = generateId();
 
-        Offer storage offer = offers[id];
+        Offer storage offer = _offers[id];
         offer.id = id;
         offer.seller = msg.sender;
         offer.assetAddress = assetAddress;
@@ -77,12 +77,12 @@ contract SpaceibleOffer is GeneratorID {
             address money
         )
     {
-        Offer memory offer = offers[id];
+        Offer memory offer = _offers[id];
         return (offer.seller, offer.assetAddress, offer.assetId, offer.amount, offer.price, offer.money);
     }
 
     function buy(uint256 id, uint256 amount) public {
-        Offer memory offer = offers[id];
+        Offer memory offer = _offers[id];
         SpaceibleAsset asset = SpaceibleAsset(offer.assetAddress);
         require(offer.amount >= amount, 'Not enough asset balance on sale');
         IERC20 money = IERC20(offer.money);
@@ -115,7 +115,7 @@ contract SpaceibleOffer is GeneratorID {
     }
 
     function pause(uint256 id) public {
-        Offer memory offer = offers[id];
+        Offer memory offer = _offers[id];
         require(msg.sender == offer.seller, 'Only offer seller can pause');
     }
 }

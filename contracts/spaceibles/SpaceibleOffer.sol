@@ -110,4 +110,9 @@ contract SpaceibleOffer is GeneratorID {
 
         emit Buy(id, amount, sellerFeeAmount, royaltiesFeeAmount, operatorFeeAmount);
     }
+
+    function pause(uint256 id) public {
+        Offer memory offer = offers[id];
+        require(msg.sender == offer.seller, 'Only offer seller can pause');
+    }
 }

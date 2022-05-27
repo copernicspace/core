@@ -6,7 +6,7 @@ export const getOfferSellID = (txr: ContractReceipt): BigNumber =>
 		.map(e => e.args.sellID as BigNumber)
 		.pop()
 
-		export const getOfferId = (txr: ContractReceipt): BigNumber =>
+export const getOfferId = (txr: ContractReceipt): BigNumber =>
 	txr.events
 		.filter(e => e.event === 'NewOffer')
 		.map(e => e.args.id as BigNumber)

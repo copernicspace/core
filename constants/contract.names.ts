@@ -8,5 +8,4 @@ export default {
 	// Spaceibles
 	SPACEIBLE_ASSET: 'SpaceibleAsset',
 	SPACEIBLE_OFFER: 'SpaceibleOffer'
-
 }

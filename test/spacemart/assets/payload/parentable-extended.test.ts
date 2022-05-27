@@ -25,8 +25,6 @@ describe('[spacemart/assets/payload/payload/parentable-extended] extended parent
 	before('load receivers', async () => ([, , receiver, anotherReceiver] = await ethers.getSigners()))
 
 	describe('create `cosmos` child and assert balances', () => {
-
-		
 		let creatorBalance: BigNumber
 
 		before(

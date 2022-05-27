@@ -6,7 +6,10 @@ import { deployInstantOffer } from './fixtures/deployOffer.fixture'
 
 describe('[spacemart/offers/instant/deploy.test]', () => {
 	let instantOffer: InstantOffer
-	before('load `fixtures/deployInstantOffer`', async () => ({ instantOffer } = await waffle.loadFixture(deployInstantOffer)))
+	before(
+		'load `fixtures/deployInstantOffer`',
+		async () => ({ instantOffer } = await waffle.loadFixture(deployInstantOffer))
+	)
 
 	it('should have success tx receipt status', async () =>
 		await instantOffer.deployTransaction

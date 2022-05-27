@@ -67,7 +67,6 @@ describe('[spacemart/offers/instant/float-royalties-offer.test] Instant offer wi
 		await erc20Mock.connect(userA).approve(instantOffer.address, approveAmount)
 		await kycContract.connect(deployer).setKycStatus(userA.address, true)
 
-
 		const txr = await instantOffer
 			.connect(userA)
 			.buy(offerId, buyAmount)

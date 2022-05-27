@@ -87,7 +87,10 @@ contract SpaceibleOffer is GeneratorID {
         require(offer.amount >= amount, 'Not enough asset balance on sale');
         IERC20 money = IERC20(offer.money);
         uint256 amountPrice = amount * offer.price;
-        require(money.allowance(msg.sender, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
+        require(
+            money.allowance(msg.sender, address(this)) >= amountPrice,
+            'Insufficient balance via allowance to purchase'
+        );
         uint256 royalties = asset.getRoyalties(offer.assetId);
         address creator = asset.getCreator(offer.assetId);
 
@@ -95,9 +98,9 @@ contract SpaceibleOffer is GeneratorID {
         if (royalties == 0 || offer.seller == creator) {
             royaltiesFeeAmount = 0;
         } else {
-            royaltiesFeeAmount = amount * royalties / 1e4;
+            royaltiesFeeAmount = (amount * royalties) / 1e4;
         }
-        uint256 operatorFeeAmount = amountPrice * operatorFee / 1e4;
+        uint256 operatorFeeAmount = (amountPrice * operatorFee) / 1e4;
 
         uint256 sellerFeeAmount = amountPrice - royaltiesFeeAmount - operatorFeeAmount;
 

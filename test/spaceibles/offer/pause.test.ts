@@ -12,7 +12,6 @@ import { getOfferId } from '../../helpers/getOfferId.helper'
 
 const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 
-
 describe('[spaceibles/offer/pause]', () => {
 	let spaceibleAsset: SpaceibleAsset
 
@@ -31,7 +30,7 @@ describe('[spaceibles/offer/pause]', () => {
 		before('load asset/fixtures/deploy', async () => ({ spaceibleAsset } = await loadFixture(deploySpaceibleAsset)))
 
 		before('load offer/fixtures/deploy', async () => ({ spaceibleOffer } = await loadFixture(deploySpaceibleOffer)))
-		
+
 		before('deploy ERC20 Mock', async () => {
 			erc20Mock = await ethers
 				.getContractFactory(contractNames.ERC20_MOCK)

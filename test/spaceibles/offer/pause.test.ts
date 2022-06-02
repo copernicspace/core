@@ -12,7 +12,7 @@ import { getOfferId } from '../../helpers/getOfferId.helper'
 
 const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 
-describe('[spaceibles/offer/pause] `SpaceibleOffer::pause` test suite', () => {
+describe('[spaceibles/offer/pause] `SpaceibleOffer::pause/unpause/isPaused` test suite', () => {
 	let spaceibleAsset: SpaceibleAsset
 
 	let spaceibleOffer: SpaceibleOffer
@@ -79,7 +79,7 @@ describe('[spaceibles/offer/pause] `SpaceibleOffer::pause` test suite', () => {
 
 	before('send pause tx from seller', async () => (pauseTx = await spaceibleOffer.connect(seller).pause(offer.id)))
 
-	describe('* access to `pause` function', () => {
+	describe('access to `pause` function', () => {
 		it('should revert on `pause` tx if user is not offer seller', async () =>
 			await expect(spaceibleOffer.connect(user).pause(offer.id)).to.be.revertedWith(
 				'Only offer seller can pause'
@@ -89,7 +89,7 @@ describe('[spaceibles/offer/pause] `SpaceibleOffer::pause` test suite', () => {
 			await expect(spaceibleOffer.connect(seller).pause(offer.id)).not.to.be.reverted)
 	})
 
-	describe('* `paused` state for offer after `pause` tx', () => {
+	describe('`paused` state for offer after `pause` tx', () => {
 		it('should set paused status after tx', async () =>
 			await expect(pauseTx).to.emit(spaceibleOffer, 'Pause').withArgs(offer.id))
 
@@ -97,7 +97,7 @@ describe('[spaceibles/offer/pause] `SpaceibleOffer::pause` test suite', () => {
 			expect(await spaceibleOffer.isPaused(offer.id)).to.be.true)
 	})
 
-	describe('* access to `unpause` function', () => {
+	describe('access to `unpause` function', () => {
 		it('should revert on `unpause` tx if user is not offer seller', async () =>
 			await expect(spaceibleOffer.connect(user).unpause(offer.id)).to.be.revertedWith(
 				'Only offer seller can unpause'
@@ -107,5 +107,16 @@ describe('[spaceibles/offer/pause] `SpaceibleOffer::pause` test suite', () => {
 			await expect(spaceibleOffer.connect(seller).unpause(offer.id)).not.to.be.reverted)
 	})
 
-	// describe('* `unpause` state for offer offer after `unpause` tx`', async () => {})
+	describe('`unpause` state for offer offer after `unpause` tx`', async () => {
+		before('pause offer first', async () => await spaceibleOffer.connect(seller).pause(offer.id))
+
+		it('offer is paused before', async () => expect(await spaceibleOffer.isPaused(offer.id)).to.be.true)
+
+		it('should unpause offer', async () =>
+			await expect(spaceibleOffer.connect(seller).unpause(offer.id))
+				.to.emit(spaceibleOffer, 'Unpause')
+				.withArgs(offer.id))
+
+		it('offer should be unpause after', async () => expect(await spaceibleOffer.isPaused(offer.id)).to.be.false)
+	})
 })

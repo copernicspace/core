@@ -55,7 +55,6 @@ const createPayloadAssetWithFloatRoyalties: Fixture<Create> = async () => {
 	return { deployer, creator, payloadFactory, kycContract, payloadAsset, totalSupply, decimals }
 }
 
-
 export interface DeployInstantOffer {
 	deployer: SignerWithAddress
 	creator: SignerWithAddress

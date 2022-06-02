@@ -34,7 +34,7 @@ export interface Deploy {
  * @returns blockchain state with result of fixture actions
  */
 
- export const deployPayloadAsset: Fixture<Deploy> = async () => {
+export const deployPayloadAsset: Fixture<Deploy> = async () => {
 	const [deployer, creator]: SignerWithAddress[] = await ethers.getSigners()
 	const payloadContractAddress = await ethers
 		.getContractFactory(contract_names.PAYLOAD_ASSET)
@@ -53,7 +53,7 @@ export interface Deploy {
 		.then(factory => factory.connect(deployer).deploy(payloadContractAddress))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract as PayloadFactory)
-		
+
 	return { deployer, creator, payloadFactory, payloadContractAddress, kycContract }
 }
 

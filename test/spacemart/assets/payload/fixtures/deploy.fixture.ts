@@ -14,7 +14,6 @@ export interface Deploy {
 export const loadFixtureState0: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 export const loadFixtureState1: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 
-
 /**
  * This fixture deploys:
  * * payload asset contract

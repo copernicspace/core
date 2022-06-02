@@ -101,7 +101,7 @@ contract InstantOffer {
      */
     function buy(uint256 sellID, uint256 amount) public {
         Offer memory offer = offers[sellID];
-        //todo count decimals from ERC20 
+        //todo count decimals from ERC20
         uint256 decimals = Decimals(offer.asset).decimals();
 
         require(offer.amount >= amount, 'Not enough asset balance on sale');

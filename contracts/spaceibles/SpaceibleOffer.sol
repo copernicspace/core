@@ -24,10 +24,13 @@ contract SpaceibleOffer is GeneratorID {
     address public operator;
     uint256 public operatorFee;
 
-    mapping(uint256 => Offer) private offers;
+    mapping(uint256 => Offer) private _offers;
+    mapping(uint256 => bool) private _paused;
 
     event NewOffer(uint256 indexed id);
     event Buy(uint256 indexed id, uint256 amount, uint256 sellerFee, uint256 royaltiesFee, uint256 platformFee);
+    event Pause(uint256 indexed id);
+    event Unpause(uint256 indexed id);
 
     constructor(address _operator, uint256 _operatorFee) {
         operator = _operator;
@@ -53,7 +56,7 @@ contract SpaceibleOffer is GeneratorID {
 
         id = generateId();
 
-        Offer storage offer = offers[id];
+        Offer storage offer = _offers[id];
         offer.id = id;
         offer.seller = msg.sender;
         offer.assetAddress = assetAddress;
@@ -77,17 +80,20 @@ contract SpaceibleOffer is GeneratorID {
             address money
         )
     {
-        Offer memory offer = offers[id];
+        Offer memory offer = _offers[id];
         return (offer.seller, offer.assetAddress, offer.assetId, offer.amount, offer.price, offer.money);
     }
 
     function buy(uint256 id, uint256 amount) public {
-        Offer memory offer = offers[id];
+        Offer memory offer = _offers[id];
         SpaceibleAsset asset = SpaceibleAsset(offer.assetAddress);
         require(offer.amount >= amount, 'Not enough asset balance on sale');
         IERC20 money = IERC20(offer.money);
         uint256 amountPrice = amount * offer.price;
-        require(money.allowance(msg.sender, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
+        require(
+            money.allowance(msg.sender, address(this)) >= amountPrice,
+            'Insufficient balance via allowance to purchase'
+        );
         uint256 royalties = asset.getRoyalties(offer.assetId);
         address creator = asset.getCreator(offer.assetId);
 
@@ -95,9 +101,9 @@ contract SpaceibleOffer is GeneratorID {
         if (royalties == 0 || offer.seller == creator) {
             royaltiesFeeAmount = 0;
         } else {
-            royaltiesFeeAmount = amount * royalties / 1e4;
+            royaltiesFeeAmount = (amount * royalties) / 1e4;
         }
-        uint256 operatorFeeAmount = amountPrice * operatorFee / 1e4;
+        uint256 operatorFeeAmount = (amountPrice * operatorFee) / 1e4;
 
         uint256 sellerFeeAmount = amountPrice - royaltiesFeeAmount - operatorFeeAmount;
 
@@ -109,5 +115,23 @@ contract SpaceibleOffer is GeneratorID {
         asset.safeTransferFrom(offer.seller, msg.sender, offer.assetId, amount, '');
 
         emit Buy(id, amount, sellerFeeAmount, royaltiesFeeAmount, operatorFeeAmount);
+    }
+
+    function pause(uint256 id) public {
+        Offer memory offer = _offers[id];
+        require(msg.sender == offer.seller, 'Only offer seller can pause');
+        _paused[id] = true;
+        emit Pause(id);
+    }
+
+    function unpause(uint256 id) public {
+        Offer memory offer = _offers[id];
+        require(msg.sender == offer.seller, 'Only offer seller can unpause');
+        _paused[id] = false;
+        emit Unpause(id);
+    }
+
+    function isPaused(uint256 id) public view returns (bool) {
+        return _paused[id];
     }
 }

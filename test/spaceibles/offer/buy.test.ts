@@ -22,21 +22,6 @@ describe('[spaceibles/offer/buy]', () => {
 	let seller: SignerWithAddress
 	let buyer: SignerWithAddress
 
-	let mintTx: ContractTransaction
-	let mintTxr: ContractReceipt
-
-	let sellTx: ContractTransaction
-	let sellTxr: ContractReceipt
-
-	let newOffer: {
-		seller: string
-		assetAddress: string
-		assetId: BigNumber
-		amount: BigNumber
-		price: BigNumber
-		money: string
-	}
-
 	let operatorMoneyBalanceBefore: BigNumber, operatorMoneyBalanceAfter: BigNumber
 
 	let buyerAssetBalanceBefore: BigNumber, buyerAssetBalanceAfter: BigNumber
@@ -68,7 +53,7 @@ describe('[spaceibles/offer/buy]', () => {
 
 			moneyDecimals = await money.decimals()
 		})
-		before('load seller', async () => ([, seller, buyer] = await ethers.getSigners()))
+		before('load seller and buyer signers', async () => ([, seller, buyer] = await ethers.getSigners()))
 
 		const asset = {
 			id: undefined,
@@ -78,12 +63,15 @@ describe('[spaceibles/offer/buy]', () => {
 			data: '0x'
 		}
 
-		before('mint asset as seller and assign id', async () => {
-			mintTx = await spaceibleAsset.connect(seller).mint(asset.cid, asset.balance, asset.royalties, asset.data)
-			mintTxr = await mintTx.wait()
-		})
-
-		before('assign asset id from mint tx receipt', async () => (asset.id = getAssetID(mintTxr)))
+		before(
+			'mint asset as seller and assign id',
+			async () =>
+				await spaceibleAsset
+					.connect(seller)
+					.mint(asset.cid, asset.balance, asset.royalties, asset.data)
+					.then(tx => tx.wait())
+					.then(txr => (asset.id = getAssetID(txr)))
+		)
 
 		const offer = {
 			id: undefined,
@@ -96,19 +84,14 @@ describe('[spaceibles/offer/buy]', () => {
 			async () => await spaceibleAsset.connect(seller).setApprovalForAll(spaceibleOffer.address, true)
 		)
 
-		before('create new offer', async () => {
-			sellTx = await spaceibleOffer
-				.connect(seller)
-				.sell(spaceibleAsset.address, asset.id, offer.amount, offer.price, money.address)
-
-			sellTxr = await sellTx.wait()
-		})
-
-		before('assign new sell offer id', async () => (offer.id = getOfferId(sellTxr)))
-
 		before(
-			'read new offer`s data from chain',
-			async () => (newOffer = await spaceibleOffer.getSmartOffer(offer.id))
+			'create new offer',
+			async () =>
+				await spaceibleOffer
+					.connect(seller)
+					.sell(spaceibleAsset.address, asset.id, offer.amount, offer.price, money.address)
+					.then(tx => tx.wait())
+					.then(txr => (offer.id = getOfferId(txr)))
 		)
 
 		const buyAmount = 1
@@ -118,7 +101,7 @@ describe('[spaceibles/offer/buy]', () => {
 
 		before('set money allowance', async () => await money.connect(buyer).approve(spaceibleOffer.address, buyPrice))
 
-		before('safe balances before buy tx', async () => {
+		before('save balances before buy tx', async () => {
 			operatorMoneyBalanceBefore = await money.balanceOf(deployer.address)
 
 			buyerAssetBalanceBefore = await spaceibleAsset.balanceOf(buyer.address, asset.id)

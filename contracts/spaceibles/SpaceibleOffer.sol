@@ -9,12 +9,9 @@ import '../utils/ERC20Percentage.sol';
 import '../utils/GeneratorID.sol';
 
 contract SpaceibleOffer is GeneratorID {
-    using ERC20Percentage for uint256;
-
     struct Offer {
         uint256 id;
         address seller;
-        address assetAddress;
         uint256 assetId;
         uint256 amount;
         uint256 price;
@@ -23,6 +20,7 @@ contract SpaceibleOffer is GeneratorID {
 
     address public operator;
     uint256 public operatorFee;
+    address public assetAddress;
 
     mapping(uint256 => Offer) private _offers;
     mapping(uint256 => bool) private _paused;
@@ -32,13 +30,13 @@ contract SpaceibleOffer is GeneratorID {
     event Pause(uint256 indexed id);
     event Unpause(uint256 indexed id);
 
-    constructor(address _operator, uint256 _operatorFee) {
+    constructor(address _operator, uint256 _operatorFee, address _assetAddress) {
         operator = _operator;
         operatorFee = _operatorFee;
+        assetAddress = _assetAddress;
     }
 
     function sell(
-        address assetAddress,
         uint256 assetId,
         uint256 amount,
         uint256 price,
@@ -59,7 +57,6 @@ contract SpaceibleOffer is GeneratorID {
         Offer storage offer = _offers[id];
         offer.id = id;
         offer.seller = msg.sender;
-        offer.assetAddress = assetAddress;
         offer.assetId = assetId;
         offer.amount = price;
         offer.price = price;
@@ -73,7 +70,6 @@ contract SpaceibleOffer is GeneratorID {
         view
         returns (
             address seller,
-            address assetAddress,
             uint256 assetId,
             uint256 amount,
             uint256 price,
@@ -81,12 +77,12 @@ contract SpaceibleOffer is GeneratorID {
         )
     {
         Offer memory offer = _offers[id];
-        return (offer.seller, offer.assetAddress, offer.assetId, offer.amount, offer.price, offer.money);
+        return (offer.seller, offer.assetId, offer.amount, offer.price, offer.money);
     }
 
     function buy(uint256 id, uint256 amount) public {
         Offer memory offer = _offers[id];
-        SpaceibleAsset asset = SpaceibleAsset(offer.assetAddress);
+        SpaceibleAsset asset = SpaceibleAsset(assetAddress);
         require(offer.amount >= amount, 'Not enough asset balance on sale');
         IERC20 money = IERC20(offer.money);
         uint256 amountPrice = amount * offer.price;

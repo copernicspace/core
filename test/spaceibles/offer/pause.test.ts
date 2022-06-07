@@ -6,7 +6,6 @@ import { ERC20Mock, SpaceibleAsset, SpaceibleOffer } from '../../../typechain'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import contractNames from '../../../constants/contract.names'
 import { ContractReceipt, ContractTransaction } from '@ethersproject/contracts'
-import { deploySpaceibleAsset } from '../asset/fixtures/deploy.fixture'
 import { getAssetID } from '../../helpers/getAssetId.helper'
 import { getOfferId } from '../../helpers/getOfferId.helper'
 
@@ -28,9 +27,8 @@ describe('[spaceibles/offer/pause] `SpaceibleOffer::pause/unpause/isPaused` test
 
 	let pauseTx: ContractTransaction
 
-	before('load asset/fixtures/deploy', async () => ({ spaceibleAsset } = await loadFixture(deploySpaceibleAsset)))
 
-	before('load offer/fixtures/deploy', async () => ({ spaceibleOffer } = await loadFixture(deploySpaceibleOffer)))
+	before('load offer/fixtures/deploy', async () => ({spaceibleAsset, spaceibleOffer } = await loadFixture(deploySpaceibleOffer)))
 
 	before('deploy ERC20 Mock', async () => {
 		erc20Mock = await ethers
@@ -68,9 +66,7 @@ describe('[spaceibles/offer/pause] `SpaceibleOffer::pause/unpause/isPaused` test
 	)
 
 	before('create new offer', async () => {
-		sellTx = await spaceibleOffer
-			.connect(seller)
-			.sell(spaceibleAsset.address, asset.id, offer.amount, offer.price, erc20Mock.address)
+		sellTx = await spaceibleOffer.connect(seller).sell(asset.id, offer.amount, offer.price, erc20Mock.address)
 
 		sellTxr = await sellTx.wait()
 	})

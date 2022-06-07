@@ -37,11 +37,10 @@ describe('[spaceibles/offer/buy]', () => {
 	let moneyDecimals: number
 
 	describe('buy asset via offer', () => {
-		before('load asset/fixtures/deploy', async () => ({ spaceibleAsset } = await loadFixture(deploySpaceibleAsset)))
 
 		before(
 			'load offer/fixtures/deploy',
-			async () => ({ deployer, spaceibleOffer } = await loadFixture(deploySpaceibleOffer))
+			async () => ({ deployer, spaceibleAsset, spaceibleOffer } = await loadFixture(deploySpaceibleOffer))
 		)
 
 		before('deploy ERC20 Mock', async () => {
@@ -89,7 +88,7 @@ describe('[spaceibles/offer/buy]', () => {
 			async () =>
 				await spaceibleOffer
 					.connect(seller)
-					.sell(spaceibleAsset.address, asset.id, offer.amount, offer.price, money.address)
+					.sell(asset.id, offer.amount, offer.price, money.address)
 					.then(tx => tx.wait())
 					.then(txr => (offer.id = getOfferId(txr)))
 		)

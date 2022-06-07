@@ -7,7 +7,6 @@ import contractNames from '../../../constants/contract.names'
 import { ERC20Mock, SpaceibleAsset, SpaceibleOffer } from '../../../typechain'
 import { getAssetID } from '../../helpers/getAssetId.helper'
 import { getOfferId } from '../../helpers/getOfferId.helper'
-import { deploySpaceibleAsset } from '../asset/fixtures/deploy.fixture'
 import { deploySpaceibleOffer } from './fixtures/deploy.fixture'
 
 const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
@@ -27,9 +26,8 @@ describe('[spaceibles/offer/sell]', () => {
 	let erc20Mock: ERC20Mock
 
 	describe('create new offer', () => {
-		before('load asset/fixtures/deploy', async () => ({ spaceibleAsset } = await loadFixture(deploySpaceibleAsset)))
 
-		before('load offer/fixtures/deploy', async () => ({ spaceibleOffer } = await loadFixture(deploySpaceibleOffer)))
+		before('load offer/fixtures/deploy', async () => ({ spaceibleAsset, spaceibleOffer } = await loadFixture(deploySpaceibleOffer)))
 
 		before('deploy ERC20 Mock', async () => {
 			erc20Mock = await ethers
@@ -67,9 +65,7 @@ describe('[spaceibles/offer/sell]', () => {
 		)
 
 		before('create new offer', async () => {
-			sellTx = await spaceibleOffer
-				.connect(seller)
-				.sell(spaceibleAsset.address, asset.id, offer.amount, offer.price, erc20Mock.address)
+			sellTx = await spaceibleOffer.connect(seller).sell(asset.id, offer.amount, offer.price, erc20Mock.address)
 
 			sellTxr = await sellTx.wait()
 		})
@@ -78,7 +74,6 @@ describe('[spaceibles/offer/sell]', () => {
 
 		let newOffer: {
 			seller: string
-			assetAddress: string
 			assetId: BigNumber
 			amount: BigNumber
 			price: BigNumber
@@ -91,8 +86,6 @@ describe('[spaceibles/offer/sell]', () => {
 
 		it('should have correct `id` value', async () => expect(offer.id).to.be.eq(1))
 		it('should have correct `seller` value', async () => expect(newOffer.seller).to.be.eq(seller.address))
-		it('should have correct `assetAddress` value', async () =>
-			expect(newOffer.assetAddress).to.be.eq(spaceibleAsset.address))
 		it('should have correct `assetId` value', async () => expect(newOffer.assetId).to.be.eq(asset.id))
 		it('should have correct `amount` value', async () => expect(newOffer.amount).to.be.eq(offer.amount))
 		it('should have correct `price` value', async () => expect(newOffer.price).to.be.eq(offer.price))

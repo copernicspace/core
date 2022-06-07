@@ -1,22 +1,24 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Fixture } from 'ethereum-waffle'
-import { ethers } from 'hardhat'
+import { ethers, waffle } from 'hardhat'
 import contractNames from '../../../../constants/contract.names'
-import { SpaceibleOffer } from '../../../../typechain'
+import { SpaceibleAsset, SpaceibleOffer } from '../../../../typechain'
+import { deploySpaceibleAsset } from '../../asset/fixtures/deploy.fixture'
 
 export interface Deploy {
 	deployer: SignerWithAddress
+	spaceibleAsset: SpaceibleAsset
 	spaceibleOffer: SpaceibleOffer
 }
 
 export const deploySpaceibleOffer: Fixture<Deploy> = async () => {
 	const [deployer]: SignerWithAddress[] = await ethers.getSigners()
-
+	const { spaceibleAsset } = await waffle.loadFixture(deploySpaceibleAsset)
 	const spaceibleOffer = await ethers
 		.getContractFactory(contractNames.SPACEIBLE_OFFER)
-		.then(factory => factory.deploy(deployer.address, 300))
+		.then(factory => factory.deploy(deployer.address, 300, spaceibleAsset.address))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract as SpaceibleOffer)
 
-	return { deployer, spaceibleOffer }
+	return { deployer, spaceibleAsset, spaceibleOffer }
 }

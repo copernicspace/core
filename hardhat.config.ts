@@ -11,7 +11,7 @@ import * as secret from './secret'
 
 const config = {
 	solidity: {
-		version: '0.8.13',
+		version: '0.8.14',
 		settings: {
 			optimizer: {
 				enabled: true,

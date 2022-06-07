@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: private
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.14;
 
 abstract contract GeneratorID {
     uint256 private nonce;

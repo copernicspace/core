@@ -10,8 +10,13 @@ async function main() {
 		.then(factory => factory.deploy('ipfs://'))
 		.then(contract => contract.deployed())
 		.then(deployedContract => {
-			console.log(`SpaceibleAsset contract deployed: ${deployedContract.address}`)
-			console.log(polygonScanLink(deployedContract.deployTransaction.hash, network))
+			console.log('`SpaceibleAsset` contract deployed')
+			console.log(`Address: ${deployedContract.address}`)
+			return deployedContract.deployTransaction.wait()
+		})
+		.then(txr => {
+			console.log(`Block: ${txr.blockNumber}`)
+			console.log(`TX: ${polygonScanLink(txr.transactionHash, network)}`)
 		})
 }
 

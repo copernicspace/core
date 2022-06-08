@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: private
+pragma solidity ^0.8.14;
+
 import '../utils/ERC20Percentage.sol';
 
 contract ERC20PercentageTest {

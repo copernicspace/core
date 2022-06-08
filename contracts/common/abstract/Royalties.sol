@@ -2,15 +2,10 @@
 pragma solidity ^0.8.14;
 
 abstract contract Royalties {
-    uint256 internal _royalties;
+    uint256 public royalties;
 
-    function _setRoyalties(uint256 royalties) internal {
-        if (royalties > 0) {
-            _royalties = royalties;
-        }
+    function _setRoyalties(uint256 _royalties) internal {
+            royalties = _royalties;
     }
 
-    function royalties() public view returns (uint256) {
-        return _royalties;
-    }
 }

@@ -37,7 +37,6 @@ describe('[spaceibles/offer/buy]', () => {
 	let moneyDecimals: number
 
 	describe('buy asset via offer', () => {
-
 		before(
 			'load offer/fixtures/deploy',
 			async () => ({ deployer, spaceibleAsset, spaceibleOffer } = await loadFixture(deploySpaceibleOffer))

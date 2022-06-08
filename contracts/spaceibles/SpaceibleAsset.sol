@@ -5,16 +5,23 @@ import '@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol';
 
 import '../utils/GeneratorID.sol';
 
+// [BREAKS CODE]: invariant forall(uint256 assetID in _creators) _creators[assetID] != address(0);
+
 contract SpaceibleAsset is ERC1155URIStorage, GeneratorID {
     event Royalties(uint256 indexed id, uint256 indexed royalties);
 
     mapping(uint256 => uint256) private _royalties;
+    /// #if_updated forall(uint256 assetID in _creators) _creators[assetID] != address(0);
     mapping(uint256 => address) private _creators;
 
     constructor(string memory uri) ERC1155(uri) {
         _setBaseURI(uri);
     }
 
+    /// #if_succeeds  {:msg "correct mint params"}
+    ///         balance != 0 
+    ///     &&  bytes(cid).length != 0
+    ///     &&  royalties <= 10000;
     function mint(
         string memory cid,
         uint256 balance,
@@ -28,6 +35,7 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID {
         _setCreator(id, msg.sender);
     }
 
+    /// #if_succeeds {:msg "royalties only set once"} old(_royalties[id]) == 0;
     function _setRoyalties(uint256 id, uint256 royalties) internal {
         _royalties[id] = royalties;
         emit Royalties(id, royalties);
@@ -37,6 +45,9 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID {
         return _royalties[id];
     }
 
+    /// #if_succeeds {:msg "creator only set once"} 
+    ///     old(_creators[id]) == address(0) &&
+    ///     creator != address(0);
     function _setCreator(uint256 id, address creator) internal {
         _creators[id] = creator;
     }

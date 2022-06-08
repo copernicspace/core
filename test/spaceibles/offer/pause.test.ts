@@ -27,8 +27,10 @@ describe('[spaceibles/offer/pause] `SpaceibleOffer::pause/unpause/isPaused` test
 
 	let pauseTx: ContractTransaction
 
-
-	before('load offer/fixtures/deploy', async () => ({spaceibleAsset, spaceibleOffer } = await loadFixture(deploySpaceibleOffer)))
+	before(
+		'load offer/fixtures/deploy',
+		async () => ({ spaceibleAsset, spaceibleOffer } = await loadFixture(deploySpaceibleOffer))
+	)
 
 	before('deploy ERC20 Mock', async () => {
 		erc20Mock = await ethers

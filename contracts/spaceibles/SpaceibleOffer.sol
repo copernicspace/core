@@ -58,7 +58,7 @@ contract SpaceibleOffer is GeneratorID {
         offer.id = id;
         offer.seller = msg.sender;
         offer.assetId = assetId;
-        offer.amount = price;
+        offer.amount = amount;
         offer.price = price;
         offer.money = money;
 

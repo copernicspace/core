@@ -26,8 +26,10 @@ describe('[spaceibles/offer/sell]', () => {
 	let erc20Mock: ERC20Mock
 
 	describe('create new offer', () => {
-
-		before('load offer/fixtures/deploy', async () => ({ spaceibleAsset, spaceibleOffer } = await loadFixture(deploySpaceibleOffer)))
+		before(
+			'load offer/fixtures/deploy',
+			async () => ({ spaceibleAsset, spaceibleOffer } = await loadFixture(deploySpaceibleOffer))
+		)
 
 		before('deploy ERC20 Mock', async () => {
 			erc20Mock = await ethers
@@ -41,7 +43,7 @@ describe('[spaceibles/offer/sell]', () => {
 		const asset = {
 			id: undefined,
 			cid: 'mockCID-deployer-0x123abc',
-			balance: 100,
+			balance: 142,
 			royalties: 0,
 			data: '0x'
 		}
@@ -55,8 +57,8 @@ describe('[spaceibles/offer/sell]', () => {
 
 		const offer = {
 			id: undefined,
-			amount: 100,
-			price: 100
+			amount: 142,
+			price: 1000
 		}
 
 		before(

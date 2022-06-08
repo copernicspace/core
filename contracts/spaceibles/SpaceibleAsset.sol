@@ -33,7 +33,7 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID {
         emit Royalties(id, royalties);
     }
 
-    function getRoyalties(uint256 id) public returns (uint256) {
+    function getRoyalties(uint256 id) public view returns (uint256) {
         return _royalties[id];
     }
 
@@ -41,7 +41,7 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID {
         _creators[id] = creator;
     }
 
-    function getCreator(uint256 id) public returns (address) {
+    function getCreator(uint256 id) public view returns (address) {
         return _creators[id];
     }
 }

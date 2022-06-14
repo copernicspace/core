@@ -65,7 +65,7 @@ contract SpaceibleOffer is GeneratorID {
         emit NewOffer(id);
     }
 
-    function getSmartOffer(uint256 id)
+    function getOffer(uint256 id)
         public
         view
         returns (
@@ -97,7 +97,7 @@ contract SpaceibleOffer is GeneratorID {
         if (royalties == 0 || offer.seller == creator) {
             royaltiesFeeAmount = 0;
         } else {
-            royaltiesFeeAmount = (amount * royalties) / 1e4;
+            royaltiesFeeAmount = (amountPrice * royalties) / 1e4;
         }
         uint256 operatorFeeAmount = (amountPrice * operatorFee) / 1e4;
 

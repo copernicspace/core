@@ -85,7 +85,7 @@ contract SpaceibleOffer is GeneratorID {
     }
 
     function buy(uint256 id, uint256 amount) public {
-        Offer memory offer = _offers[id];
+        Offer storage offer = _offers[id];
         SpaceibleAsset asset = SpaceibleAsset(assetAddress);
         require(offer.amount >= amount, 'Not enough asset balance on sale');
         IERC20 money = IERC20(offer.money);

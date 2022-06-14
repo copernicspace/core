@@ -30,7 +30,11 @@ contract SpaceibleOffer is GeneratorID {
     event Pause(uint256 indexed id);
     event Unpause(uint256 indexed id);
 
-    constructor(address _operator, uint256 _operatorFee, address _assetAddress) {
+    constructor(
+        address _operator,
+        uint256 _operatorFee,
+        address _assetAddress
+    ) {
         operator = _operator;
         operatorFee = _operatorFee;
         assetAddress = _assetAddress;

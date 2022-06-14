@@ -30,7 +30,11 @@ contract SpaceibleOffer is GeneratorID {
     event Pause(uint256 indexed id);
     event Unpause(uint256 indexed id);
 
-    constructor(address _operator, uint256 _operatorFee, address _assetAddress) {
+    constructor(
+        address _operator,
+        uint256 _operatorFee,
+        address _assetAddress
+    ) {
         operator = _operator;
         operatorFee = _operatorFee;
         assetAddress = _assetAddress;
@@ -65,7 +69,7 @@ contract SpaceibleOffer is GeneratorID {
         emit NewOffer(id);
     }
 
-    function getSmartOffer(uint256 id)
+    function getOffer(uint256 id)
         public
         view
         returns (
@@ -81,7 +85,7 @@ contract SpaceibleOffer is GeneratorID {
     }
 
     function buy(uint256 id, uint256 amount) public {
-        Offer memory offer = _offers[id];
+        Offer storage offer = _offers[id];
         SpaceibleAsset asset = SpaceibleAsset(assetAddress);
         require(offer.amount >= amount, 'Not enough asset balance on sale');
         IERC20 money = IERC20(offer.money);
@@ -97,7 +101,7 @@ contract SpaceibleOffer is GeneratorID {
         if (royalties == 0 || offer.seller == creator) {
             royaltiesFeeAmount = 0;
         } else {
-            royaltiesFeeAmount = (amount * royalties) / 1e4;
+            royaltiesFeeAmount = (amountPrice * royalties) / 1e4;
         }
         uint256 operatorFeeAmount = (amountPrice * operatorFee) / 1e4;
 

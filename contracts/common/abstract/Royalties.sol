@@ -5,7 +5,6 @@ abstract contract Royalties {
     uint256 public royalties;
 
     function _setRoyalties(uint256 _royalties) internal {
-            royalties = _royalties;
+        royalties = _royalties;
     }
-
 }

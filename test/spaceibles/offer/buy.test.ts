@@ -1,159 +1,233 @@
-import { BigNumber } from '@ethersproject/bignumber'
-import { ContractReceipt, ContractTransaction } from '@ethersproject/contracts'
+import { ContractTransaction } from '@ethersproject/contracts'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { expect } from 'chai'
+import { BigNumber } from 'ethers'
 import { parseUnits } from 'ethers/lib/utils'
 import { ethers, waffle } from 'hardhat'
 import contractNames from '../../../constants/contract.names'
 import { ERC20Mock, SpaceibleAsset, SpaceibleOffer } from '../../../typechain'
 import { getAssetID } from '../../helpers/getAssetId.helper'
 import { getOfferId } from '../../helpers/getOfferId.helper'
-import { deploySpaceibleAsset } from '../asset/fixtures/deploy.fixture'
 import { deploySpaceibleOffer } from './fixtures/deploy.fixture'
+import { Balances, balances } from './helpers/balances'
 
 const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 
-describe('[spaceibles/offer/buy]', () => {
+describe('[spaceibles/offer/buy] buy asset via offer', () => {
+	let deployer: SignerWithAddress
+
 	let spaceibleAsset: SpaceibleAsset
 	let spaceibleOffer: SpaceibleOffer
-
-	let deployer: SignerWithAddress
 
 	let seller: SignerWithAddress
 	let buyer: SignerWithAddress
 
-	let operatorMoneyBalanceBefore: BigNumber, operatorMoneyBalanceAfter: BigNumber
-
-	let buyerAssetBalanceBefore: BigNumber, buyerAssetBalanceAfter: BigNumber
-	let buyerMoneyBalanceBefore: BigNumber, buyerMoneyBalanceAfter: BigNumber
-
-	let sellerMoneyBalanceBefore: BigNumber, sellerMoneyBalanceAfter
-	let sellerAssetBalanceBefore: BigNumber, sellerAssetBalanceAfter
-
-	let buyTx: ContractTransaction
-	let buyTxr: ContractReceipt
-
 	let money: ERC20Mock
 	let moneyDecimals: number
 
-	describe('buy asset via offer', () => {
-		before(
-			'load offer/fixtures/deploy',
-			async () => ({ deployer, spaceibleAsset, spaceibleOffer } = await loadFixture(deploySpaceibleOffer))
-		)
+	let buyTx: ContractTransaction
 
-		before('deploy ERC20 Mock', async () => {
-			money = await ethers
-				.getContractFactory(contractNames.ERC20_MOCK)
-				.then(factory => factory.deploy())
-				.then(contract => contract.deployed())
-				.then(deployedContract => deployedContract as ERC20Mock)
+	before(
+		'load offer/fixtures/deploy',
+		async () => ({ deployer, spaceibleAsset, spaceibleOffer } = await loadFixture(deploySpaceibleOffer))
+	)
 
-			moneyDecimals = await money.decimals()
-		})
-		before('load seller and buyer signers', async () => ([, seller, buyer] = await ethers.getSigners()))
+	before('load seller and buyer signers', async () => ([, seller, buyer] = await ethers.getSigners()))
 
-		const asset = {
-			id: undefined,
-			cid: 'mockCID-deployer-0x123abc',
-			balance: 100,
-			royalties: 500,
-			data: '0x'
-		}
+	before('deploy ERC20 Mock', async () => {
+		money = await ethers
+			.getContractFactory(contractNames.ERC20_MOCK)
+			.then(factory => factory.deploy())
+			.then(contract => contract.deployed())
+			.then(deployedContract => deployedContract as ERC20Mock)
 
-		before(
-			'mint asset as seller and assign id',
-			async () =>
-				await spaceibleAsset
-					.connect(seller)
-					.mint(asset.cid, asset.balance, asset.royalties, asset.data)
-					.then(tx => tx.wait())
-					.then(txr => (asset.id = getAssetID(txr)))
-		)
+		moneyDecimals = await money.decimals()
+	})
 
-		const offer = {
-			id: undefined,
-			amount: 100,
-			price: parseUnits('100', moneyDecimals)
-		}
+	const bps = 10000
+	const operatorFee = 300
 
-		before(
-			'approve for all as seller',
-			async () => await spaceibleAsset.connect(seller).setApprovalForAll(spaceibleOffer.address, true)
-		)
+	const asset = {
+		id: undefined, // initialize after mint tx
+		cid: 'test-buy-tx',
+		balance: 42,
+		royalties: 500, // 5%
+		data: '0x'
+	}
 
-		before(
-			'create new offer',
-			async () =>
-				await spaceibleOffer
-					.connect(seller)
-					.sell(asset.id, offer.amount, offer.price, money.address)
-					.then(tx => tx.wait())
-					.then(txr => (offer.id = getOfferId(txr)))
-		)
+	before(
+		'mint asset as seller and assign id',
+		async () =>
+			await spaceibleAsset
+				.connect(seller)
+				.mint(asset.cid, asset.balance, asset.royalties, asset.data)
+				.then(tx => tx.wait())
+				.then(txr => (asset.id = getAssetID(txr)))
+	)
 
-		const buyAmount = 1
-		const buyPrice = offer.price.mul(buyAmount)
+	const offer = {
+		id: undefined, // initialize after sell tx
+		amount: asset.balance, // sell max balance
+		price: parseUnits('100', moneyDecimals)
+	}
 
-		before('mint mock money to buyer', async () => await money.mintTo(buyer.address, buyPrice))
+	before(
+		'approve for all as seller',
+		async () => await spaceibleAsset.connect(seller).setApprovalForAll(spaceibleOffer.address, true)
+	)
 
-		before('set money allowance', async () => await money.connect(buyer).approve(spaceibleOffer.address, buyPrice))
+	before(
+		'create new offer as seller',
+		async () =>
+			await spaceibleOffer
+				.connect(seller)
+				.sell(asset.id, offer.amount, offer.price, money.address)
+				.then(tx => tx.wait())
+				.then(txr => (offer.id = getOfferId(txr)))
+	)
 
-		before('save balances before buy tx', async () => {
-			operatorMoneyBalanceBefore = await money.balanceOf(deployer.address)
+	const buyAmount = 9
+	const buyPrice = offer.price.mul(buyAmount)
 
-			buyerAssetBalanceBefore = await spaceibleAsset.balanceOf(buyer.address, asset.id)
-			buyerMoneyBalanceBefore = await money.balanceOf(buyer.address)
+	before('mint mock money to buyer', async () => await money.mintTo(buyer.address, buyPrice))
 
-			sellerAssetBalanceBefore = await spaceibleAsset.balanceOf(seller.address, asset.id)
-			sellerMoneyBalanceBefore = await money.balanceOf(seller.address)
-		})
+	before('set money allowance', async () => await money.connect(buyer).approve(spaceibleOffer.address, buyPrice))
 
-		before('asset buy tx', async () => (buyTx = await spaceibleOffer.connect(buyer).buy(offer.id, 1)))
-		before('asset buy tx receipt', async () => (buyTxr = await buyTx.wait()))
+	const actual: Balances = balances()
+	const expected: Balances = balances()
 
-		before('safe balances after buy tx', async () => {
-			operatorMoneyBalanceAfter = await money.balanceOf(deployer.address)
+	before('save balances before buy tx', async () => {
+		actual.before.operator.money = await money.balanceOf(deployer.address)
+		actual.before.buyer.asset = await spaceibleAsset.balanceOf(buyer.address, asset.id)
+		actual.before.buyer.money = await money.balanceOf(buyer.address)
+		actual.before.seller.asset = await spaceibleAsset.balanceOf(seller.address, asset.id)
+		actual.before.seller.money = await money.balanceOf(seller.address)
+	})
 
-			buyerAssetBalanceAfter = await spaceibleAsset.balanceOf(buyer.address, asset.id)
-			buyerMoneyBalanceAfter = await money.balanceOf(buyer.address)
+	let actualOfferAmountBefore
+	before(
+		'save available offer before  buy tx',
+		async () => await spaceibleOffer.getOffer(offer.id).then(offer => (actualOfferAmountBefore = offer.amount))
+	)
 
-			sellerAssetBalanceAfter = await spaceibleAsset.balanceOf(seller.address, asset.id)
-			sellerMoneyBalanceAfter = await money.balanceOf(seller.address)
-		})
+	before('asset buy tx', async () => (buyTx = await spaceibleOffer.connect(buyer).buy(offer.id, buyAmount)))
 
-		const expected = {
-			sellerMoneyBalanceAfter: parseUnits('97', moneyDecimals),
-			sellerAssetBalanceAfter: 99,
-			buyerAssetBalanceAfter: 1,
-			royaltiesAmount: 0,
-			platformFeeAmount: parseUnits('3', moneyDecimals)
-		}
+	before('safe balances after buy tx', async () => {
+		actual.after.operator.money = await money.balanceOf(deployer.address)
+		actual.after.buyer.asset = await spaceibleAsset.balanceOf(buyer.address, asset.id)
+		actual.after.buyer.money = await money.balanceOf(buyer.address)
+		actual.after.seller.asset = await spaceibleAsset.balanceOf(seller.address, asset.id)
+		actual.after.seller.money = await money.balanceOf(seller.address)
+	})
 
-		it('operator should have correct money balance before', () => expect(operatorMoneyBalanceBefore).to.be.eq(0))
-		it('buyer should have correct money balance before', () => expect(buyerMoneyBalanceBefore).to.be.eq(buyPrice))
-		it('buyer should have correct asset balance before', () => expect(buyerAssetBalanceBefore).to.be.eq(0))
-		it('seller should have correct asset balance before', () => expect(sellerAssetBalanceBefore).to.be.eq(100))
-		it('seller should have correct money balance before', () => expect(sellerMoneyBalanceBefore).to.be.eq(0))
+	before('set up expected balances values before', async () => {
+		expected.before.operator.money = BigNumber.from('0')
+		expected.before.buyer.money = buyPrice
+		expected.before.buyer.asset = BigNumber.from('0')
+		expected.before.seller.money = BigNumber.from('0')
+		expected.before.seller.asset = BigNumber.from(asset.balance)
+	})
 
+	before('set up expected balances values after', async () => {
+		const amountPrice = offer.price.mul(buyAmount)
+		const royaltiesFeeAmount = '0' // seller is creator
+		const operatorFeeAmount = amountPrice.mul(operatorFee).div(bps)
+		const sellerFeeAmount = amountPrice.sub(royaltiesFeeAmount).sub(operatorFeeAmount)
+
+		expected.after.operator.money = BigNumber.from(operatorFeeAmount)
+		expected.after.buyer.money = BigNumber.from('0')
+		expected.after.buyer.asset = BigNumber.from(buyAmount)
+		expected.after.seller.money = sellerFeeAmount
+		expected.after.seller.asset = BigNumber.from(asset.balance - buyAmount)
+	})
+
+	describe('seller/buyer/operator balances before assert', () => {
+		it('operator should have correct money balance before', async () =>
+			expect(actual.before.operator.money).to.be.eq(expected.before.operator.money))
+
+		it('buyer should have correct money balance before', () =>
+			expect(actual.before.buyer.money).to.be.eq(expected.before.buyer.money))
+
+		it('buyer should have correct asset balance before', () =>
+			expect(actual.before.buyer.asset).to.be.eq(expected.before.buyer.asset))
+
+		it('seller should have correct asset balance before', () =>
+			expect(actual.before.seller.asset).to.be.eq(expected.before.seller.asset))
+
+		it('seller should have correct money balance before', () =>
+			expect(actual.before.seller.money).to.be.eq(expected.before.seller.money))
+	})
+
+	describe('seller/buyer/operator balances after assert', () => {
 		it('operator should have correct money balance after', () =>
-			expect(operatorMoneyBalanceAfter).to.be.eq(parseUnits('3', moneyDecimals)))
-		it('buyer should have correct money balance after', () => expect(buyerMoneyBalanceAfter).to.be.eq(0))
-		it('buyer should have correct asset balance after', () => expect(buyerAssetBalanceAfter).to.be.eq(1))
-		it('seller should have correct money balance after', () =>
-			expect(sellerMoneyBalanceAfter).to.be.eq(parseUnits('97', moneyDecimals)))
-		it('seller should have correct asset balance after', () => expect(sellerAssetBalanceAfter).to.be.eq(99))
+			expect(actual.after.operator.money).to.be.eq(expected.after.operator.money))
 
-		it('should have correct `buy` event data', async () => {
+		it('buyer should have correct money balance after', () =>
+			expect(actual.after.buyer.money).to.be.eq(expected.after.buyer.money))
+
+		it('buyer should have correct asset balance after', () =>
+			expect(actual.after.buyer.asset).to.be.eq(expected.after.buyer.asset))
+
+		it('seller should have correct money balance after', () =>
+			expect(actual.after.seller.money).to.be.eq(expected.after.seller.money))
+
+		it('seller should have correct asset balance after', () =>
+			expect(actual.after.seller.asset).to.be.eq(expected.after.seller.asset))
+	})
+
+	describe('correct `Buy` event data', () => {
+		let expectedBuyEventData
+		before('set up expected buy event data', async () => {
+			const amountPrice = offer.price.mul(buyAmount)
+			const royaltiesFeeAmount = '0' // seller is creator
+			const operatorFeeAmount = amountPrice.mul(operatorFee).div(bps)
+			const sellerFeeAmount = amountPrice.sub(royaltiesFeeAmount).sub(operatorFeeAmount)
+
+			expectedBuyEventData = {
+				id: offer.id,
+				amount: buyAmount,
+				sellerFee: sellerFeeAmount,
+				royaltiesFee: royaltiesFeeAmount,
+				operatorFee: operatorFeeAmount
+			}
+		})
+
+		it('should have correct `Buy` event data', async () => {
 			await expect(buyTx)
 				.to.emit(spaceibleOffer, 'Buy')
 				.withArgs(
-					offer.id,
-					buyAmount,
-					expected.sellerMoneyBalanceAfter,
-					expected.royaltiesAmount,
-					expected.platformFeeAmount
+					expectedBuyEventData.id,
+					expectedBuyEventData.amount,
+					expectedBuyEventData.sellerFee,
+					expectedBuyEventData.royaltiesFee,
+					expectedBuyEventData.operatorFee
 				)
 		})
+	})
+
+	describe('buy asset via offer: assert offer amount before/after buy tx', () => {
+		const expected = {
+			offer: {
+				amount: {
+					before: 42,
+					after: 33
+				}
+			}
+		}
+
+		let actualAfter
+		before(
+			'save available offer before  buy tx',
+			async () => await spaceibleOffer.getOffer(offer.id).then(offer => (actualAfter = offer.amount))
+		)
+
+		it('should be different offer amount after and before', async () =>
+			expect(actualAfter).not.to.be.eq(actualOfferAmountBefore))
+
+		it('should have correct value for offer amount before buy tx', async () =>
+			expect(actualOfferAmountBefore).to.be.eq(expected.offer.amount.before))
+
+		it('should have correct value for offer amount after buy tx', async () =>
+			expect(actualAfter).to.be.eq(expected.offer.amount.after))
 	})
 })

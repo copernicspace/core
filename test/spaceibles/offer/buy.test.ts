@@ -104,6 +104,12 @@ describe('[spaceibles/offer/buy] buy asset via offer', () => {
 		actual.before.seller.money = await money.balanceOf(seller.address)
 	})
 
+	let actualOfferAmountBefore
+	before(
+		'save available offer before  buy tx',
+		async () => await spaceibleOffer.getOffer(offer.id).then(offer => (actualOfferAmountBefore = offer.amount))
+	)
+
 	before('asset buy tx', async () => (buyTx = await spaceibleOffer.connect(buyer).buy(offer.id, buyAmount)))
 
 	before('safe balances after buy tx', async () => {
@@ -113,38 +119,6 @@ describe('[spaceibles/offer/buy] buy asset via offer', () => {
 		actual.after.seller.asset = await spaceibleAsset.balanceOf(seller.address, asset.id)
 		actual.after.seller.money = await money.balanceOf(seller.address)
 	})
-	// const expected = {
-	// 	before: {
-	// 		buyer: {
-	// 			money: {
-	// 				// we minted ERC20 MT in amount to cover the buy,
-	// 				before: buyPrice,
-	// 				after: '0'
-	// 			},
-	// 			asset: {
-	// 				before: '0',
-	// 				after: buyAmount
-	// 			}
-	// 		},
-	// 		seller: {
-	// 			money: {
-	// 				before: '0',
-	// 				after: '0'
-	// 			},
-	// 			asset: {
-	// 				before: asset.balance, // before buy tx, seller should have whole balance2
-	// 				after: '0'
-	// 			}
-	// 		},
-
-	// 		operator: {
-	// 			money: {
-	// 				before: '0',
-	// 				after: '0'
-	// 			}
-	// 		}
-	// 	}
-	// }
 
 	before('set up expected balances values before', async () => {
 		expected.before.operator.money = BigNumber.from('0')
@@ -241,12 +215,6 @@ describe('[spaceibles/offer/buy] buy asset via offer', () => {
 			}
 		}
 
-		let actualBefore
-		before(
-			'save available offer before  buy tx',
-			async () => await spaceibleOffer.getOffer(offer.id).then(offer => (actualBefore = offer.amount))
-		)
-
 		let actualAfter
 		before(
 			'save available offer before  buy tx',
@@ -254,10 +222,10 @@ describe('[spaceibles/offer/buy] buy asset via offer', () => {
 		)
 
 		it('should be different offer amount after and before', async () =>
-			expect(actualAfter).not.to.be.eq(actualBefore))
+			expect(actualAfter).not.to.be.eq(actualOfferAmountBefore))
 
 		it('should have correct value for offer amount before buy tx', async () =>
-			expect(actualBefore).to.be.eq(expected.offer.amount.before))
+			expect(actualOfferAmountBefore).to.be.eq(expected.offer.amount.before))
 
 		it('should have correct value for offer amount after buy tx', async () =>
 			expect(actualAfter).to.be.eq(expected.offer.amount.after))

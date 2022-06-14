@@ -230,4 +230,36 @@ describe('[spaceibles/offer/buy] buy asset via offer', () => {
 				)
 		})
 	})
+
+	describe('buy asset via offer: assert offer amount before/after buy tx', () => {
+		const expected = {
+			offer: {
+				amount: {
+					before: 42,
+					after: 33
+				}
+			}
+		}
+
+		let actualBefore
+		before(
+			'save available offer before  buy tx',
+			async () => await spaceibleOffer.getOffer(offer.id).then(offer => (actualBefore = offer.amount))
+		)
+
+		let actualAfter
+		before(
+			'save available offer before  buy tx',
+			async () => await spaceibleOffer.getOffer(offer.id).then(offer => (actualAfter = offer.amount))
+		)
+
+		it('should be different offer amount after and before', async () =>
+			expect(actualAfter).not.to.be.eq(actualBefore))
+
+		it('should have correct value for offer amount before buy tx', async () =>
+			expect(actualBefore).to.be.eq(expected.offer.amount.before))
+
+		it('should have correct value for offer amount after buy tx', async () =>
+			expect(actualAfter).to.be.eq(expected.offer.amount.after))
+	})
 })

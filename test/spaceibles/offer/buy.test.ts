@@ -56,6 +56,11 @@ describe('[spaceibles/offer/buy] buy asset via offer', () => {
 	}
 
 	before(
+		'grant creator role to user',
+		async () => await spaceibleAsset.connect(deployer).grantCreatorRole(seller.address)
+	)
+
+	before(
 		'mint asset as seller and assign id',
 		async () =>
 			await spaceibleAsset

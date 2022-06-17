@@ -69,7 +69,6 @@ contract PayloadFactory is AccessControl {
     function revokeManage(address target) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), 'Only factory owner can add managers');
         revokeRole(FACTORY_MANAGER, target);
-        (FACTORY_MANAGER, target);
     }
 
     function addClient(address target) external {

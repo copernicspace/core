@@ -9,7 +9,9 @@
     "lint:sol": "solhint -f table contracts/**/*.sol",
     "fix:ts": "prettier --write './**/*{.ts,.tsx}'",
     "fix:sol": "prettier --write 'contracts/**/*.sol'",
-    "lint": "eslint \"./**/*{.ts,.tsx}\" && solhint contracts/**/*.sol"
+    "lint": "eslint \"./**/*{.ts,.tsx}\" && solhint contracts/**/*.sol",
+    "scribble:SpaceibleAsset": "scribble ./contracts/spaceibles/SpaceibleAsset.sol --output-mode files --arm --instrumentation-metadata-file md.json && yarn test && scribble ./contracts/spaceibles/SpaceibleAsset.sol --output-mode files --arm --instrumentation-metadata-file md.json || yarn clean:SpaceibleAsset",
+    "clean:SpaceibleAsset": "scribble ./contracts/spaceibles/SpaceibleAsset.sol --output-mode files --disarm --instrumentation-metadata-file md.json" 
   },
   "engines": {
     "node": ">=16.9.1",

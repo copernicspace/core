@@ -18,4 +18,8 @@ fuzz-hardhat:
 
 clean:
 	rm -rf ./build
-	test .scribble-arming.meta.json && fuzz disarm
+	git restore contracts/spaceibles/SpaceibleAsset.sol
+	rm -rf .scribble-arming.meta.json
+	rm -rf contracts/spaceibles/SpaceibleAsset.sol.instrumented
+	rm -rf contracts/spaceibles/SpaceibleAsset.sol.original
+

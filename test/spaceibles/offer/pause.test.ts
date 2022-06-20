@@ -17,7 +17,7 @@ describe('[spaceibles/offer/pause] `SpaceibleOffer::pause/unpause/isPaused` test
 	let spaceibleOffer: SpaceibleOffer
 
 	let erc20Mock: ERC20Mock
-	let seller: SignerWithAddress, user: SignerWithAddress
+	let deployer: SignerWithAddress, seller: SignerWithAddress, user: SignerWithAddress
 
 	let mintTx: ContractTransaction
 	let mintTxr: ContractReceipt
@@ -29,7 +29,7 @@ describe('[spaceibles/offer/pause] `SpaceibleOffer::pause/unpause/isPaused` test
 
 	before(
 		'load offer/fixtures/deploy',
-		async () => ({ spaceibleAsset, spaceibleOffer } = await loadFixture(deploySpaceibleOffer))
+		async () => ({ deployer, spaceibleAsset, spaceibleOffer } = await loadFixture(deploySpaceibleOffer))
 	)
 
 	before('deploy ERC20 Mock', async () => {
@@ -39,6 +39,7 @@ describe('[spaceibles/offer/pause] `SpaceibleOffer::pause/unpause/isPaused` test
 			.then(contract => contract.deployed())
 			.then(deployedContract => deployedContract as ERC20Mock)
 	})
+
 	before('load creator and user', async () => ([, seller, user] = await ethers.getSigners()))
 
 	const asset = {
@@ -48,6 +49,11 @@ describe('[spaceibles/offer/pause] `SpaceibleOffer::pause/unpause/isPaused` test
 		royalties: 0,
 		data: '0x'
 	}
+
+	before(
+		'grant creator role to user',
+		async () => await spaceibleAsset.connect(deployer).grantCreatorRole(seller.address)
+	)
 
 	before('mint asset as seller and assign id', async () => {
 		mintTx = await spaceibleAsset.connect(seller).mint(asset.cid, asset.balance, asset.royalties, asset.data)

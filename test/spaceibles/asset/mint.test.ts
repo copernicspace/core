@@ -66,6 +66,11 @@ describe('[spaceibles/asset/mint]', () => {
 		const royalties = 0
 		const mintData = '0x'
 
+		before(
+			'grant creator role to user',
+			async () => await spaceibleAsset.connect(deployer).grantCreatorRole(user.address)
+		)
+
 		before('send `mint` transaction', async () => {
 			mintTx = await spaceibleAsset.connect(user).mint(mintCID, mintBalance, royalties, mintData)
 			mintTxr = await mintTx.wait()
@@ -139,6 +144,11 @@ describe('[spaceibles/asset/mint]', () => {
 		const mintBalance = 142
 		const royalties = 42
 		const mintData = '0x'
+
+		before(
+			'grant creator role to user',
+			async () => await spaceibleAsset.connect(deployer).grantCreatorRole(user.address)
+		)
 
 		before('send `mint` transaction', async () => {
 			mintTx = await spaceibleAsset.connect(user).mint(mintCID, mintBalance, royalties, mintData)

@@ -8,17 +8,21 @@ import { BigNumber, ContractReceipt, ContractTransaction } from 'ethers'
 import { getAssetID } from '../../helpers/getAssetId.helper'
 
 describe('[spaceibles/asset/transfer]', () => {
-	let user: SignerWithAddress, anotherUser: SignerWithAddress
+	let deployer: SignerWithAddress, user: SignerWithAddress, anotherUser: SignerWithAddress
 	let spaceibleAsset: SpaceibleAsset
 	let mintTx: ContractTransaction
 	let mintTxr: ContractReceipt
 	let assetId: BigNumber
 	let userBalanceBefore: BigNumber, anotherUserBalanceBefore: BigNumber
 
-	before('load `user` and `anotherUser`', async () => ([, user, anotherUser] = await ethers.getSigners()))
-	before('load fixtures/deploy', async () => ({ spaceibleAsset } = await waffle.loadFixture(deploySpaceibleAsset)))
-
 	describe('transfer single asset', async () => {
+		before('load `user` and `anotherUser`', async () => ([, user, anotherUser] = await ethers.getSigners()))
+
+		before(
+			'load fixtures/deploy',
+			async () => ({ deployer, spaceibleAsset } = await waffle.loadFixture(deploySpaceibleAsset))
+		)
+
 		// mint constants
 		const mintCID = 'mockCID-transfer-0x123abc'
 		const mintBalance = 1
@@ -27,6 +31,11 @@ describe('[spaceibles/asset/transfer]', () => {
 		// transfer constants
 		const amount = BigNumber.from(1)
 		const data = '0x'
+
+		before(
+			'grant creator role to user',
+			async () => await spaceibleAsset.connect(deployer).grantCreatorRole(user.address)
+		)
 
 		before('send `mint` transaction', async () => {
 			mintTx = await spaceibleAsset.connect(user).mint(mintCID, mintBalance, royalties, mintData)
@@ -68,6 +77,13 @@ describe('[spaceibles/asset/transfer]', () => {
 	})
 
 	describe('transfer multiple asset', async () => {
+		before('load `user` and `anotherUser`', async () => ([, user, anotherUser] = await ethers.getSigners()))
+
+		before(
+			'load fixtures/deploy',
+			async () => ({ spaceibleAsset } = await waffle.loadFixture(deploySpaceibleAsset))
+		)
+
 		// mint constants
 		const mintCID = 'mockCID-transfer-0x123abc'
 		const mintBalance = 1000
@@ -76,6 +92,11 @@ describe('[spaceibles/asset/transfer]', () => {
 		// transfer constants
 		const amount = BigNumber.from(142)
 		const data = '0x'
+
+		before(
+			'grant creator role to user',
+			async () => await spaceibleAsset.connect(deployer).grantCreatorRole(user.address)
+		)
 
 		before('send `mint` transaction', async () => {
 			mintTx = await spaceibleAsset.connect(user).mint(mintCID, mintBalance, royalties, mintData)

@@ -2,24 +2,31 @@
 pragma solidity ^0.8.14;
 
 import '@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol';
+import '@openzeppelin/contracts/access/AccessControl.sol';
 
 import '../utils/GeneratorID.sol';
 
 // [BREAKS CODE]: invariant forall(uint256 assetID in _creators) _creators[assetID] != address(0);
-
-contract SpaceibleAsset is ERC1155URIStorage, GeneratorID {
+contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl {
     event Royalties(uint256 indexed id, uint256 indexed royalties);
 
     mapping(uint256 => uint256) private _royalties;
     /// #if_updated forall(uint256 assetID in _creators) _creators[assetID] != address(0);
     mapping(uint256 => address) private _creators;
 
+    bytes32 public constant CREATOR_ROLE = keccak256('CREATOR_ROLE');
+
     constructor(string memory uri) ERC1155(uri) {
         _setBaseURI(uri);
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, AccessControl) returns (bool) {
+        return super.supportsInterface(interfaceId);
     }
 
     /// #if_succeeds  {:msg "correct mint params"}
-    ///         balance != 0 
+    ///         balance != 0
     ///     &&  bytes(cid).length != 0
     ///     &&  royalties <= 10000;
     function mint(
@@ -28,6 +35,10 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID {
         uint256 royalties,
         bytes memory data
     ) public {
+        require(
+            hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(CREATOR_ROLE, msg.sender),
+            'You are not allowed to create new Spaceible Asset'
+        );
         uint256 id = generateId();
         _mint(msg.sender, id, balance, data);
         _setURI(id, cid);
@@ -45,7 +56,7 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID {
         return _royalties[id];
     }
 
-    /// #if_succeeds {:msg "creator only set once"} 
+    /// #if_succeeds {:msg "creator only set once"}
     ///     old(_creators[id]) == address(0) &&
     ///     creator != address(0);
     function _setCreator(uint256 id, address creator) internal {
@@ -54,5 +65,18 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID {
 
     function getCreator(uint256 id) public view returns (address) {
         return _creators[id];
+    }
+
+    function grantCreatorRole(address target) external onlyAdmin {
+        grantRole(CREATOR_ROLE, target);
+    }
+
+    function revokeCreatorRole(address target) external onlyAdmin {
+        revokeRole(CREATOR_ROLE, target);
+    }
+
+    modifier onlyAdmin() {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), 'Only admin can perform this action');
+        _;
     }
 }

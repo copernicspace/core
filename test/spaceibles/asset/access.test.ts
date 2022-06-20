@@ -5,33 +5,35 @@ import { expect } from 'chai'
 import { deploySpaceibleAsset } from './fixtures/deploy.fixture'
 import { SpaceibleAsset } from '../../../typechain'
 
-describe('[spaceibles/asset/mintCreatorRole]', () => {
-	let deployer: SignerWithAddress
-	let user: SignerWithAddress
-	let anotherUser: SignerWithAddress
-	let spaceibleAsset: SpaceibleAsset
+let deployer: SignerWithAddress
+let user: SignerWithAddress
+let anotherUser: SignerWithAddress
+let spaceibleAsset: SpaceibleAsset
 
-	describe('mint single from deployer', async () => {
-		before(
-			'load fixture/deploy',
-			async () => ({ deployer, spaceibleAsset } = await waffle.loadFixture(deploySpaceibleAsset))
-		)
+describe('[spaceibles/asset/access]', () => {
+	before(
+		'load fixture/deploy',
+		async () => ({ deployer, spaceibleAsset } = await waffle.loadFixture(deploySpaceibleAsset))
+	)
 
-		before('load user signer', async () => ([, user, anotherUser] = await ethers.getSigners()))
+	before('load user signer', async () => ([, user, anotherUser] = await ethers.getSigners()))
 
-		const asset = {
-			cid: 'mockCID-0x123abc',
-			balance: 1,
-			royalties: 0,
-			data: '0x'
-		}
+	const asset = {
+		cid: 'mockCID-0x123abc',
+		balance: 1,
+		royalties: 0,
+		data: '0x'
+	}
 
+	describe('access assert from user w/o creator role', async () => {
 		it('should revert on mint from user who has no creator role', async () => {
 			await expect(
 				spaceibleAsset.connect(user).mint(asset.cid, asset.balance, asset.royalties, asset.data)
 			).to.be.revertedWith('You are not allowed to create new Spaceible Asset')
 		})
+	})
 
+	describe('default roles check', () => {
 		it('should be no creator role on user address', async () => {
 			const actual = await spaceibleAsset
 				.CREATOR_ROLE()
@@ -39,7 +41,9 @@ describe('[spaceibles/asset/mintCreatorRole]', () => {
 
 			expect(actual).to.be.false
 		})
+	})
 
+	describe('assert creator role grant access', () => {
 		it('should revert on grant role from not admin', async () =>
 			await expect(spaceibleAsset.connect(anotherUser).grantCreatorRole(user.address)).to.be.revertedWith(
 				'Only admin can perform this action'
@@ -53,7 +57,9 @@ describe('[spaceibles/asset/mintCreatorRole]', () => {
 
 			expect(actual).to.be.true
 		})
+	})
 
+	describe('assert mint access from user with creator role', () => {
 		it('should not revert on mint tx', async () =>
 			await expect(spaceibleAsset.connect(user).mint(asset.cid, asset.balance, asset.royalties, asset.data)).not
 				.to.be.reverted)

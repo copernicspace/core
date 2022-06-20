@@ -29,6 +29,7 @@ contract SpaceibleOffer is GeneratorID {
     event Buy(uint256 indexed id, uint256 amount, uint256 sellerFee, uint256 royaltiesFee, uint256 platformFee);
     event Pause(uint256 indexed id);
     event Unpause(uint256 indexed id);
+    event EditOffer(uint256 indexed id, uint256 amount, uint256 price, address money);
 
     constructor(
         address _operator,
@@ -82,6 +83,20 @@ contract SpaceibleOffer is GeneratorID {
     {
         Offer memory offer = _offers[id];
         return (offer.seller, offer.assetId, offer.amount, offer.price, offer.money);
+    }
+
+    function editOffer(
+        uint256 id,
+        uint256 amount,
+        uint256 price,
+        address money
+    ) public {
+        Offer storage offer = _offers[id];
+        require(msg.sender == offer.seller, 'Only offer creator can edit');
+        offer.amount = amount;
+        offer.price = price;
+        offer.money = money;
+        emit EditOffer(id, amount, price, money);
     }
 
     function buy(uint256 id, uint256 amount) public {

@@ -63,7 +63,7 @@ describe('[spaceibles/offer/sell]', () => {
 
 		const offer = {
 			id: undefined,
-			amount: 142,
+			amount: 132,
 			price: 1000
 		}
 
@@ -76,6 +76,10 @@ describe('[spaceibles/offer/sell]', () => {
 			sellTx = await spaceibleOffer.connect(seller).sell(asset.id, offer.amount, offer.price, erc20Mock.address)
 
 			sellTxr = await sellTx.wait()
+		})
+
+		it('reverts if insufficient available balance', async() => {
+			await expect(spaceibleOffer.connect(seller).sell(asset.id, 11, offer.price, erc20Mock.address)).to.be.revertedWith('Asset amount accross offers exceeds balance')
 		})
 
 		before('assign new sell offer id', async () => (offer.id = getOfferId(sellTxr)))

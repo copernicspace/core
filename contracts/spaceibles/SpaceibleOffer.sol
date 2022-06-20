@@ -24,6 +24,7 @@ contract SpaceibleOffer is GeneratorID {
 
     mapping(uint256 => Offer) private _offers;
     mapping(uint256 => bool) private _paused;
+    mapping(address => mapping(uint256 => uint256)) private balancesOnOffers;
 
     event NewOffer(uint256 indexed id);
     event Buy(uint256 indexed id, uint256 amount, uint256 sellerFee, uint256 royaltiesFee, uint256 platformFee);
@@ -57,6 +58,10 @@ contract SpaceibleOffer is GeneratorID {
             'This contract has no approval to operate sellers assets'
         );
 
+        require(
+            IERC1155(assetAddress).balanceOf(msg.sender, assetId) >= balancesOnOffers[msg.sender][assetId] + amount,
+            'Asset amount accross offers exceeds balance');
+
         id = generateId();
 
         Offer storage offer = _offers[id];
@@ -67,6 +72,7 @@ contract SpaceibleOffer is GeneratorID {
         offer.price = price;
         offer.money = money;
 
+        balancesOnOffers[msg.sender][assetId] += amount;
         emit NewOffer(id);
     }
 
@@ -127,6 +133,8 @@ contract SpaceibleOffer is GeneratorID {
         money.transferFrom(msg.sender, offer.seller, sellerFeeAmount);
 
         offer.amount = offer.amount - amount;
+        balancesOnOffers[creator][offer.assetId] -= amount;
+
         asset.safeTransferFrom(offer.seller, msg.sender, offer.assetId, amount, '');
 
         emit Buy(id, amount, sellerFeeAmount, royaltiesFeeAmount, operatorFeeAmount);

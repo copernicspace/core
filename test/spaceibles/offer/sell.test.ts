@@ -59,11 +59,19 @@ describe('[spaceibles/offer/sell]', () => {
 
 	before('assign asset id from mint tx receipt', async () => (asset.id = getAssetID(mintTxr)))
 
+<<<<<<< HEAD
 	const offer = {
 		id: undefined,
 		amount: 142,
 		price: 1000
 	}
+=======
+		const offer = {
+			id: undefined,
+			amount: 132,
+			price: 1000
+		}
+>>>>>>> Available balance across offers check
 
 	before(
 		'approve for all as seller',
@@ -76,7 +84,15 @@ describe('[spaceibles/offer/sell]', () => {
 		sellTxr = await sellTx.wait()
 	})
 
+<<<<<<< HEAD
 	before('assign new sell offer id', async () => (offer.id = getOfferId(sellTxr)))
+=======
+		it('reverts if insufficient available balance', async() => {
+			await expect(spaceibleOffer.connect(seller).sell(asset.id, 11, offer.price, erc20Mock.address)).to.be.revertedWith('Asset amount accross offers exceeds balance')
+		})
+
+		before('assign new sell offer id', async () => (offer.id = getOfferId(sellTxr)))
+>>>>>>> Available balance across offers check
 
 	describe('correct data for new offer', () => {
 		let newOffer: {

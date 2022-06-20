@@ -14,6 +14,7 @@ const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.create
 let spaceibleAsset: SpaceibleAsset
 let spaceibleOffer: SpaceibleOffer
 let erc20Mock: ERC20Mock
+let anotherErc20Mock: ERC20Mock
 
 let deployer: SignerWithAddress
 let seller: SignerWithAddress
@@ -35,6 +36,13 @@ describe('[spaceibles/offer/edit]', () => {
 			.then(deployedContract => deployedContract as ERC20Mock)
 	})
 
+	before('deploy another ERC20 Mock', async () => {
+		anotherErc20Mock = await ethers
+			.getContractFactory(contractNames.ERC20_MOCK)
+			.then(factory => factory.deploy())
+			.then(contract => contract.deployed())
+			.then(deployedContract => deployedContract as ERC20Mock)
+	})
 	before('load signers', async () => ([, seller, user] = await ethers.getSigners()))
 
 	const asset = {
@@ -93,7 +101,7 @@ describe('[spaceibles/offer/edit]', () => {
 		it('should not revert on edit from offer seller', async () => {
 			editTx = await spaceibleOffer
 				.connect(seller)
-				.editOffer(offer.id, updatedOffer.amount, updatedOffer.price, erc20Mock.address)
+				.editOffer(offer.id, updatedOffer.amount, updatedOffer.price, anotherErc20Mock.address)
 
 			await expect(editTx.wait()).not.to.be.reverted
 		})
@@ -101,7 +109,7 @@ describe('[spaceibles/offer/edit]', () => {
 		it('should have correct event data on edit tx', async () =>
 			await expect(editTx)
 				.to.emit(spaceibleOffer, 'EditOffer')
-				.withArgs(offer.id, updatedOffer.amount, updatedOffer.price, erc20Mock.address))
+				.withArgs(offer.id, updatedOffer.amount, updatedOffer.price, anotherErc20Mock.address))
 	})
 
 	describe('updated offer data', () => {
@@ -120,6 +128,6 @@ describe('[spaceibles/offer/edit]', () => {
 		it('should have correct `assetId` value', async () => expect(offerData.assetId).to.be.eq(asset.id))
 		it('should have correct `amount` value', async () => expect(offerData.amount).to.be.eq(updatedOffer.amount))
 		it('should have correct `price` value', async () => expect(offerData.price).to.be.eq(updatedOffer.price))
-		it('should have correct `money` value', async () => expect(offerData.money).to.be.eq(erc20Mock.address))
+		it('should have correct `money` value', async () => expect(offerData.money).to.be.eq(anotherErc20Mock.address))
 	})
 })

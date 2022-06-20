@@ -1,5 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber'
-import { ContractReceipt, ContractTransaction } from '@ethersproject/contracts'
+import { ContractTransaction } from '@ethersproject/contracts'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { expect } from 'chai'
 import { ethers, waffle } from 'hardhat'

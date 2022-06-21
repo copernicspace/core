@@ -49,7 +49,7 @@ describe('[spaceibles/offer/edit]', () => {
 	const asset = {
 		id: undefined,
 		cid: 'mockCID-deployer-0x123abc',
-		balance: 142,
+		balance: 200,
 		royalties: 0,
 		data: '0x'
 	}

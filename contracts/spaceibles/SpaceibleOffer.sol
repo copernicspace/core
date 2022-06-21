@@ -99,6 +99,12 @@ contract SpaceibleOffer is GeneratorID {
     ) public {
         Offer storage offer = _offers[id];
         require(msg.sender == offer.seller, 'Only offer creator can edit');
+
+        require(
+            IERC1155(assetAddress).balanceOf(msg.sender, offer.assetId) >= balancesOnOffers[msg.sender][offer.assetId] - offer.amount + amount,
+            'Asset amount accross offers exceeds balance'
+        );
+
         offer.amount = amount;
         offer.price = price;
         offer.money = money;

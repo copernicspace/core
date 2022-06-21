@@ -59,19 +59,11 @@ describe('[spaceibles/offer/sell]', () => {
 
 	before('assign asset id from mint tx receipt', async () => (asset.id = getAssetID(mintTxr)))
 
-<<<<<<< HEAD
-	const offer = {
-		id: undefined,
-		amount: 142,
-		price: 1000
-	}
-=======
 		const offer = {
 			id: undefined,
 			amount: 132,
 			price: 1000
 		}
->>>>>>> Available balance across offers check
 
 	before(
 		'approve for all as seller',
@@ -84,15 +76,9 @@ describe('[spaceibles/offer/sell]', () => {
 		sellTxr = await sellTx.wait()
 	})
 
-<<<<<<< HEAD
 	before('assign new sell offer id', async () => (offer.id = getOfferId(sellTxr)))
-=======
-		it('reverts if insufficient available balance', async() => {
-			await expect(spaceibleOffer.connect(seller).sell(asset.id, 11, offer.price, erc20Mock.address)).to.be.revertedWith('Asset amount accross offers exceeds balance')
-		})
 
-		before('assign new sell offer id', async () => (offer.id = getOfferId(sellTxr)))
->>>>>>> Available balance across offers check
+	before('assign new sell offer id', async () => (offer.id = getOfferId(sellTxr)))
 
 	describe('correct data for new offer', () => {
 		let newOffer: {
@@ -116,4 +102,19 @@ describe('[spaceibles/offer/sell]', () => {
 	describe('correct `NewOffer` event data', () =>
 		it('should have correct `id` value', async () =>
 			await expect(sellTx).to.emit(spaceibleOffer, 'NewOffer').withArgs(offer.id)))
+
+	describe('offer creation & edit revert tests', async () => {
+
+		it('reverts sell if insufficient available balance', async() => {
+			await expect(spaceibleOffer.connect(seller).sell(asset.id, 11, offer.price, erc20Mock.address)).to.be.revertedWith('Asset amount accross offers exceeds balance')
+		})
+
+		it('reverts edit if insufficient available balance', async() => {
+			// prepare sell of another offer
+			const _sellTx = await spaceibleOffer.connect(seller).sell(asset.id, 10, offer.price, erc20Mock.address)
+			const _id = getOfferId(await _sellTx.wait())
+
+			await expect(spaceibleOffer.connect(seller).editOffer(_id, 11, offer.price, erc20Mock.address)).to.be.revertedWith('Asset amount accross offers exceeds balance')
+		})
+	})
 })

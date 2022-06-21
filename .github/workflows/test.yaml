@@ -18,4 +18,5 @@ jobs:
         with:
           node-version:  16
       - run: yarn
+      - run: yarn hardhat compile
       - run: yarn hardhat test

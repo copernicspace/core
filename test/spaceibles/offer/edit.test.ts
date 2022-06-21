@@ -131,4 +131,17 @@ describe('[spaceibles/offer/edit]', () => {
 		it('should have correct `price` value', async () => expect(offerData.price).to.be.eq(updatedOffer.price))
 		it('should have correct `money` value', async () => expect(offerData.money).to.be.eq(anotherErc20Mock.address))
 	})
+
+	describe('offer edit balance revert test', async() => {
+		it('reverts edit if insufficient available balance', async() => {
+			const maxAmount = updatedOffer.amount - offer.amount
+
+			// prepare sell of editable offer
+			const _sellTx = await spaceibleOffer.connect(seller).sell(asset.id, maxAmount, offer.price, erc20Mock.address)
+			const _id = getOfferId(await _sellTx.wait())
+
+			// test if edit with edit amount > supply is reverted
+			await expect(spaceibleOffer.connect(seller).editOffer(_id, maxAmount + 1, offer.price, erc20Mock.address)).to.be.revertedWith('Asset amount accross offers exceeds balance')
+		})
+	})
 })

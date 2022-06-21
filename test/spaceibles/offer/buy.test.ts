@@ -210,7 +210,7 @@ describe('[spaceibles/offer/buy] buy asset via offer', () => {
 		})
 	})
 
-	describe('buy asset via offer: assert offer amount before/after buy tx', () => {
+	describe('assert offer amount before/after buy tx', () => {
 		const expected = {
 			offer: {
 				amount: {

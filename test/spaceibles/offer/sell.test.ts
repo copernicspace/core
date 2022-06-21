@@ -11,75 +11,74 @@ import { deploySpaceibleOffer } from './fixtures/deploy.fixture'
 
 const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 
+let spaceibleAsset: SpaceibleAsset
+let spaceibleOffer: SpaceibleOffer
+
+let deployer: SignerWithAddress, seller: SignerWithAddress
+
+let mintTx: ContractTransaction
+let mintTxr: ContractReceipt
+
+let sellTx: ContractTransaction
+let sellTxr: ContractReceipt
+
+let erc20Mock: ERC20Mock
 describe('[spaceibles/offer/sell]', () => {
-	let spaceibleAsset: SpaceibleAsset
-	let spaceibleOffer: SpaceibleOffer
+	before(
+		'load offer/fixtures/deploy',
+		async () => ({ deployer, spaceibleAsset, spaceibleOffer } = await loadFixture(deploySpaceibleOffer))
+	)
 
-	let deployer: SignerWithAddress, seller: SignerWithAddress
+	before('deploy ERC20 Mock', async () => {
+		erc20Mock = await ethers
+			.getContractFactory(contractNames.ERC20_MOCK)
+			.then(factory => factory.deploy())
+			.then(contract => contract.deployed())
+			.then(deployedContract => deployedContract as ERC20Mock)
+	})
 
-	let mintTx: ContractTransaction
-	let mintTxr: ContractReceipt
+	before('load seller', async () => ([, seller] = await ethers.getSigners()))
 
-	let sellTx: ContractTransaction
-	let sellTxr: ContractReceipt
+	const asset = {
+		id: undefined,
+		cid: 'mockCID-deployer-0x123abc',
+		balance: 142,
+		royalties: 0,
+		data: '0x'
+	}
 
-	let erc20Mock: ERC20Mock
+	before(
+		'grant creator role to user',
+		async () => await spaceibleAsset.connect(deployer).grantCreatorRole(seller.address)
+	)
 
-	describe('create new offer', () => {
-		before(
-			'load offer/fixtures/deploy',
-			async () => ({ deployer, spaceibleAsset, spaceibleOffer } = await loadFixture(deploySpaceibleOffer))
-		)
+	before('mint asset as seller and assign id', async () => {
+		mintTx = await spaceibleAsset.connect(seller).mint(asset.cid, asset.balance, asset.royalties, asset.data)
+		mintTxr = await mintTx.wait()
+	})
 
-		before('deploy ERC20 Mock', async () => {
-			erc20Mock = await ethers
-				.getContractFactory(contractNames.ERC20_MOCK)
-				.then(factory => factory.deploy())
-				.then(contract => contract.deployed())
-				.then(deployedContract => deployedContract as ERC20Mock)
-		})
+	before('assign asset id from mint tx receipt', async () => (asset.id = getAssetID(mintTxr)))
 
-		before('load seller', async () => ([, seller] = await ethers.getSigners()))
+	const offer = {
+		id: undefined,
+		amount: 142,
+		price: 1000
+	}
 
-		const asset = {
-			id: undefined,
-			cid: 'mockCID-deployer-0x123abc',
-			balance: 142,
-			royalties: 0,
-			data: '0x'
-		}
+	before(
+		'approve for all as seller',
+		async () => await spaceibleAsset.connect(seller).setApprovalForAll(spaceibleOffer.address, true)
+	)
 
-		before(
-			'grant creator role to user',
-			async () => await spaceibleAsset.connect(deployer).grantCreatorRole(seller.address)
-		)
+	before('create new offer', async () => {
+		sellTx = await spaceibleOffer.connect(seller).sell(asset.id, offer.amount, offer.price, erc20Mock.address)
 
-		before('mint asset as seller and assign id', async () => {
-			mintTx = await spaceibleAsset.connect(seller).mint(asset.cid, asset.balance, asset.royalties, asset.data)
-			mintTxr = await mintTx.wait()
-		})
+		sellTxr = await sellTx.wait()
+	})
 
-		before('assign asset id from mint tx receipt', async () => (asset.id = getAssetID(mintTxr)))
+	before('assign new sell offer id', async () => (offer.id = getOfferId(sellTxr)))
 
-		const offer = {
-			id: undefined,
-			amount: 142,
-			price: 1000
-		}
-
-		before(
-			'approve for all as seller',
-			async () => await spaceibleAsset.connect(seller).setApprovalForAll(spaceibleOffer.address, true)
-		)
-
-		before('create new offer', async () => {
-			sellTx = await spaceibleOffer.connect(seller).sell(asset.id, offer.amount, offer.price, erc20Mock.address)
-
-			sellTxr = await sellTx.wait()
-		})
-
-		before('assign new sell offer id', async () => (offer.id = getOfferId(sellTxr)))
-
+	describe('correct data for new offer', () => {
 		let newOffer: {
 			seller: string
 			assetId: BigNumber
@@ -87,6 +86,7 @@ describe('[spaceibles/offer/sell]', () => {
 			price: BigNumber
 			money: string
 		}
+
 		before('read new offer`s data from chain', async () => (newOffer = await spaceibleOffer.getOffer(offer.id)))
 
 		it('should have correct `id` value', async () => expect(offer.id).to.be.eq(1))
@@ -96,4 +96,8 @@ describe('[spaceibles/offer/sell]', () => {
 		it('should have correct `price` value', async () => expect(newOffer.price).to.be.eq(offer.price))
 		it('should have correct `price` value', async () => expect(newOffer.money).to.be.eq(erc20Mock.address))
 	})
+
+	describe('correct `NewOffer` event data', () =>
+		it('should have correct `id` value', async () =>
+			await expect(sellTx).to.emit(spaceibleOffer, 'NewOffer').withArgs(offer.id)))
 })

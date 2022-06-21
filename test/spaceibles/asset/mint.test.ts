@@ -1,21 +1,25 @@
+import { BigNumber, ContractReceipt, ContractTransaction } from 'ethers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers, waffle } from 'hardhat'
 import { expect } from 'chai'
 
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
 import { deploySpaceibleAsset } from './fixtures/deploy.fixture'
-import { SpaceibleAsset } from '../../../typechain'
-import { BigNumber, ContractReceipt, ContractTransaction } from 'ethers'
 import { getAssetID } from '../../helpers/getAssetId.helper'
+import { SpaceibleAsset } from '../../../typechain'
+
+let deployer: SignerWithAddress
+let spaceibleAsset: SpaceibleAsset
+let baseURI: string
+
+let user: SignerWithAddress
+
+let mintTx: ContractTransaction
+let mintTxr: ContractReceipt
+let newAssetId: BigNumber
 
 describe('[spaceibles/asset/mint]', () => {
-	let deployer: SignerWithAddress
-	let user: SignerWithAddress
-	let spaceibleAsset: SpaceibleAsset
-	let baseURI: string
-	let mintTx: ContractTransaction
-	let mintTxr: ContractReceipt
-	let newAssetId: BigNumber
+	before('load `user` signer', async () => ([, user] = await ethers.getSigners()))
 
 	describe('mint single from deployer', async () => {
 		before(
@@ -35,7 +39,7 @@ describe('[spaceibles/asset/mint]', () => {
 
 		before('get new asset id from transaction receipt', () => (newAssetId = getAssetID(mintTxr)))
 
-		it('should have `success` status on mint transaction receipt', () =>
+		it('should have `success` status on mint txr, from: deployer', () =>
 			expect(mintTxr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS))
 
 		it('should have correct balance after mint', async () =>
@@ -59,8 +63,6 @@ describe('[spaceibles/asset/mint]', () => {
 			async () => ({ spaceibleAsset, baseURI } = await waffle.loadFixture(deploySpaceibleAsset))
 		)
 
-		before('load `user` signer', async () => ([, user] = await ethers.getSigners()))
-
 		const mintCID = 'mockCID-not-deployer-0x123abc'
 		const mintBalance = 1
 		const royalties = 0
@@ -78,7 +80,7 @@ describe('[spaceibles/asset/mint]', () => {
 
 		before('get new asset id from transaction receipt', () => (newAssetId = getAssetID(mintTxr)))
 
-		it('should have `success` status on mint transaction receipt, from: `deployer`', async () =>
+		it('should have `success` status on mint txr, from: user', async () =>
 			expect(mintTxr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS))
 
 		it('should have correct balance after mint', async () =>
@@ -114,7 +116,7 @@ describe('[spaceibles/asset/mint]', () => {
 
 		before('get new asset id from transaction receipt', () => (newAssetId = getAssetID(mintTxr)))
 
-		it('should have `success` status on mint transaction receipt', () =>
+		it('should have `success` status on mint txr, from: deployer', () =>
 			expect(mintTxr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS))
 
 		it('should have correct balance after mint', async () =>
@@ -138,8 +140,6 @@ describe('[spaceibles/asset/mint]', () => {
 			async () => ({ spaceibleAsset, baseURI } = await waffle.loadFixture(deploySpaceibleAsset))
 		)
 
-		before('load `user` signer', async () => ([, user] = await ethers.getSigners()))
-
 		const mintCID = 'mockCID-not-deployer-0x123abc'
 		const mintBalance = 142
 		const royalties = 42
@@ -157,7 +157,7 @@ describe('[spaceibles/asset/mint]', () => {
 
 		before('get new asset id from transaction receipt', () => (newAssetId = getAssetID(mintTxr)))
 
-		it('should have `success` status on mint transaction receipt, from: `deployer`', async () =>
+		it('should have `success` status on mint txr, from: `user`', async () =>
 			expect(mintTxr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS))
 
 		it('should have correct balance after mint', async () =>

@@ -78,8 +78,6 @@ describe('[spaceibles/offer/sell]', () => {
 
 	before('assign new sell offer id', async () => (offer.id = getOfferId(sellTxr)))
 
-	before('assign new sell offer id', async () => (offer.id = getOfferId(sellTxr)))
-
 	describe('correct data for new offer', () => {
 		let newOffer: {
 			seller: string

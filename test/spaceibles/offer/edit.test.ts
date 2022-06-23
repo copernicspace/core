@@ -133,15 +133,20 @@ describe('[spaceibles/offer/edit]', () => {
 	})
 
 	describe('offer edit balance revert test', async() => {
+		const maxAmount: number = updatedOffer.amount - offer.amount
+		let _sellTx, _id
+		before('prepare sell of editable offer', async () => {
+			_sellTx = await spaceibleOffer.connect(seller).sell(asset.id, maxAmount, offer.price, erc20Mock.address)
+			_id = getOfferId(await _sellTx.wait())
+		})
 		it('reverts edit if insufficient available balance', async() => {
-			const maxAmount = updatedOffer.amount - offer.amount
-
-			// prepare sell of editable offer
-			const _sellTx = await spaceibleOffer.connect(seller).sell(asset.id, maxAmount, offer.price, erc20Mock.address)
-			const _id = getOfferId(await _sellTx.wait())
-
-			// test if edit with edit amount > supply is reverted
+			// try to edit offer so that the amount is 1 above the available balance
 			await expect(spaceibleOffer.connect(seller).editOffer(_id, maxAmount + 1, offer.price, erc20Mock.address)).to.be.revertedWith('Asset amount accross offers exceeds balance')
+		})
+		it('does not revert if total amount within user balance', async() => {
+			// edit offer to be within the available balance
+			const tx = await (await spaceibleOffer.connect(seller).editOffer(_id, maxAmount, offer.price, erc20Mock.address)).wait()
+			expect(tx.status).to.be.eq(1)
 		})
 	})
 })

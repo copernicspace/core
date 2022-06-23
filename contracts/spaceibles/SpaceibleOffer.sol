@@ -49,17 +49,13 @@ contract SpaceibleOffer is GeneratorID {
         address money
     ) public returns (uint256 id) {
         require(
-            IERC1155(assetAddress).balanceOf(msg.sender, assetId) >= amount,
-            'Failed to create new sell, insuffucient balance'
-        );
-
-        require(
             IERC1155(assetAddress).isApprovedForAll(msg.sender, address(this)) == true,
             'This contract has no approval to operate sellers assets'
         );
 
         require(
-            IERC1155(assetAddress).balanceOf(msg.sender, assetId) >= balancesOnOffers[msg.sender][assetId] + amount,
+            IERC1155(assetAddress).balanceOf(msg.sender, assetId) 
+            >= balancesOnOffers[msg.sender][assetId] + amount,
             'Asset amount accross offers exceeds balance');
 
         id = generateId();
@@ -101,7 +97,8 @@ contract SpaceibleOffer is GeneratorID {
         require(msg.sender == offer.seller, 'Only offer creator can edit');
 
         require(
-            IERC1155(assetAddress).balanceOf(msg.sender, offer.assetId) >= balancesOnOffers[msg.sender][offer.assetId] - offer.amount + amount,
+            IERC1155(assetAddress).balanceOf(msg.sender, offer.assetId) 
+            >= balancesOnOffers[msg.sender][offer.assetId] - offer.amount + amount,
             'Asset amount accross offers exceeds balance'
         );
 

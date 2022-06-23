@@ -101,7 +101,15 @@ describe('[spaceibles/offer/sell]', () => {
 		it('should have correct `id` value', async () =>
 			await expect(sellTx).to.emit(spaceibleOffer, 'NewOffer').withArgs(offer.id)))
 
-	describe('offer creation balance revert test', async () =>
+	describe('offer creation: insufficient balance revert', async () => {
+		// current amount across offers: 132 --> amount available: 10 --> should revert
 		it('reverts sell if insufficient available balance', async() =>
-			await expect(spaceibleOffer.connect(seller).sell(asset.id, 11, offer.price, erc20Mock.address)).to.be.revertedWith('Asset amount accross offers exceeds balance')))
+			await expect(spaceibleOffer.connect(seller).sell(asset.id, 11, offer.price, erc20Mock.address)).to.be.revertedWith('Asset amount accross offers exceeds balance'))
+		
+		// should succeed if amount sold within amount available (10)
+		it('does not revert if total amount within user balance', async() => {
+			const tx = await (await spaceibleOffer.connect(seller).sell(asset.id, 10, offer.price, erc20Mock.address)).wait()
+			expect(tx.status).to.be.eq(1)
+		})
+	})
 })

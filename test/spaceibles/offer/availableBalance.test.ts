@@ -94,11 +94,16 @@ describe('[spaceibles/availableBalance] test set for available balance', () => {
     describe('offer creation: insufficient balance revert', async () => {
 		// current amount across offers: 132 --> amount available: 10 --> should revert
 		it('reverts sell if insufficient available balance', async() =>
-			await expect(spaceibleOffer.connect(seller).sell(asset.id, asset.balance * 0.5 + 1, offer.price, money.address)).to.be.revertedWith('Asset amount accross offers exceeds balance'))
+			await expect(
+				spaceibleOffer.connect(seller)
+				.sell(asset.id, asset.balance * 0.5 + 1, offer.price, money.address)
+			).to.be.revertedWith('Asset amount accross offers exceeds balance'))
 
 		// should succeed if amount sold within amount available (10)
 		it('does not revert sell if total amount within user balance', async() => {
-			const tx = await (await spaceibleOffer.connect(seller).sell(asset.id, asset.balance * 0.5, offer.price, money.address)).wait()
+			const tx = await (
+				await spaceibleOffer.connect(seller)
+				.sell(asset.id, asset.balance * 0.5, offer.price, money.address)).wait()
 			expect(tx.status).to.be.eq(1)
 		})
 	})
@@ -106,11 +111,16 @@ describe('[spaceibles/availableBalance] test set for available balance', () => {
     describe('offer edit balance revert test', async() => {
 		it('reverts edit if insufficient available balance', async() => {
 			// try to edit offer so that the amount is 1 above the available balance
-			await expect(spaceibleOffer.connect(seller).editOffer(offer.id, asset.balance * 0.5 + 1, offer.price, money.address)).to.be.revertedWith('Asset amount accross offers exceeds balance')
+			await expect(
+				spaceibleOffer.connect(seller)
+				.editOffer(offer.id, asset.balance * 0.5 + 1, offer.price, money.address)
+			).to.be.revertedWith('Asset amount accross offers exceeds balance')
 		})
 		it('does not revert edit if total amount within user balance', async() => {
 			// edit offer to be within the available balance
-			const tx = await (await spaceibleOffer.connect(seller).editOffer(offer.id, asset.balance * 0.5, offer.price, money.address)).wait()
+			const tx = await (
+				await spaceibleOffer.connect(seller)
+				.editOffer(offer.id, asset.balance * 0.5, offer.price, money.address)).wait()
 			expect(tx.status).to.be.eq(1)
 		})
 	})

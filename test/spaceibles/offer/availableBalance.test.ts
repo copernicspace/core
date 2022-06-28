@@ -1,6 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { expect } from 'chai'
-import { waffle } from 'hardhat'
+import { BigNumber } from 'ethers'
+import { ethers, waffle } from 'hardhat'
 import { ERC20Mock, SpaceibleAsset, SpaceibleOffer } from '../../../typechain'
 import { getOfferId } from '../../helpers/getOfferId.helper'
 import { setupSpaceibleOffer } from './fixtures/setupOffer.fixture'
@@ -137,6 +138,109 @@ describe('[spaceibles/availableBalance] test set for available balance', () => {
 			const availableBal = await spaceibleOffer.getAvailableBalance(seller.address, asset.id)
 			const expected = asset.balance * 0.2
 			expect(expected).to.be.eq(availableBal)
+		})
+	})
+
+	describe('edit the first offer after second created', async () => {
+		it('at the start, availableBalance should be 0.2 * asset amount', async () => {
+			const availableBal = await spaceibleOffer.getAvailableBalance(seller.address, asset.id)
+			const expected = asset.balance * 0.2
+			expect(expected).to.be.eq(availableBal)
+		})
+		it('reverts edit if amount > available balance', async () => {
+			// edit offer to be bigger than the available balance
+			// old offer is currently at 0.5 * assset amount, available bal is 0.2 * asset amount
+			await expect(
+				spaceibleOffer.connect(seller)
+				.editOffer(offer.id, asset.balance * 0.7 + 1, offer.price, money.address)
+			).to.be.revertedWith('Asset amount accross offers exceeds balance')
+		})
+		it('availableBalance after revert should not change', async () => {
+			const availableBal = await spaceibleOffer.getAvailableBalance(seller.address, asset.id)
+			const expected = asset.balance * 0.2
+			expect(expected).to.be.eq(availableBal)
+		})
+		it('changes old offer to have 0.6 * asset amount balance', async () => {
+			// edit offer to be bigger than the available balance
+			// old offer is currently at 0.5 * assset amount, available bal is 0.2 * asset amount
+			const tx = await (
+				await spaceibleOffer.connect(seller)
+				.editOffer(offer.id, asset.balance * 0.6, offer.price, money.address)).wait()
+			expect(tx.status).to.be.eq(1)
+		})
+		it('availableBalance after revert should not change', async () => {
+			const availableBal = await spaceibleOffer.getAvailableBalance(seller.address, asset.id)
+			const expected = asset.balance * 0.1
+			expect(expected).to.be.eq(availableBal)
+		})
+	})
+
+	let buyer: SignerWithAddress
+	let buyPrice: number
+	before('set buy price', async () => buyPrice = offer.price.mul(asset.balance))
+	before('get buyer', async () => [, , buyer] = await ethers.getSigners())
+	before('mint mock money to buyer', async () => await money.mintTo(buyer.address, buyPrice))
+	before('set money allowance', async () => await money.connect(buyer).approve(spaceibleOffer.address, buyPrice))
+
+	describe('buy the first offer', async () => {
+		/*
+			x = asset.balance
+
+			at the start (before buy):
+				availableBalance = 0.1 * x
+				amount on offer = 0.6 * x
+
+			after buy:
+				availableBalance = 0.1 * x
+				amount on offer = 0 (all sold)
+
+			after edit (effectively: sell all remaining):
+				availableBalance = 0
+				amount on offer = 0.1 * x
+
+			after second buy:
+				availableBalance = 0
+				amount on offer = 0
+		*/
+		it('`buy` does not change available balance', async () => {
+			const startAval = await spaceibleOffer.getAvailableBalance(seller.address, asset.id)
+
+			// buy with `buyer`
+			await spaceibleOffer.connect(buyer).buy(offer.id, asset.balance * 0.6)
+
+			const endAval = await spaceibleOffer.getAvailableBalance(seller.address, asset.id)
+
+			expect(endAval).to.be.eq(startAval)
+			/*
+				this ^ is because both the amount across offers, and user's balance,
+				decrease by the same amount -- offerBuyAmount
+				and so their difference stays the same, equaling the value before the
+				transaction
+			*/
+		})
+		it('can edit offer after buy', async () => {
+			const tx = await (
+				await spaceibleOffer.connect(seller)
+				.editOffer(offer.id, asset.balance * 0.1, offer.price, money.address)).wait()
+			expect(tx.status).to.be.eq(1)
+		})
+		it('has zero availableBalance after edit', async () => {
+			const availableBal = await spaceibleOffer.getAvailableBalance(seller.address, asset.id)
+			const expected = 0
+			expect(expected).to.be.eq(availableBal)
+		})
+		it('can buy offer after it has been 1) sold and 2) edited', async () => {
+			const startBal = await spaceibleAsset.balanceOf(buyer.address, asset.id)
+
+			// buy with `buyer`
+			await spaceibleOffer.connect(buyer).buy(offer.id, asset.balance * 0.1)
+
+			const endBal = await spaceibleAsset.balanceOf(buyer.address, asset.id)
+			expect(endBal).to.be.eq(startBal.add(BigNumber.from(asset.balance * 0.1)))
+		})
+		it('has zero remaining balance on offer', async () => {
+			const newOffer = await spaceibleOffer.getOffer(offer.id)
+			expect(newOffer.amount).to.be.eq('0')
 		})
 	})
 })

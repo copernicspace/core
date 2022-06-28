@@ -150,6 +150,13 @@ contract SpaceibleOffer is GeneratorID {
         emit Buy(id, amount, sellerFeeAmount, royaltiesFeeAmount, operatorFeeAmount);
     }
 
+    function getAvailableBalance(address user, uint256 assetId) 
+    public view returns (
+        uint256 availableBalance
+    ) {
+        return IERC1155(assetAddress).balanceOf(user, assetId) - balancesOnOffers[user][assetId];
+    }
+
     function pause(uint256 id) public {
         Offer memory offer = _offers[id];
         require(msg.sender == offer.seller, 'Only offer seller can pause');

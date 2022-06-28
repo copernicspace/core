@@ -20,6 +20,9 @@ export interface _setupSpaceibleOffer {
 }
 
 export const setupSpaceibleOffer: Fixture<_setupSpaceibleOffer> = async () => {
+    // create custom fixture loader
+    const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
+
     // deploy offer
     const { deployer, spaceibleAsset, spaceibleOffer } = await loadFixture(deploySpaceibleOffer)
 

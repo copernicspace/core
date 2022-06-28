@@ -1,16 +1,8 @@
-import { ContractTransaction } from '@ethersproject/contracts'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { expect } from 'chai'
-import { BigNumber } from 'ethers'
-import { parseUnits } from 'ethers/lib/utils'
-import { ethers, waffle } from 'hardhat'
-import contractNames from '../../../constants/contract.names'
+import { waffle } from 'hardhat'
 import { ERC20Mock, SpaceibleAsset, SpaceibleOffer } from '../../../typechain'
-import { getAssetID } from '../../helpers/getAssetId.helper'
-import { getOfferId } from '../../helpers/getOfferId.helper'
-import { deploySpaceibleOffer } from './fixtures/deploy.fixture'
 import { setupSpaceibleOffer } from './fixtures/setupOffer.fixture'
-import { Balances, balances } from './helpers/balances'
 
 const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 

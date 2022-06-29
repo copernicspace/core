@@ -49,8 +49,7 @@ contract SpaceibleOffer is GeneratorID {
         address money
     ) public returns (uint256 id) {
         require(
-            IERC1155(assetAddress).balanceOf(msg.sender, assetId) 
-            >= balancesOnOffers[msg.sender][assetId] + amount,
+            IERC1155(assetAddress).balanceOf(msg.sender, assetId) >= balancesOnOffers[msg.sender][assetId] + amount,
             'Asset amount accross offers exceeds balance'
         );
 
@@ -99,15 +98,14 @@ contract SpaceibleOffer is GeneratorID {
         require(msg.sender == offer.seller, 'Only offer creator can edit');
 
         require(
-            IERC1155(assetAddress).balanceOf(msg.sender, offer.assetId) 
-            >= balancesOnOffers[msg.sender][offer.assetId] - offer.amount + amount,
+            IERC1155(assetAddress).balanceOf(msg.sender, offer.assetId) >=
+                balancesOnOffers[msg.sender][offer.assetId] - offer.amount + amount,
             'Asset amount accross offers exceeds balance'
         );
 
         uint256 oldBal = offer.amount;
         uint256 oldMapBal = balancesOnOffers[msg.sender][offer.assetId];
         balancesOnOffers[msg.sender][offer.assetId] = oldMapBal + amount - oldBal;
-
 
         offer.amount = amount;
         offer.price = price;
@@ -150,10 +148,7 @@ contract SpaceibleOffer is GeneratorID {
         emit Buy(id, amount, sellerFeeAmount, royaltiesFeeAmount, operatorFeeAmount);
     }
 
-    function getAvailableBalance(address user, uint256 assetId) 
-    public view returns (
-        uint256 availableBalance
-    ) {
+    function getAvailableBalance(address user, uint256 assetId) public view returns (uint256 availableBalance) {
         return IERC1155(assetAddress).balanceOf(user, assetId) - balancesOnOffers[user][assetId];
     }
 

@@ -50,7 +50,7 @@ contract SpaceibleOffer is GeneratorID {
     ) public returns (uint256 id) {
         require(
             IERC1155(assetAddress).balanceOf(msg.sender, assetId) >= balancesOnOffers[msg.sender][assetId] + amount,
-            'Asset amount accross offers exceeds balance'
+            'Asset amount across offers exceeds available balance'
         );
 
         require(
@@ -100,7 +100,7 @@ contract SpaceibleOffer is GeneratorID {
         require(
             IERC1155(assetAddress).balanceOf(msg.sender, offer.assetId) >=
                 balancesOnOffers[msg.sender][offer.assetId] - offer.amount + amount,
-            'Asset amount accross offers exceeds balance'
+            'Asset amount across offers exceeds available balance'
         );
 
         uint256 oldBal = offer.amount;

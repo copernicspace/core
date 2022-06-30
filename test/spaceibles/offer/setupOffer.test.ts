@@ -15,16 +15,14 @@ describe('[spaceibles/offer/setupOffer] setupOffer fixture test suite', () => {
 	let spaceibleAsset: SpaceibleAsset
 	let spaceibleOffer: SpaceibleOffer
 	let money: ERC20Mock
-	let deployer, seller: SignerWithAddress
+	let seller: SignerWithAddress
 	let moneyDecimals: BigNumber
 	let offerFetched: any
 
 	before(
 		'load offer/fixtures/setupOffer',
 		async () =>
-			({ asset, offer, spaceibleAsset, spaceibleOffer, money, deployer, seller } = await loadFixture(
-				setupSpaceibleOffer
-			))
+			({ asset, offer, spaceibleAsset, spaceibleOffer, money, seller } = await loadFixture(setupSpaceibleOffer))
 	)
 
 	before('fetch offer', async () => {

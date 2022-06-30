@@ -13,15 +13,13 @@ describe('[spaceibles/availableBalance] test set for available balance', () => {
 	let asset, offer
 	let spaceibleAsset: SpaceibleAsset
 	let spaceibleOffer: SpaceibleOffer
-	let deployer, seller: SignerWithAddress
+	let seller: SignerWithAddress
 	let money: ERC20Mock
 	let newOfferID
 	before(
 		'load offer/fixtures/setupOffer',
 		async () =>
-			({ asset, offer, spaceibleAsset, spaceibleOffer, money, deployer, seller } = await loadFixture(
-				setupSpaceibleOffer
-			))
+			({ asset, offer, spaceibleAsset, spaceibleOffer, money, seller } = await loadFixture(setupSpaceibleOffer))
 	)
 
 	// asset.balance is 100

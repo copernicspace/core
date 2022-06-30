@@ -1,7 +1,7 @@
+import { ContractReceipt, ContractTransaction } from '@ethersproject/contracts'
 import { ethers, waffle } from 'hardhat'
 import { expect } from 'chai'
 
-import { ContractReceipt, ContractTransaction } from '@ethersproject/contracts'
 import { ERC20Mock, SpaceibleAsset, SpaceibleOffer } from '../../../typechain'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { deploySpaceibleOffer } from './fixtures/deploy.fixture'

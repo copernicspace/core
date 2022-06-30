@@ -9,7 +9,7 @@ import { getOfferId } from '../../helpers/getOfferId.helper'
 
 const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 
-describe('[spaceibles/availableBalance] test set for available balance', () => {
+describe('[spaceibles/offer/availableBalance] test set for available balance', () => {
 	let asset, offer
 	let spaceibleAsset: SpaceibleAsset
 	let spaceibleOffer: SpaceibleOffer

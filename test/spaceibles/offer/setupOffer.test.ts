@@ -10,7 +10,7 @@ import { setupSpaceibleOffer } from './fixtures/setupOffer.fixture'
 
 const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 
-describe('[spaceibles/setupOffer] setupOffer fixture test suite', () => {
+describe('[spaceibles/offer/setupOffer] setupOffer fixture test suite', () => {
 	let asset, offer: any
 	let spaceibleAsset: SpaceibleAsset
 	let spaceibleOffer: SpaceibleOffer

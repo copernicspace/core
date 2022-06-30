@@ -1,9 +1,9 @@
 import { ContractReceipt, ContractTransaction } from '@ethersproject/contracts'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers, waffle } from 'hardhat'
 import { expect } from 'chai'
 
 import { ERC20Mock, SpaceibleAsset, SpaceibleOffer } from '../../../typechain'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { deploySpaceibleOffer } from './fixtures/deploy.fixture'
 import contractNames from '../../../constants/contract.names'
 import { getAssetID } from '../../helpers/getAssetId.helper'

@@ -1,10 +1,11 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { expect } from 'chai'
-import { BigNumber } from 'ethers'
 import { ethers, waffle } from 'hardhat'
+import { BigNumber } from 'ethers'
+import { expect } from 'chai'
+
 import { ERC20Mock, SpaceibleAsset, SpaceibleOffer } from '../../../typechain'
-import { getOfferId } from '../../helpers/getOfferId.helper'
 import { setupSpaceibleOffer } from './fixtures/setupOffer.fixture'
+import { getOfferId } from '../../helpers/getOfferId.helper'
 
 const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 

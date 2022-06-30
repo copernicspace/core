@@ -24,12 +24,15 @@ contract SpaceibleOffer is GeneratorID {
 
     mapping(uint256 => Offer) private _offers;
     mapping(uint256 => bool) private _paused;
+    mapping(uint256 => bool) private _canceled;
+
     mapping(address => mapping(uint256 => uint256)) private balancesOnOffers;
 
     event NewOffer(uint256 indexed id);
     event Buy(uint256 indexed id, uint256 amount, uint256 sellerFee, uint256 royaltiesFee, uint256 platformFee);
     event Pause(uint256 indexed id);
     event Unpause(uint256 indexed id);
+    event Cancel(uint256 indexed id);
     event EditOffer(uint256 indexed id, uint256 amount, uint256 price, address money);
 
     constructor(
@@ -168,5 +171,16 @@ contract SpaceibleOffer is GeneratorID {
 
     function isPaused(uint256 id) public view returns (bool) {
         return _paused[id];
+    }
+
+    function cancel(uint256 id) public {
+        Offer memory offer = _offers[id];
+        require(msg.sender == offer.seller, 'Only offer seller can cancel');
+        _canceled[id] = true;
+        emit Cancel(id);
+    }
+
+    function isCanceled(uint256 id) public view returns (bool) {
+        return _canceled[id];
     }
 }

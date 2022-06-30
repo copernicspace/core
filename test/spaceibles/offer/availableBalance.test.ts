@@ -205,45 +205,40 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 				availableBalance = 0
 				amount on offer = 0
 		*/
-			it('`buy` does not change available balance', async () => {
+			it('should not change available balance, after `buy` tx', async () => {
 				const startAval = await spaceibleOffer.getAvailableBalance(seller.address, asset.id)
-
-				// buy with `buyer`
 				await spaceibleOffer.connect(buyer).buy(offer.id, asset.balance * 0.6)
-
 				const endAval = await spaceibleOffer.getAvailableBalance(seller.address, asset.id)
-
 				expect(endAval).to.be.eq(startAval)
 				/*
-				this ^ is because both the amount across offers, and user's balance,
-				decrease by the same amount -- offerBuyAmount
-				and so their difference stays the same, equaling the value before the
-				transaction
+				this ^ is because both, the amount across offers, and user's balance,
+				decrease by the same amount -- offerBuyAmount,  so their difference 
+				stays the same, equaling the value before the transaction
 			*/
 			})
-			it('can edit offer after buy', async () => {
-				const tx = await (
-					await spaceibleOffer
-						.connect(seller)
-						.editOffer(offer.id, asset.balance * 0.1, offer.price, money.address)
-				).wait()
-				expect(tx.status).to.be.eq(1)
-			})
-			it('has zero availableBalance after edit', async () => {
-				const availableBal = await spaceibleOffer.getAvailableBalance(seller.address, asset.id)
+			it('should not revert on edit tx, after buy tx', async () =>
+				await spaceibleOffer
+					.connect(seller)
+					.editOffer(offer.id, asset.balance * 0.1, offer.price, money.address)
+					.then(tx => tx.wait())
+					.then(txr => expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)))
+
+			it('has zero availableBalance after edit tx', async () => {
+				const actual = await spaceibleOffer.getAvailableBalance(seller.address, asset.id)
 				const expected = 0
-				expect(expected).to.be.eq(availableBal)
+				expect(expected).to.be.eq(actual)
 			})
 			it('can buy offer after it has been 1) sold and 2) edited', async () => {
 				const startBal = await spaceibleAsset.balanceOf(buyer.address, asset.id)
 
 				// buy with `buyer`
-				await spaceibleOffer.connect(buyer).buy(offer.id, asset.balance * 0.1)
+				const buyAmount = asset.balance * 0.1
+				await spaceibleOffer.connect(buyer).buy(offer.id, buyAmount)
 
 				const endBal = await spaceibleAsset.balanceOf(buyer.address, asset.id)
-				expect(endBal).to.be.eq(startBal.add(BigNumber.from(asset.balance * 0.1)))
+				expect(endBal).to.be.eq(startBal.add(buyAmount))
 			})
-			it('has zero remaining balance on offer', async () => {
+			it('has zero remaining balance on offer after buy tx', async () => {
 				const newOffer = await spaceibleOffer.getOffer(offer.id)
 				expect(newOffer.amount).to.be.eq('0')
 			})

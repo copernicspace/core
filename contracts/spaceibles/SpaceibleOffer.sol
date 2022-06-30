@@ -24,6 +24,7 @@ contract SpaceibleOffer is GeneratorID {
 
     mapping(uint256 => Offer) private _offers;
     mapping(uint256 => bool) private _paused;
+    mapping(address => mapping(uint256 => uint256)) private balancesOnOffers;
 
     event NewOffer(uint256 indexed id);
     event Buy(uint256 indexed id, uint256 amount, uint256 sellerFee, uint256 royaltiesFee, uint256 platformFee);
@@ -48,8 +49,8 @@ contract SpaceibleOffer is GeneratorID {
         address money
     ) public returns (uint256 id) {
         require(
-            IERC1155(assetAddress).balanceOf(msg.sender, assetId) >= amount,
-            'Failed to create new sell, insuffucient balance'
+            IERC1155(assetAddress).balanceOf(msg.sender, assetId) >= balancesOnOffers[msg.sender][assetId] + amount,
+            'Asset amount across offers exceeds available balance'
         );
 
         require(
@@ -66,6 +67,8 @@ contract SpaceibleOffer is GeneratorID {
         offer.amount = amount;
         offer.price = price;
         offer.money = money;
+
+        balancesOnOffers[msg.sender][assetId] += amount;
 
         emit NewOffer(id);
     }
@@ -93,6 +96,17 @@ contract SpaceibleOffer is GeneratorID {
     ) public {
         Offer storage offer = _offers[id];
         require(msg.sender == offer.seller, 'Only offer creator can edit');
+
+        require(
+            IERC1155(assetAddress).balanceOf(msg.sender, offer.assetId) >=
+                balancesOnOffers[msg.sender][offer.assetId] - offer.amount + amount,
+            'Asset amount across offers exceeds available balance'
+        );
+
+        uint256 oldBal = offer.amount;
+        uint256 oldMapBal = balancesOnOffers[msg.sender][offer.assetId];
+        balancesOnOffers[msg.sender][offer.assetId] = oldMapBal + amount - oldBal;
+
         offer.amount = amount;
         offer.price = price;
         offer.money = money;
@@ -127,9 +141,15 @@ contract SpaceibleOffer is GeneratorID {
         money.transferFrom(msg.sender, offer.seller, sellerFeeAmount);
 
         offer.amount = offer.amount - amount;
+        balancesOnOffers[creator][offer.assetId] -= amount;
+
         asset.safeTransferFrom(offer.seller, msg.sender, offer.assetId, amount, '');
 
         emit Buy(id, amount, sellerFeeAmount, royaltiesFeeAmount, operatorFeeAmount);
+    }
+
+    function getAvailableBalance(address user, uint256 assetId) public view returns (uint256 availableBalance) {
+        return IERC1155(assetAddress).balanceOf(user, assetId) - balancesOnOffers[user][assetId];
     }
 
     function pause(uint256 id) public {

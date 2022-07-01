@@ -143,8 +143,8 @@ contract SpaceibleOffer is GeneratorID {
         money.transferFrom(msg.sender, operator, operatorFeeAmount);
         money.transferFrom(msg.sender, offer.seller, sellerFeeAmount);
 
-        offer.amount = offer.amount - amount;
-        balancesOnOffers[offer.seller][offer.assetId] -= amount;
+        offer.amount -= amount;
+        balancesOnOffers[creator][offer.assetId] -= amount;
 
         asset.safeTransferFrom(offer.seller, msg.sender, offer.assetId, amount, '');
 

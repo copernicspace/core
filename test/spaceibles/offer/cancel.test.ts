@@ -5,7 +5,6 @@ import { expect } from 'chai'
 
 import { SpaceibleOffer } from '../../../typechain'
 import { setupSpaceibleOffer } from './fixtures/setupOffer.fixture'
-import exp from 'constants'
 
 const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 

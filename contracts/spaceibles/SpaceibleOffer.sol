@@ -177,6 +177,7 @@ contract SpaceibleOffer is GeneratorID {
         Offer memory offer = _offers[id];
         require(msg.sender == offer.seller, 'Only offer seller can cancel');
         _canceled[id] = true;
+        balancesOnOffers[offer.seller][offer.assetId] -= offer.amount;
         emit Cancel(id);
     }
 

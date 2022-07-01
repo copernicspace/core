@@ -96,7 +96,7 @@ contract SpaceibleOffer is GeneratorID {
         uint256 amount,
         uint256 price,
         address money
-    ) public {
+    ) public notCanceled(id) {
         Offer storage offer = _offers[id];
         require(msg.sender == offer.seller, 'Only offer creator can edit');
 
@@ -116,7 +116,7 @@ contract SpaceibleOffer is GeneratorID {
         emit EditOffer(id, amount, price, money);
     }
 
-    function buy(uint256 id, uint256 amount) public {
+    function buy(uint256 id, uint256 amount) public notCanceled(id) {
         Offer storage offer = _offers[id];
         SpaceibleAsset asset = SpaceibleAsset(assetAddress);
         require(offer.amount >= amount, 'Not enough asset balance on sale');
@@ -155,14 +155,14 @@ contract SpaceibleOffer is GeneratorID {
         return IERC1155(assetAddress).balanceOf(user, assetId) - balancesOnOffers[user][assetId];
     }
 
-    function pause(uint256 id) public {
+    function pause(uint256 id) public notCanceled(id) {
         Offer memory offer = _offers[id];
         require(msg.sender == offer.seller, 'Only offer seller can pause');
         _paused[id] = true;
         emit Pause(id);
     }
 
-    function unpause(uint256 id) public {
+    function unpause(uint256 id) public notCanceled(id) {
         Offer memory offer = _offers[id];
         require(msg.sender == offer.seller, 'Only offer seller can unpause');
         _paused[id] = false;
@@ -173,7 +173,7 @@ contract SpaceibleOffer is GeneratorID {
         return _paused[id];
     }
 
-    function cancel(uint256 id) public {
+    function cancel(uint256 id) public notCanceled(id) {
         Offer memory offer = _offers[id];
         require(msg.sender == offer.seller, 'Only offer seller can cancel');
         _canceled[id] = true;
@@ -182,5 +182,10 @@ contract SpaceibleOffer is GeneratorID {
 
     function isCanceled(uint256 id) public view returns (bool) {
         return _canceled[id];
+    }
+
+    modifier notCanceled(uint256 id) {
+        require(_canceled[id] != true, 'Offer is canceled');
+        _;
     }
 }

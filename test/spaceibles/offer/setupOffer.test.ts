@@ -26,7 +26,7 @@ describe('[spaceibles/offer/setupOffer] setupOffer fixture test suite', () => {
 	)
 
 	before('fetch offer', async () => {
-		offerFetched = await spaceibleOffer.getOffer(offer.id)
+		offerFetched = await spaceibleOffer.get(offer.id)
 	})
 
 	it('should have `success` status on `SetupSpaceibleOffer` fixture tx receipt', async () =>

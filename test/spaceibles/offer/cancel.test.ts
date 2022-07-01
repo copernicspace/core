@@ -3,7 +3,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers, waffle } from 'hardhat'
 import { expect } from 'chai'
 
-import { SpaceibleOffer } from '../../../typechain'
+import { ERC20Mock, SpaceibleOffer } from '../../../typechain'
 import { setupSpaceibleOffer } from './fixtures/setupOffer.fixture'
 
 const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
@@ -14,10 +14,11 @@ describe('[spaceibles/offer/cancel] `SpaceibleOffer::cancel` test suite', () => 
 	let seller: SignerWithAddress
 	let user: SignerWithAddress
 	let cancelTx: ContractTransaction
+	let money: ERC20Mock
 
 	before(
 		'load offer/fixtures/setupOffer',
-		async () => ({ offer, spaceibleOffer, seller } = await loadFixture(setupSpaceibleOffer))
+		async () => ({ offer, spaceibleOffer, seller, money } = await loadFixture(setupSpaceibleOffer))
 	)
 
 	before('load user signer', async () => ([, , user] = await ethers.getSigners()))
@@ -45,5 +46,19 @@ describe('[spaceibles/offer/cancel] `SpaceibleOffer::cancel` test suite', () => 
 
 		it('should have paused status after pause tx', async () =>
 			expect(await spaceibleOffer.isCanceled(offer.id)).to.be.true)
+	})
+
+	describe('access checks on canceled offer', () => {
+		const expectedRevertMsg = 'Offer is canceled'
+		it('should revert on `buy` tx, if offer is canceled', async () =>
+			await expect(spaceibleOffer.connect(user).buy(offer.id, 10)).to.be.revertedWith(expectedRevertMsg))
+
+		it('should revert on `edit` tx, if offer is canceled', async () =>
+			await expect(spaceibleOffer.connect(user).edit(offer.id, 1, 1, money.address)).to.be.revertedWith(
+				expectedRevertMsg
+			))
+
+		it('should revert on `cancel` tx, if offer is already canceled', async () =>
+			await expect(spaceibleOffer.connect(user).cancel(offer.id)).to.be.revertedWith(expectedRevertMsg))
 	})
 })

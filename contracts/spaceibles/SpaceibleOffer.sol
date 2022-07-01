@@ -33,7 +33,7 @@ contract SpaceibleOffer is GeneratorID {
     event Pause(uint256 indexed id);
     event Unpause(uint256 indexed id);
     event Cancel(uint256 indexed id);
-    event EditOffer(uint256 indexed id, uint256 amount, uint256 price, address money);
+    event Edit(uint256 indexed id, uint256 amount, uint256 price, address money);
 
     constructor(
         address _operator,
@@ -76,7 +76,7 @@ contract SpaceibleOffer is GeneratorID {
         emit NewOffer(id);
     }
 
-    function getOffer(uint256 id)
+    function get(uint256 id)
         public
         view
         returns (
@@ -91,7 +91,7 @@ contract SpaceibleOffer is GeneratorID {
         return (offer.seller, offer.assetId, offer.amount, offer.price, offer.money);
     }
 
-    function editOffer(
+    function edit(
         uint256 id,
         uint256 amount,
         uint256 price,
@@ -113,10 +113,11 @@ contract SpaceibleOffer is GeneratorID {
         offer.amount = amount;
         offer.price = price;
         offer.money = money;
-        emit EditOffer(id, amount, price, money);
+        emit Edit(id, amount, price, money);
     }
 
     function buy(uint256 id, uint256 amount) public notCanceled(id) {
+        require(_paused[id] != true, 'Offer is paused');
         Offer storage offer = _offers[id];
         SpaceibleAsset asset = SpaceibleAsset(assetAddress);
         require(offer.amount >= amount, 'Not enough asset balance on sale');

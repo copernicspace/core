@@ -1,6 +1,5 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers, waffle } from 'hardhat'
-import { BigNumber } from 'ethers'
 import { expect } from 'chai'
 
 import { ERC20Mock, SpaceibleAsset, SpaceibleOffer } from '../../../typechain'
@@ -44,7 +43,7 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 			it('reverts on edit tx, if edit amount > user`s balance', async () => {
 				// edit offer to be bigger than the available balance
 				await expect(
-					spaceibleOffer.connect(seller).editOffer(offer.id, asset.balance + 1, offer.price, money.address)
+					spaceibleOffer.connect(seller).edit(offer.id, asset.balance + 1, offer.price, money.address)
 				).to.be.revertedWith('Asset amount across offers exceeds available balance')
 			})
 			it('returns correct value for `availableBalance` after revert', async () => {
@@ -56,7 +55,7 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 				// edit offer to be within the available balance
 				await spaceibleOffer
 					.connect(seller)
-					.editOffer(offer.id, asset.balance, offer.price, money.address)
+					.edit(offer.id, asset.balance, offer.price, money.address)
 					.then(tx => tx.wait())
 					.then(txr => expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)))
 
@@ -66,9 +65,7 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 				expect(expected).to.be.eq(availableBal)
 			})
 			after('return to starting state', async () => {
-				await spaceibleOffer
-					.connect(seller)
-					.editOffer(offer.id, asset.balance * 0.5, offer.price, money.address)
+				await spaceibleOffer.connect(seller).edit(offer.id, asset.balance * 0.5, offer.price, money.address)
 			})
 		})
 
@@ -100,7 +97,7 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 				expect(expected).to.be.eq(availableBal)
 			})
 			after('return to starting state', async () => {
-				await spaceibleOffer.connect(seller).editOffer(newOfferID, 0, offer.price, money.address)
+				await spaceibleOffer.connect(seller).edit(newOfferID, 0, offer.price, money.address)
 			})
 		})
 
@@ -115,9 +112,7 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 
 				// newOffer is currently at 0, available bal is 0.5 * asset amount
 				await expect(
-					spaceibleOffer
-						.connect(seller)
-						.editOffer(newOfferID, asset.balance * 0.5 + 1, offer.price, money.address)
+					spaceibleOffer.connect(seller).edit(newOfferID, asset.balance * 0.5 + 1, offer.price, money.address)
 				).to.be.revertedWith('Asset amount across offers exceeds available balance')
 			})
 			it('should not change `availableBalance` after reverted tx', async () => {
@@ -129,7 +124,7 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 				// edit offer to be within the available balance
 				await spaceibleOffer
 					.connect(seller)
-					.editOffer(newOfferID, asset.balance * 0.3, offer.price, money.address)
+					.edit(newOfferID, asset.balance * 0.3, offer.price, money.address)
 					.then(tx => tx.wait())
 					.then(txr => expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)))
 
@@ -150,9 +145,7 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 				// edit offer to be bigger than the available balance
 				// old offer is currently at 0.5 * asset amount, available bal is 0.2 * asset amount
 				await expect(
-					spaceibleOffer
-						.connect(seller)
-						.editOffer(offer.id, asset.balance * 0.7 + 1, offer.price, money.address)
+					spaceibleOffer.connect(seller).edit(offer.id, asset.balance * 0.7 + 1, offer.price, money.address)
 				).to.be.revertedWith('Asset amount across offers exceeds available balance')
 			})
 			it('should not change `availableBalance` after reverted tx', async () => {
@@ -165,7 +158,7 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 				// old offer is currently at 0.5 * assset amount, available bal is 0.2 * asset amount
 				await spaceibleOffer
 					.connect(seller)
-					.editOffer(offer.id, asset.balance * 0.6, offer.price, money.address)
+					.edit(offer.id, asset.balance * 0.6, offer.price, money.address)
 					.then(tx => tx.wait())
 					.then(txr => expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)))
 
@@ -219,7 +212,7 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 			it('should not revert on edit tx, after buy tx', async () =>
 				await spaceibleOffer
 					.connect(seller)
-					.editOffer(offer.id, asset.balance * 0.1, offer.price, money.address)
+					.edit(offer.id, asset.balance * 0.1, offer.price, money.address)
 					.then(tx => tx.wait())
 					.then(txr => expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)))
 
@@ -239,7 +232,7 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 				expect(endBal).to.be.eq(startBal.add(buyAmount))
 			})
 			it('has zero remaining balance on offer after buy tx', async () => {
-				const newOffer = await spaceibleOffer.getOffer(offer.id)
+				const newOffer = await spaceibleOffer.get(offer.id)
 				expect(newOffer.amount).to.be.eq('0')
 			})
 		})

@@ -310,21 +310,21 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 					// all of asset.balance should be on seller & buyer
 					// because no transfer has yet been made to `buyer2`
 					it('should have 0.35 * asset.bal on seller', async () => {
-						const availableBal = await spaceibleAsset.balanceOf(seller.address, asset.id)
+						const actualBal = await spaceibleAsset.balanceOf(seller.address, asset.id)
 						const expected = asset.balance * (0.3 + 0.05)
 						// two buy transactions, see: lines 212 and 238 (0.6 and 0.05)
-						expect(expected).to.be.eq(availableBal)
+						expect(expected).to.be.eq(actualBal)
 					})
 					it('should have 0.65 * asset.bal on buyer', async () => {
-						const availableBal = await spaceibleAsset.balanceOf(buyer.address, asset.id)
+						const actualBal = await spaceibleAsset.balanceOf(buyer.address, asset.id)
 						const expected = asset.balance * (0.05 + 0.6) 
 						// offer not yet created --> availableBalance = balance
-						expect(expected).to.be.eq(availableBal)
+						expect(expected).to.be.eq(actualBal)
 					})
 					it('should have 0 on buyer2', async () => {
-						const availableBal = await spaceibleAsset.balanceOf(buyer2.address, asset.id)
+						const actualBal = await spaceibleAsset.balanceOf(buyer2.address, asset.id)
 						const expected = 0
-						expect(expected).to.be.eq(availableBal)
+						expect(expected).to.be.eq(actualBal)
 					})
 				})
 

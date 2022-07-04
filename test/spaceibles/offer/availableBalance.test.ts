@@ -190,12 +190,12 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 				availableBalance = 0.1 * x
 				amount on offer = 0 (all sold)
 
-			after edit (effectively: sell all remaining):
-				availableBalance = 0
-				amount on offer = 0.1 * x
+			after edit (effectively: sell half of remaining):
+				availableBalance = 0.05 * x
+				amount on offer = 0.05 * x
 
 			after second buy:
-				availableBalance = 0
+				availableBalance = 0.05 * x
 				amount on offer = 0
 		*/
 			it('should not change available balance, after `buy` tx', async () => {
@@ -212,28 +212,215 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 			it('should not revert on edit tx, after buy tx', async () =>
 				await spaceibleOffer
 					.connect(seller)
+<<<<<<< HEAD
 					.edit(offer.id, asset.balance * 0.1, offer.price, money.address)
+=======
+					.editOffer(offer.id, asset.balance * 0.05, offer.price, money.address)
+>>>>>>> e5fca88 (Extended `availableBalance` tests)
 					.then(tx => tx.wait())
 					.then(txr => expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)))
 
-			it('has zero availableBalance after edit tx', async () => {
+			it('has 0.05 * asset.balance availableBalance after edit tx', async () => {
 				const actual = await spaceibleOffer.getAvailableBalance(seller.address, asset.id)
-				const expected = 0
+				const expected = 0.05 * asset.balance
 				expect(expected).to.be.eq(actual)
 			})
 			it('can buy offer after it has been 1) sold and 2) edited', async () => {
 				const startBal = await spaceibleAsset.balanceOf(buyer.address, asset.id)
 
 				// buy with `buyer`
-				const buyAmount = asset.balance * 0.1
+				const buyAmount = asset.balance * 0.05
 				await spaceibleOffer.connect(buyer).buy(offer.id, buyAmount)
 
 				const endBal = await spaceibleAsset.balanceOf(buyer.address, asset.id)
 				expect(endBal).to.be.eq(startBal.add(buyAmount))
 			})
 			it('has zero remaining balance on offer after buy tx', async () => {
+<<<<<<< HEAD
 				const newOffer = await spaceibleOffer.get(offer.id)
 				expect(newOffer.amount).to.be.eq('0')
+=======
+				const fetchedOffer = await spaceibleOffer.getOffer(offer.id)
+				expect(fetchedOffer.amount).to.be.eq('0')
+			})
+
+			let buyer2: SignerWithAddress
+			before('get buyer2', async () => ([, , , buyer2] = await ethers.getSigners()))
+			const newOffer = {
+				id: undefined, // initialize after sell tx
+				amount: undefined,
+				price: undefined
+			}
+			before('setup newOffer', async () => {
+				newOffer.amount = asset.balance * 0.05
+				newOffer.price = offer.price
+			})
+			before(
+				'approve buyer for all',
+				async () => await spaceibleAsset.connect(buyer).setApprovalForAll(spaceibleOffer.address, true)
+			)
+
+			describe('sell offer to second user & buy', async () => {
+				/*
+					x = asset.balance
+
+					after the first series of tests, account: `seller` (creator of asset)
+					has 0.05 * x availableBalance left
+
+					in a series of 2 transactions, 0.65 * x balance has been transfered to `buyer`
+
+					in a further sell transaction in this test, 0.05 * x of that balance
+					will then be sold from `buyer` to `buyer2`
+
+					the purpose is to test that the original creator of asset - `seller` - 
+					does not have their availableBalance modified during resell
+
+					overall asset balance transaction flow:
+					seller --> buyer --> buyer2
+									  ^
+					(checking if    this   transaction modifies availableBalance of `seller`)
+				*/
+
+				/*
+					NOTE:
+
+					availableBalance 		--> changes after `sell` or `edit` transaction
+					balanceOf 				--> changes after `buy` transaction
+				*/
+				// available balances
+				describe('check availableBalance on accounts', async () => {
+					it('should have 0.05 * asset.bal on seller', async () => {
+						const availableBal = await spaceibleOffer.getAvailableBalance(seller.address, asset.id)
+						const expected = asset.balance * 0.05
+						expect(expected).to.be.eq(availableBal)
+					})
+					it('should have 0.65 * asset.bal on buyer', async () => {
+						const availableBal = await spaceibleOffer.getAvailableBalance(buyer.address, asset.id)
+						const expected = asset.balance * (0.05 + 0.6) // buyer bought 0.6 and then 0.05
+						expect(expected).to.be.eq(availableBal)
+					})
+					it('should have 0 on buyer2', async () => {
+						const availableBal = await spaceibleOffer.getAvailableBalance(buyer2.address, asset.id)
+						const expected = 0
+						expect(expected).to.be.eq(availableBal)
+					})
+				})
+				// actual balances
+				describe('check balance on accounts', async () => {
+					// all of asset.balance should be on seller & buyer
+					// because no transfer has yet been made to `buyer2`
+					it('should have 0.35 * asset.bal on seller', async () => {
+						const availableBal = await spaceibleAsset.balanceOf(seller.address, asset.id)
+						const expected = asset.balance * (0.3 + 0.05)
+						// two buy transactions, see: lines 212 and 238 (0.6 and 0.05)
+						expect(expected).to.be.eq(availableBal)
+					})
+					it('should have 0.65 * asset.bal on buyer', async () => {
+						const availableBal = await spaceibleAsset.balanceOf(buyer.address, asset.id)
+						const expected = asset.balance * (0.05 + 0.6) 
+						// offer not yet created --> availableBalance = balance
+						expect(expected).to.be.eq(availableBal)
+					})
+					it('should have 0 on buyer2', async () => {
+						const availableBal = await spaceibleAsset.balanceOf(buyer2.address, asset.id)
+						const expected = 0
+						expect(expected).to.be.eq(availableBal)
+					})
+				})
+
+				describe('test: create new offer with non-asset-creator', async () => {
+					before('create new offer', async () => {
+						await spaceibleOffer
+							.connect(buyer)
+							.sell(asset.id, newOffer.amount, newOffer.price, money.address)
+							.then(tx => tx.wait())
+							.then(txr => (newOffer.id = getOfferId(txr)))
+					})
+					it('should create offer with 0.05 * asset.bal', async () => {
+						const fetchedOffer = await spaceibleOffer.getOffer(newOffer.id)
+						expect(fetchedOffer.amount).to.be.eq(BigNumber.from(0.05 * asset.balance))
+					})
+
+					// --- availableBalance ---
+					it('should have 0.6 * asset.bal availableBalance on buyer', async () => {
+						// creation of offer reduced availableBalance by 0.05 * asset.balance
+						const availableBal = await spaceibleOffer.getAvailableBalance(buyer.address, asset.id)
+						const expected = 0.6 * asset.balance
+						expect(expected).to.be.eq(availableBal)
+					})
+					it('should have 0 availableBalance on buyer2', async () => {
+						// `buyer2` has not yet bought the offer -- availableBalance unchanged
+						const availableBal = await spaceibleOffer.getAvailableBalance(buyer2.address, asset.id)
+						const expected = 0
+						expect(expected).to.be.eq(availableBal)
+					})
+
+					// --- Actual asset balance ---
+					it('should have 0.65 * asset.bal balance on buyer before sell tx', async () => {
+						// NOTE: we're checking actual balance, NOT availableBalance
+						const actualBal = await spaceibleAsset.balanceOf(buyer.address, asset.id)
+						const expected = 0.65 * asset.balance
+						expect(expected).to.be.eq(actualBal)
+					})
+					it('should have 0 balance on buyer2', async () => {
+						// NOTE: we're checking actual balance, NOT availableBalance
+						const actualBal = await spaceibleAsset.balanceOf(buyer2.address, asset.id)
+						const expected = 0
+						expect(expected).to.be.eq(actualBal)
+					})
+				})
+
+				describe('test: buy offer from non-asset-creator', async () => {
+					before('mint mock money to buyer', async () => await money.mintTo(buyer2.address, buyPrice))
+					before(
+						'set money allowance',
+						async () => await money.connect(buyer2).approve(spaceibleOffer.address, buyPrice)
+					)
+					before('buy with buyer2', async () => {
+						await spaceibleOffer.connect(buyer2).buy(newOffer.id, newOffer.amount)
+					})
+
+					it('has zero remaining balance on offer after buy tx', async () => {
+						const fetchedOffer = await spaceibleOffer.getOffer(newOffer.id)
+						expect(fetchedOffer.amount).to.be.eq('0')
+					})
+
+					// --- availableBalance ---
+					it('availableBalance on seller should not change', async () => {
+						// asset creator should NOT have their availableBalance changed after resell down the line
+						const availableBal = await spaceibleOffer.getAvailableBalance(seller.address, asset.id)
+						const expected = 0.05 * asset.balance
+						expect(expected).to.be.eq(availableBal)
+					})
+					it('availableBalance on buyer should not change', async () => {
+						// account: buyer has not bought or sold any balance after offer creation
+						// 			and subsequent buy by `buyer2` -- availableBal should not change
+						const availableBal = await spaceibleOffer.getAvailableBalance(buyer.address, asset.id)
+						const expected = 0.6 * asset.balance
+						expect(expected).to.be.eq(availableBal)
+					})
+					it('should have 0.5 * asset.balance availableBalance on buyer2', async () => {
+						// after buy, `buyer2` availableBalance should increase by 0.05 * asset.balance
+						const availableBal = await spaceibleOffer.getAvailableBalance(buyer2.address, asset.id)
+						const expected = 0.05 * asset.balance
+						expect(expected).to.be.eq(availableBal)
+					})
+
+					// --- Actual asset balance ---
+					it('should have 0.6 * asset.bal balance on buyer after sell tx', async () => {
+						// NOTE: we're checking actual balance, NOT availableBalance
+						const actualBal = await spaceibleAsset.balanceOf(buyer.address, asset.id)
+						const expected = 0.6 * asset.balance
+						expect(expected).to.be.eq(actualBal)
+					})
+					it('should have 0.05 * asset.bal balance on buyer2', async () => {
+						// NOTE: we're checking actual balance, NOT availableBalance
+						const actualBal = await spaceibleAsset.balanceOf(buyer2.address, asset.id)
+						const expected = 0.05 * asset.balance
+						expect(expected).to.be.eq(actualBal)
+					})
+				})
+>>>>>>> e5fca88 (Extended `availableBalance` tests)
 			})
 		})
 	})

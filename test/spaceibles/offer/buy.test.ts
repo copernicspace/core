@@ -113,7 +113,7 @@ describe('[spaceibles/offer/buy] buy asset via offer', () => {
 	let actualOfferAmountBefore
 	before(
 		'save available offer before  buy tx',
-		async () => await spaceibleOffer.getOffer(offer.id).then(offer => (actualOfferAmountBefore = offer.amount))
+		async () => await spaceibleOffer.get(offer.id).then(offer => (actualOfferAmountBefore = offer.amount))
 	)
 
 	before('asset buy tx', async () => (buyTx = await spaceibleOffer.connect(buyer).buy(offer.id, buyAmount)))
@@ -224,7 +224,7 @@ describe('[spaceibles/offer/buy] buy asset via offer', () => {
 		let actualAfter
 		before(
 			'save available offer before  buy tx',
-			async () => await spaceibleOffer.getOffer(offer.id).then(offer => (actualAfter = offer.amount))
+			async () => await spaceibleOffer.get(offer.id).then(offer => (actualAfter = offer.amount))
 		)
 
 		it('should be different offer amount after and before', async () =>

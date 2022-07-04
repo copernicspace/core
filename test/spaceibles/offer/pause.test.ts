@@ -1,9 +1,9 @@
 import { ContractReceipt, ContractTransaction } from '@ethersproject/contracts'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers, waffle } from 'hardhat'
 import { expect } from 'chai'
 
 import { ERC20Mock, SpaceibleAsset, SpaceibleOffer } from '../../../typechain'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { deploySpaceibleOffer } from './fixtures/deploy.fixture'
 import contractNames from '../../../constants/contract.names'
 import { getAssetID } from '../../helpers/getAssetId.helper'
@@ -91,6 +91,9 @@ describe('[spaceibles/offer/pause] `SpaceibleOffer::pause/unpause/isPaused` test
 
 		it('should not revert on `pause` tx if user is seller', async () =>
 			await expect(spaceibleOffer.connect(seller).pause(offer.id)).not.to.be.reverted)
+
+		it('should revert on `buy` tx if offer is paused', async () =>
+			await expect(spaceibleOffer.connect(user).buy(offer.id, 1)).to.be.revertedWith('Offer is paused'))
 	})
 
 	describe('`paused` state for offer after `pause` tx', () => {

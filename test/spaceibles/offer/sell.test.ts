@@ -88,7 +88,7 @@ describe('[spaceibles/offer/sell]', () => {
 			money: string
 		}
 
-		before('read new offer`s data from chain', async () => (newOffer = await spaceibleOffer.getOffer(offer.id)))
+		before('read new offer`s data from chain', async () => (newOffer = await spaceibleOffer.get(offer.id)))
 
 		it('should have correct `id` value', async () => expect(offer.id).to.be.eq(1))
 		it('should have correct `seller` value', async () => expect(newOffer.seller).to.be.eq(seller.address))

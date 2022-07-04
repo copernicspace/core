@@ -94,22 +94,20 @@ describe('[spaceibles/offer/edit]', () => {
 	describe('edit access', () => {
 		it('should revert on edit tx from not offer seller', async () =>
 			await expect(
-				spaceibleOffer
-					.connect(user)
-					.editOffer(offer.id, updatedOffer.amount, updatedOffer.price, erc20Mock.address)
+				spaceibleOffer.connect(user).edit(offer.id, updatedOffer.amount, updatedOffer.price, erc20Mock.address)
 			).to.be.revertedWith('Only offer creator can edit'))
 
 		it('should not revert on edit from offer seller', async () => {
 			editTx = await spaceibleOffer
 				.connect(seller)
-				.editOffer(offer.id, updatedOffer.amount, updatedOffer.price, anotherErc20Mock.address)
+				.edit(offer.id, updatedOffer.amount, updatedOffer.price, anotherErc20Mock.address)
 
 			await expect(editTx.wait()).not.to.be.reverted
 		})
 
 		it('should have correct event data on edit tx', async () =>
 			await expect(editTx)
-				.to.emit(spaceibleOffer, 'EditOffer')
+				.to.emit(spaceibleOffer, 'Edit')
 				.withArgs(offer.id, updatedOffer.amount, updatedOffer.price, anotherErc20Mock.address))
 	})
 
@@ -122,7 +120,7 @@ describe('[spaceibles/offer/edit]', () => {
 			money: string
 		}
 
-		before('read new offer`s data from chain', async () => (offerData = await spaceibleOffer.getOffer(offer.id)))
+		before('read new offer`s data from chain', async () => (offerData = await spaceibleOffer.get(offer.id)))
 
 		it('should have correct `id` value', async () => expect(offer.id).to.be.eq(1))
 		it('should have correct `seller` value', async () => expect(offerData.seller).to.be.eq(seller.address))

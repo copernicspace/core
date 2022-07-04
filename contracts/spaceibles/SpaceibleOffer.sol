@@ -24,13 +24,16 @@ contract SpaceibleOffer is GeneratorID {
 
     mapping(uint256 => Offer) private _offers;
     mapping(uint256 => bool) private _paused;
+    mapping(uint256 => bool) private _canceled;
+
     mapping(address => mapping(uint256 => uint256)) private balancesOnOffers;
 
     event NewOffer(uint256 indexed id);
     event Buy(uint256 indexed id, uint256 amount, uint256 sellerFee, uint256 royaltiesFee, uint256 platformFee);
     event Pause(uint256 indexed id);
     event Unpause(uint256 indexed id);
-    event EditOffer(uint256 indexed id, uint256 amount, uint256 price, address money);
+    event Cancel(uint256 indexed id);
+    event Edit(uint256 indexed id, uint256 amount, uint256 price, address money);
 
     constructor(
         address _operator,
@@ -73,7 +76,7 @@ contract SpaceibleOffer is GeneratorID {
         emit NewOffer(id);
     }
 
-    function getOffer(uint256 id)
+    function get(uint256 id)
         public
         view
         returns (
@@ -88,12 +91,12 @@ contract SpaceibleOffer is GeneratorID {
         return (offer.seller, offer.assetId, offer.amount, offer.price, offer.money);
     }
 
-    function editOffer(
+    function edit(
         uint256 id,
         uint256 amount,
         uint256 price,
         address money
-    ) public {
+    ) public notCanceled(id) {
         Offer storage offer = _offers[id];
         require(msg.sender == offer.seller, 'Only offer creator can edit');
 
@@ -110,10 +113,11 @@ contract SpaceibleOffer is GeneratorID {
         offer.amount = amount;
         offer.price = price;
         offer.money = money;
-        emit EditOffer(id, amount, price, money);
+        emit Edit(id, amount, price, money);
     }
 
-    function buy(uint256 id, uint256 amount) public {
+    function buy(uint256 id, uint256 amount) public notCanceled(id) {
+        require(_paused[id] != true, 'Offer is paused');
         Offer storage offer = _offers[id];
         SpaceibleAsset asset = SpaceibleAsset(assetAddress);
         require(offer.amount >= amount, 'Not enough asset balance on sale');
@@ -140,7 +144,7 @@ contract SpaceibleOffer is GeneratorID {
         money.transferFrom(msg.sender, operator, operatorFeeAmount);
         money.transferFrom(msg.sender, offer.seller, sellerFeeAmount);
 
-        offer.amount = offer.amount - amount;
+        offer.amount -= amount;
         balancesOnOffers[offer.seller][offer.assetId] -= amount;
 
         asset.safeTransferFrom(offer.seller, msg.sender, offer.assetId, amount, '');
@@ -152,14 +156,14 @@ contract SpaceibleOffer is GeneratorID {
         return IERC1155(assetAddress).balanceOf(user, assetId) - balancesOnOffers[user][assetId];
     }
 
-    function pause(uint256 id) public {
+    function pause(uint256 id) public notCanceled(id) {
         Offer memory offer = _offers[id];
         require(msg.sender == offer.seller, 'Only offer seller can pause');
         _paused[id] = true;
         emit Pause(id);
     }
 
-    function unpause(uint256 id) public {
+    function unpause(uint256 id) public notCanceled(id) {
         Offer memory offer = _offers[id];
         require(msg.sender == offer.seller, 'Only offer seller can unpause');
         _paused[id] = false;
@@ -168,5 +172,22 @@ contract SpaceibleOffer is GeneratorID {
 
     function isPaused(uint256 id) public view returns (bool) {
         return _paused[id];
+    }
+
+    function cancel(uint256 id) public notCanceled(id) {
+        Offer memory offer = _offers[id];
+        require(msg.sender == offer.seller, 'Only offer seller can cancel');
+        _canceled[id] = true;
+        balancesOnOffers[offer.seller][offer.assetId] -= offer.amount;
+        emit Cancel(id);
+    }
+
+    function isCanceled(uint256 id) public view returns (bool) {
+        return _canceled[id];
+    }
+
+    modifier notCanceled(uint256 id) {
+        require(_canceled[id] != true, 'Offer is canceled');
+        _;
     }
 }

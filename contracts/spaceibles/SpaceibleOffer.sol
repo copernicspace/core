@@ -140,7 +140,10 @@ contract SpaceibleOffer is GeneratorID {
 
         uint256 sellerFeeAmount = amountPrice - royaltiesFeeAmount - operatorFeeAmount;
 
-        money.transferFrom(msg.sender, creator, royaltiesFeeAmount);
+        // do not send 0 amount ERC20 transfer
+        if (royaltiesFeeAmount > 0) {
+            money.transferFrom(msg.sender, creator, royaltiesFeeAmount);
+        }
         money.transferFrom(msg.sender, operator, operatorFeeAmount);
         money.transferFrom(msg.sender, offer.seller, sellerFeeAmount);
 

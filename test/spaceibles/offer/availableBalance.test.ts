@@ -6,6 +6,7 @@ import { ERC20Mock, SpaceibleAsset, SpaceibleOffer } from '../../../typechain'
 import { setupSpaceibleOffer } from './fixtures/setupOffer.fixture'
 import { getOfferId } from '../../helpers/getOfferId.helper'
 import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
+import { BigNumber } from 'ethers'
 
 const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 
@@ -212,11 +213,7 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 			it('should not revert on edit tx, after buy tx', async () =>
 				await spaceibleOffer
 					.connect(seller)
-<<<<<<< HEAD
-					.edit(offer.id, asset.balance * 0.1, offer.price, money.address)
-=======
-					.editOffer(offer.id, asset.balance * 0.05, offer.price, money.address)
->>>>>>> e5fca88 (Extended `availableBalance` tests)
+					.edit(offer.id, asset.balance * 0.05, offer.price, money.address)
 					.then(tx => tx.wait())
 					.then(txr => expect(txr.status).to.be.eq(TX_RECEIPT_STATUS.SUCCESS)))
 
@@ -236,11 +233,7 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 				expect(endBal).to.be.eq(startBal.add(buyAmount))
 			})
 			it('has zero remaining balance on offer after buy tx', async () => {
-<<<<<<< HEAD
-				const newOffer = await spaceibleOffer.get(offer.id)
-				expect(newOffer.amount).to.be.eq('0')
-=======
-				const fetchedOffer = await spaceibleOffer.getOffer(offer.id)
+				const fetchedOffer = await spaceibleOffer.get(offer.id)
 				expect(fetchedOffer.amount).to.be.eq('0')
 			})
 
@@ -337,7 +330,7 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 							.then(txr => (newOffer.id = getOfferId(txr)))
 					})
 					it('should create offer with 0.05 * asset.bal', async () => {
-						const fetchedOffer = await spaceibleOffer.getOffer(newOffer.id)
+						const fetchedOffer = await spaceibleOffer.get(newOffer.id)
 						expect(fetchedOffer.amount).to.be.eq(BigNumber.from(0.05 * asset.balance))
 					})
 
@@ -381,7 +374,7 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 					})
 
 					it('has zero remaining balance on offer after buy tx', async () => {
-						const fetchedOffer = await spaceibleOffer.getOffer(newOffer.id)
+						const fetchedOffer = await spaceibleOffer.get(newOffer.id)
 						expect(fetchedOffer.amount).to.be.eq('0')
 					})
 
@@ -420,7 +413,6 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 						expect(expected).to.be.eq(actualBal)
 					})
 				})
->>>>>>> e5fca88 (Extended `availableBalance` tests)
 			})
 		})
 	})

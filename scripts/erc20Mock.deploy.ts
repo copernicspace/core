@@ -2,10 +2,10 @@ import { ethers } from 'hardhat'
 import ContractNames from '../constants/contract.names'
 import { polygonScanLink } from '../tasks/utils/polygonScanLink'
 
-const network = 'mumbai'
-const name = 'USDC Coin mock'
-const symbol = 'USDC'
-const decimals = 6
+const network = 'SET ME' // polygon / mumbai
+const name = 'SET ME'
+const symbol = 'SET ME'
+const decimals = 'SET ME'
 
 const main = async () =>
 	await ethers

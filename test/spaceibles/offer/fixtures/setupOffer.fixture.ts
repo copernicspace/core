@@ -31,9 +31,13 @@ export const setupSpaceibleOffer: Fixture<_setupSpaceibleOffer> = async () => {
 	const [, seller] = await ethers.getSigners()
 
 	// setup ERC20 money
+	const name = 'MockToken'
+	const symbol = 'MT'
+	const decimals = 18
+
 	const money = await ethers
 		.getContractFactory(contractNames.ERC20_MOCK)
-		.then(factory => factory.deploy())
+		.then(factory => factory.deploy(name, symbol, decimals))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract as ERC20Mock)
 

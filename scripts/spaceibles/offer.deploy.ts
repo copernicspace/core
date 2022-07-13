@@ -8,8 +8,8 @@ async function main() {
 	const [deployer] = await ethers.getSigners()
 	const operator = deployer.address
 	// operator fee is integer, in  basis points, where 100% = 10000
-	const operatorFee = 'operatorFee: SET ME ;)'
-	const assetAddress = 'assetAddress: SET ME ;)'
+	const operatorFee = 300
+	const assetAddress = '0x9C27091eA94D930dec660bE0642bf809bda158a8'
 
 	await ethers
 		.getContractFactory(contractNames.SPACEIBLE_OFFER)

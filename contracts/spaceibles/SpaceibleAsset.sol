@@ -14,6 +14,7 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl {
     /// #if_updated forall(uint256 assetID in _creators) _creators[assetID] != address(0);
     mapping(uint256 => address) private _creators;
 
+    bool public openCreate = false;
     bytes32 public constant CREATOR_ROLE = keccak256('CREATOR_ROLE');
 
     constructor(string memory uri) ERC1155(uri) {
@@ -35,10 +36,8 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl {
         uint256 royalties,
         bytes memory data
     ) public {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(CREATOR_ROLE, msg.sender),
-            'You are not allowed to create new Spaceible Asset'
-        );
+        bool senderHasCreatorRole = hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(CREATOR_ROLE, msg.sender);
+        require(openCreate || senderHasCreatorRole, 'You are not allowed to create new Spaceible Asset');
         uint256 id = generateId();
         _mint(msg.sender, id, balance, data);
         _setURI(id, cid);
@@ -73,6 +72,14 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl {
 
     function revokeCreatorRole(address target) external onlyAdmin {
         revokeRole(CREATOR_ROLE, target);
+    }
+
+    function hasCreatorRole(address target) public view returns (bool) {
+        return openCreate || hasRole(CREATOR_ROLE, target) || hasRole(DEFAULT_ADMIN_ROLE, target);
+    }
+
+    function toggleOpenCreate() external onlyAdmin {
+        openCreate = !openCreate;
     }
 
     modifier onlyAdmin() {

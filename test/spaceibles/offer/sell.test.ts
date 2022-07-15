@@ -31,9 +31,13 @@ describe('[spaceibles/offer/sell]', () => {
 	)
 
 	before('deploy ERC20 Mock', async () => {
+		const name = 'MockToken'
+		const symbol = 'MT'
+		const decimals = 18
+
 		erc20Mock = await ethers
 			.getContractFactory(contractNames.ERC20_MOCK)
-			.then(factory => factory.deploy())
+			.then(factory => factory.deploy(name, symbol, decimals))
 			.then(contract => contract.deployed())
 			.then(deployedContract => deployedContract as ERC20Mock)
 	})

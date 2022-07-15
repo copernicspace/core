@@ -34,9 +34,13 @@ describe('[spacemart/offers/instant/offer-amount.test.ts] InstantOffer: min buy 
 	before('add buyer to KYC', async () => await kycContract.connect(deployer).setKycStatus(buyer.address, true))
 	let erc20Mock: ERC20Mock
 	before('Deploy ERC20 Mock', async () => {
+		const name = 'MockToken'
+		const symbol = 'MT'
+		const decimals = 18
+
 		erc20Mock = await ethers
 			.getContractFactory(contractNames.ERC20_MOCK)
-			.then(factory => factory.deploy())
+			.then(factory => factory.deploy(name, symbol, decimals))
 			.then(contract => contract.deployed())
 			.then(deployedContract => deployedContract as ERC20Mock)
 	})

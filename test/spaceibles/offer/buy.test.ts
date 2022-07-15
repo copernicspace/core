@@ -36,9 +36,12 @@ describe('[spaceibles/offer/buy] buy asset via offer', () => {
 	before('load seller and buyer signers', async () => ([, seller, buyer] = await ethers.getSigners()))
 
 	before('deploy ERC20 Mock', async () => {
+		const name = 'MockToken'
+		const symbol = 'MT'
+		const decimals = 18
 		money = await ethers
 			.getContractFactory(contractNames.ERC20_MOCK)
-			.then(factory => factory.deploy())
+			.then(factory => factory.deploy(name, symbol, decimals))
 			.then(contract => contract.deployed())
 			.then(deployedContract => deployedContract as ERC20Mock)
 

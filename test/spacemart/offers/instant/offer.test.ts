@@ -33,12 +33,18 @@ describe('[spacemart/offers/instant/offer.test] Instant offer: deployOffer fixtu
 
 	let erc20Mock: ERC20Mock
 	before(' deploy ERC20 Mock', async () => {
+		const name = 'MockToken'
+		const symbol = 'MT'
+		const decimals = 6
+
 		erc20Mock = await ethers
 			.getContractFactory(contractNames.ERC20_MOCK)
-			.then(factory => factory.deploy())
+			.then(factory => factory.deploy(name, symbol, decimals))
 			.then(contract => contract.deployed())
 			.then(deployedContract => deployedContract as ERC20Mock)
 	})
+
+	it('should have correct decimals on mock ERC20', async () => expect(await erc20Mock.decimals()).to.be.eq(6))
 
 	let offerId: BigNumberish
 	const price = parseUnits('4250', 18)

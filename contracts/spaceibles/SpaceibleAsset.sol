@@ -36,8 +36,8 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl {
         uint256 royalties,
         bytes memory data
     ) public {
-        bool hasCreatorRole = hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(CREATOR_ROLE, msg.sender);
-        require(openCreate || hasCreatorRole, 'You are not allowed to create new Spaceible Asset');
+        bool senderHasCreatorRole = hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(CREATOR_ROLE, msg.sender);
+        require(openCreate || senderHasCreatorRole, 'You are not allowed to create new Spaceible Asset');
         uint256 id = generateId();
         _mint(msg.sender, id, balance, data);
         _setURI(id, cid);
@@ -75,7 +75,7 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl {
     }
 
     function hasCreatorRole(address target) public view returns (bool) {
-        return openCreate || hasRole(CREATOR_ROLE, target);
+        return openCreate || hasRole(CREATOR_ROLE, target) || hasRole(DEFAULT_ADMIN_ROLE, target);
     }
 
     function toggleOpenCreate() external onlyAdmin {

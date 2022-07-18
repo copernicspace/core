@@ -28,7 +28,7 @@ contract SpaceibleOffer is GeneratorID {
 
     mapping(address => mapping(uint256 => uint256)) private balancesOnOffers;
 
-    event NewOffer(uint256 indexed id);
+    event Sell(uint256 indexed id);
     event Buy(uint256 indexed id, uint256 amount, uint256 sellerFee, uint256 royaltiesFee, uint256 platformFee);
     event Pause(uint256 indexed id);
     event Unpause(uint256 indexed id);
@@ -73,7 +73,7 @@ contract SpaceibleOffer is GeneratorID {
 
         balancesOnOffers[msg.sender][assetId] += amount;
 
-        emit NewOffer(id);
+        emit Sell(id);
     }
 
     function get(uint256 id)

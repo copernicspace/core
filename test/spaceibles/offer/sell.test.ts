@@ -104,5 +104,5 @@ describe('[spaceibles/offer/sell]', () => {
 
 	describe('correct `NewOffer` event data', () =>
 		it('should have correct `id` value', async () =>
-			await expect(sellTx).to.emit(spaceibleOffer, 'NewOffer').withArgs(offer.id)))
+			await expect(sellTx).to.emit(spaceibleOffer, 'Sell').withArgs(offer.id)))
 })

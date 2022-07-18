@@ -102,7 +102,7 @@ describe('[spaceibles/offer/sell]', () => {
 		it('should have correct `price` value', async () => expect(newOffer.money).to.be.eq(erc20Mock.address))
 	})
 
-	describe('correct `NewOffer` event data', () =>
+	describe('correct `Sell` event data', () =>
 		it('should have correct `id` value', async () =>
 			await expect(sellTx).to.emit(spaceibleOffer, 'Sell').withArgs(offer.id)))
 })

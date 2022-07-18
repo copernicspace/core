@@ -22,6 +22,7 @@ let seller: SignerWithAddress
 let user: SignerWithAddress
 
 let editTx: ContractTransaction
+let editedOfferId: BigNumber
 
 describe('[spaceibles/offer/edit]', () => {
 	before(
@@ -111,13 +112,15 @@ describe('[spaceibles/offer/edit]', () => {
 				.connect(seller)
 				.edit(offer.id, updatedOffer.amount, updatedOffer.price, anotherErc20Mock.address)
 
+			editedOfferId = await editTx.wait().then(txr => getOfferId(txr))
 			await expect(editTx.wait()).not.to.be.reverted
 		})
 
-		it('should have correct event data on edit tx', async () =>
-			await expect(editTx)
-				.to.emit(spaceibleOffer, 'Edit')
-				.withArgs(offer.id, updatedOffer.amount, updatedOffer.price, anotherErc20Mock.address))
+		it('should have correct `Cancel` event data on edit tx', async () =>
+			await expect(editTx).to.emit(spaceibleOffer, 'Cancel').withArgs(offer.id))
+
+		it('should have correct `Sell` event data on edit tx', async () =>
+			await expect(editTx).to.emit(spaceibleOffer, 'Sell').withArgs(editedOfferId))
 	})
 
 	describe('updated offer data', () => {
@@ -129,7 +132,7 @@ describe('[spaceibles/offer/edit]', () => {
 			money: string
 		}
 
-		before('read new offer`s data from chain', async () => (offerData = await spaceibleOffer.get(offer.id)))
+		before('read new offer`s data from chain', async () => (offerData = await spaceibleOffer.get(editedOfferId)))
 
 		it('should have correct `id` value', async () => expect(offer.id).to.be.eq(1))
 		it('should have correct `seller` value', async () => expect(offerData.seller).to.be.eq(seller.address))

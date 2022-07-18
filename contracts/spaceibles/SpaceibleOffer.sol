@@ -100,20 +100,9 @@ contract SpaceibleOffer is GeneratorID {
         Offer storage offer = _offers[id];
         require(msg.sender == offer.seller, 'Only offer creator can edit');
 
-        require(
-            IERC1155(assetAddress).balanceOf(msg.sender, offer.assetId) >=
-                balancesOnOffers[msg.sender][offer.assetId] - offer.amount + amount,
-            'Asset amount across offers exceeds available balance'
-        );
+        cancel(offer.id);
 
-        uint256 oldBal = offer.amount;
-        uint256 oldMapBal = balancesOnOffers[msg.sender][offer.assetId];
-        balancesOnOffers[msg.sender][offer.assetId] = oldMapBal + amount - oldBal;
-
-        offer.amount = amount;
-        offer.price = price;
-        offer.money = money;
-        emit Edit(id, amount, price, money);
+        sell(offer.assetId, amount, price, money);
     }
 
     function buy(uint256 id, uint256 amount) public notCanceled(id) {

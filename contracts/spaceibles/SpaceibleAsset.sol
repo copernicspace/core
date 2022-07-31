@@ -3,12 +3,14 @@ pragma solidity ^0.8.14;
 
 import '@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol';
 import '@openzeppelin/contracts/access/AccessControl.sol';
+import '@openzeppelin/contracts/access/Ownable.sol';
 
 import '../utils/GeneratorID.sol';
 
 // [BREAKS CODE]: invariant forall(uint256 assetID in _creators) _creators[assetID] != address(0);
-contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl {
+contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownable {
     event Royalties(uint256 indexed id, uint256 indexed royalties);
+    event PermanentURI(string _value, uint256 indexed _id);
 
     mapping(uint256 => uint256) private _royalties;
     /// #if_updated forall(uint256 assetID in _creators) _creators[assetID] != address(0);
@@ -16,6 +18,7 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl {
 
     bool public openCreate = false;
     bytes32 public constant CREATOR_ROLE = keccak256('CREATOR_ROLE');
+    string private metadataCID;
 
     constructor(string memory uri) ERC1155(uri) {
         _setBaseURI(uri);
@@ -24,6 +27,14 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl {
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
+    }
+
+    function contractURI() public view returns (string memory) {
+        return metadataCID;
+    }
+
+    function setMetadataCID(string memory _metadataCID) public onlyAdmin {
+        metadataCID = _metadataCID;
     }
 
     /// #if_succeeds  {:msg "correct mint params"}
@@ -43,6 +54,7 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl {
         _setURI(id, cid);
         _setRoyalties(id, royalties);
         _setCreator(id, msg.sender);
+        emit PermanentURI(cid, id);
     }
 
     /// #if_succeeds {:msg "royalties only set once"} old(_royalties[id]) == 0;

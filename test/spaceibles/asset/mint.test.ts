@@ -55,6 +55,9 @@ describe('[spaceibles/asset/mint]', () => {
 
 		it('should have correct `Royalties` event', async () =>
 			await expect(mintTx).to.emit(spaceibleAsset, 'Royalties').withArgs(newAssetId, royalties))
+
+		it('should have correct `PermanentURI` event', async () =>
+			await expect(mintTx).to.emit(spaceibleAsset, 'PermanentURI').withArgs(mintCID, newAssetId))
 	})
 
 	describe('mint single from not deployer', async () => {
@@ -96,6 +99,9 @@ describe('[spaceibles/asset/mint]', () => {
 
 		it('should have correct `Royalties` event', async () =>
 			await expect(mintTx).to.emit(spaceibleAsset, 'Royalties').withArgs(newAssetId, royalties))
+
+		it('should have correct `PermanentURI` event', async () =>
+			await expect(mintTx).to.emit(spaceibleAsset, 'PermanentURI').withArgs(mintCID, newAssetId))
 	})
 
 	describe('mint multiple from deployer', async () => {
@@ -132,6 +138,9 @@ describe('[spaceibles/asset/mint]', () => {
 
 		it('should have correct `Royalties` event', async () =>
 			await expect(mintTx).to.emit(spaceibleAsset, 'Royalties').withArgs(newAssetId, royalties))
+
+		it('should have correct `PermanentURI` event', async () =>
+			await expect(mintTx).to.emit(spaceibleAsset, 'PermanentURI').withArgs(mintCID, newAssetId))
 	})
 
 	describe('mint multiple from not deployer', async () => {
@@ -173,5 +182,8 @@ describe('[spaceibles/asset/mint]', () => {
 
 		it('should have correct `Royalties` event', async () =>
 			await expect(mintTx).to.emit(spaceibleAsset, 'Royalties').withArgs(newAssetId, royalties))
+
+		it('should have correct `PermanentURI` event', async () =>
+			await expect(mintTx).to.emit(spaceibleAsset, 'PermanentURI').withArgs(mintCID, newAssetId))
 	})
 })

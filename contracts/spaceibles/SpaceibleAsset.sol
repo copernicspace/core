@@ -17,6 +17,7 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownabl
 
     bool public openCreate = false;
     bytes32 public constant CREATOR_ROLE = keccak256('CREATOR_ROLE');
+    string private metadataCID;
 
     constructor(string memory uri) ERC1155(uri) {
         _setBaseURI(uri);
@@ -25,6 +26,14 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownabl
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
+    }
+
+    function contractURI() public view returns (string memory) {
+        return metadataCID;
+    }
+
+    function setMetadataCID(string memory _metadataCID) public onlyAdmin {
+        metadataCID = _metadataCID;
     }
 
     /// #if_succeeds  {:msg "correct mint params"}

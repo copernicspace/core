@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: private
 pragma solidity ^0.8.14;
 
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
 
@@ -9,6 +10,8 @@ import '../utils/ERC20Percentage.sol';
 import '../utils/GeneratorID.sol';
 
 contract SpaceibleOffer is GeneratorID {
+    using SafeERC20 for IERC20;
+
     struct Offer {
         uint256 id;
         address seller;
@@ -131,10 +134,10 @@ contract SpaceibleOffer is GeneratorID {
 
         // do not send 0 amount ERC20 transfer
         if (royaltiesFeeAmount > 0) {
-            money.transferFrom(msg.sender, creator, royaltiesFeeAmount);
+            money.safeTransferFrom(msg.sender, creator, royaltiesFeeAmount);
         }
-        money.transferFrom(msg.sender, operator, operatorFeeAmount);
-        money.transferFrom(msg.sender, offer.seller, sellerFeeAmount);
+        money.safeTransferFrom(msg.sender, operator, operatorFeeAmount);
+        money.safeTransferFrom(msg.sender, offer.seller, sellerFeeAmount);
 
         offer.amount -= amount;
         balancesOnOffers[offer.seller][offer.assetId] -= amount;

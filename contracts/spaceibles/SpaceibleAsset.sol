@@ -54,7 +54,7 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownabl
         _setURI(id, cid);
         _setRoyalties(id, royalties);
         _setCreator(id, msg.sender);
-        emit PermanentURI(cid, id)
+        emit PermanentURI(cid, id);
     }
 
     /// #if_succeeds {:msg "royalties only set once"} old(_royalties[id]) == 0;
@@ -98,5 +98,4 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownabl
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), 'Only admin can perform this action');
         _;
     }
-
 }

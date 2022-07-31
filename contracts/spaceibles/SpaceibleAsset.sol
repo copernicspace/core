@@ -10,6 +10,7 @@ import '../utils/GeneratorID.sol';
 // [BREAKS CODE]: invariant forall(uint256 assetID in _creators) _creators[assetID] != address(0);
 contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownable {
     event Royalties(uint256 indexed id, uint256 indexed royalties);
+    event PermanentURI(string _value, uint256 indexed _id);
 
     mapping(uint256 => uint256) private _royalties;
     /// #if_updated forall(uint256 assetID in _creators) _creators[assetID] != address(0);
@@ -53,6 +54,7 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownabl
         _setURI(id, cid);
         _setRoyalties(id, royalties);
         _setCreator(id, msg.sender);
+        emit PermanentURI(cid, id)
     }
 
     /// #if_succeeds {:msg "royalties only set once"} old(_royalties[id]) == 0;
@@ -96,4 +98,5 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownabl
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), 'Only admin can perform this action');
         _;
     }
+
 }

@@ -3,11 +3,12 @@ pragma solidity ^0.8.14;
 
 import '@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol';
 import '@openzeppelin/contracts/access/AccessControl.sol';
+import '@openzeppelin/contracts/access/Ownable.sol';
 
 import '../utils/GeneratorID.sol';
 
 // [BREAKS CODE]: invariant forall(uint256 assetID in _creators) _creators[assetID] != address(0);
-contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl {
+contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownable {
     event Royalties(uint256 indexed id, uint256 indexed royalties);
 
     mapping(uint256 => uint256) private _royalties;

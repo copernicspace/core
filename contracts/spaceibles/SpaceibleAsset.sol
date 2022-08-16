@@ -94,6 +94,10 @@ contract SpaceibleAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownabl
         openCreate = !openCreate;
     }
 
+    function burn(uint256 id, uint256 amount) external {
+        _burn(msg.sender, id, amount);
+    }
+
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), 'Only admin can perform this action');
         _;

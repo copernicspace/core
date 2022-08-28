@@ -1,6 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Fixture } from 'ethereum-waffle'
 import { ethers, waffle } from 'hardhat'
+
 import { KycRegister, PayloadFactory } from '../../../../../typechain'
 import contract_names from '../../../../../constants/contract.names'
 

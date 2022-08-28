@@ -3,7 +3,7 @@ import { parseUnits } from '@ethersproject/units'
 import { Fixture } from 'ethereum-waffle'
 import { ethers } from 'hardhat'
 
-import { deployPayloadAsset, Deploy, loadFixtureState0, loadFixtureState1 } from './deploy.fixture'
+import { deployPayloadAsset, Deploy, loadFixtureState0 } from './deploy.fixture'
 import contractNames from '../../../../../constants/contract.names'
 import { getPayloadAddress } from '../../../../helpers/payloadAddress'
 import { PayloadAsset } from '../../../../../typechain'

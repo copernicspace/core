@@ -14,41 +14,30 @@ export interface Create extends Deploy {
 	decimals: number
 }
 
-export const createPayloadAsset: Fixture<Create> = async () => {
+export const createPayloadAsset: Fixture<Create> = async () => deploy({ paused: false })
+
+export const createPayloadAssetPaused: Fixture<Create> = async () => deploy({ paused: true })
+
+const deploy = async (props: { paused: boolean }) => {
 	const { deployer, creator, payloadFactory, kycContract } = await loadFixtureState0(deployPayloadAsset)
 	const decimals = 18
 	const totalSupply = parseUnits('3500', decimals)
 	const royalties = 0
 
 	await payloadFactory.connect(deployer).addClient(creator.address)
-
 	await kycContract.connect(deployer).setKycStatus(creator.address, true)
 
 	const payloadContractAddress = await payloadFactory
 		.connect(creator)
-		.create('test.uri.com', 'rootSpacePayloadName', decimals, totalSupply, kycContract.address, royalties, false)
-		.then(tx => tx.wait())
-		.then(txr => getPayloadAddress(txr))
-
-	const payloadAsset = await ethers
-		.getContractAt(contractNames.PAYLOAD_ASSET, payloadContractAddress)
-		.then(contract => contract as PayloadAsset)
-
-	return { deployer, creator, payloadFactory, kycContract, payloadAsset, totalSupply, decimals }
-}
-
-export const createPayloadAssetPaused: Fixture<Create> = async () => {
-	const { deployer, creator, payloadFactory, kycContract } = await loadFixtureState1(deployPayloadAsset)
-	const decimals = 18
-	const totalSupply = parseUnits('3500', decimals)
-	const royalties = 0
-
-	await payloadFactory.connect(deployer).addClient(creator.address)
-	await kycContract.connect(deployer).setKycStatus(creator.address, true)
-
-	const payloadContractAddress = await payloadFactory
-		.connect(creator)
-		.create('test.uri.com', 'rootSpacePayloadName', decimals, totalSupply, kycContract.address, royalties, true)
+		.create(
+			'test.uri.com',
+			'rootSpacePayloadName',
+			decimals,
+			totalSupply,
+			kycContract.address,
+			royalties,
+			props.paused
+		)
 		.then(tx => tx.wait())
 		.then(txr => getPayloadAddress(txr))
 

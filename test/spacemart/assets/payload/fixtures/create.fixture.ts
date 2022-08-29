@@ -1,11 +1,11 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { Fixture } from 'ethereum-waffle'
-import { ethers } from 'hardhat'
+import { ethers, waffle } from 'hardhat'
 
-import { deployPayloadAsset, Deploy, loadFixtureState0 } from './deploy.fixture'
-import contractNames from '../../../../../constants/contract.names'
 import { getPayloadAddress } from '../../../../helpers/payloadAddress'
+import contractNames from '../../../../../constants/contract.names'
+import { deployPayloadAsset, Deploy } from './deploy.fixture'
 import { PayloadAsset } from '../../../../../typechain'
 
 export interface Create extends Deploy {
@@ -14,15 +14,20 @@ export interface Create extends Deploy {
 	decimals: number
 }
 
-export const createPayloadAsset: Fixture<Create> = async () => deploy({ paused: false })
+export const createPayloadAsset: Fixture<Create> = async () => deploy({ paused: false, royalties: '0' })
 
-export const createPayloadAssetPaused: Fixture<Create> = async () => deploy({ paused: true })
+export const createPayloadAssetPaused: Fixture<Create> = async () => deploy({ paused: true, royalties: '0' })
 
-const deploy = async (props: { paused: boolean }) => {
-	const { deployer, creator, payloadFactory, kycContract } = await loadFixtureState0(deployPayloadAsset)
+export const createPayloadAssetWithRoyalties: Fixture<Create> = async () => deploy({ paused: false, royalties: '5' })
+
+export const createPayloadAssetWithFloatRoyalties: Fixture<Create> = async () =>
+	deploy({ paused: false, royalties: '5.725' })
+
+const deploy = async (props: { paused: boolean; royalties: string }) => {
+	const fixtureLoader = waffle.createFixtureLoader()
+	const { deployer, creator, payloadFactory, kycContract } = await fixtureLoader(deployPayloadAsset)
 	const decimals = 18
 	const totalSupply = parseUnits('3500', decimals)
-	const royalties = 0
 
 	await payloadFactory.connect(deployer).addClient(creator.address)
 	await kycContract.connect(deployer).setKycStatus(creator.address, true)
@@ -35,7 +40,7 @@ const deploy = async (props: { paused: boolean }) => {
 			decimals,
 			totalSupply,
 			kycContract.address,
-			royalties,
+			parseUnits(props.royalties, decimals),
 			props.paused
 		)
 		.then(tx => tx.wait())

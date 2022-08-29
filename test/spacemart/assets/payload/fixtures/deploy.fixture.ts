@@ -12,13 +12,11 @@ export interface Deploy {
 	kycContract: KycRegister
 }
 
-export const loadFixtureState0: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
-export const loadFixtureState1: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
-
 /**
  * This fixture deploys:
- * * payload asset contract
+ * * spacemart payload asset
  * * clone payload factory
+ * * KYC register
  *
  * for test suite @see `test/asset/deploy/deploy.test.ts`
  *

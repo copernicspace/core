@@ -21,7 +21,7 @@ export const createPayloadAssetPaused: Fixture<Create> = async () => deploy({ pa
 export const createPayloadAssetWithRoyalties: Fixture<Create> = async () => deploy({ paused: false, royalties: '5' })
 
 export const createPayloadAssetWithFloatRoyalties: Fixture<Create> = async () =>
-	deploy({ paused: false, royalties: '5.725' })
+	deploy({ paused: false, royalties: '5.75' })
 
 const deploy = async (props: { paused: boolean; royalties: string }) => {
 	const fixtureLoader = waffle.createFixtureLoader()

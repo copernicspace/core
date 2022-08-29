@@ -4,14 +4,14 @@ import { Fixture } from 'ethereum-waffle'
 import { ethers, waffle } from 'hardhat'
 import { BigNumber } from 'ethers'
 
+import { InstantOffer, KycRegister, PayloadAsset } from '../../../../../typechain'
+import contractNames from '../../../../../constants/contract.names'
 import {
 	Create,
 	createPayloadAsset,
 	createPayloadAssetWithFloatRoyalties,
 	createPayloadAssetWithRoyalties
 } from '../../../assets/payload/fixtures/create.fixture'
-import { InstantOffer, KycRegister, PayloadAsset } from '../../../../../typechain'
-import contractNames from '../../../../../constants/contract.names'
 
 export interface DeployInstantOffer {
 	deployer: SignerWithAddress
@@ -28,11 +28,10 @@ export const deployInstantOfferWithRoyalties: Fixture<DeployInstantOffer> = asyn
 	deploy(createPayloadAssetWithRoyalties, '3')
 
 export const deployInstantOfferWithFloatFeesAndRoyalties: Fixture<DeployInstantOffer> = async () =>
-	deploy(createPayloadAssetWithFloatRoyalties, '3.255')
+	deploy(createPayloadAssetWithFloatRoyalties, '3.25')
 
 const deploy = async (fixture: Fixture<Create>, operatorFee: string) => {
 	const loadFixture = waffle.createFixtureLoader()
-
 	const { deployer, creator, payloadAsset, kycContract, totalSupply } = await loadFixture(fixture)
 	const operatorFeeBN = parseUnits(operatorFee, await payloadAsset.decimals())
 	const instantOffer = await ethers

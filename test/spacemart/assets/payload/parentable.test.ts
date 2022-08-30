@@ -59,29 +59,35 @@ describe('[asset/payload/parentable.test] `PayloadAsset`: parentable fixture tes
 
 	it('disallows non-creators from creating child asset', async () => {
 		await expect(
-			payloadAsset.connect(receiver).createChild(50, childID, 'revert.test.com', receiver.address)
+			payloadAsset
+				.connect(receiver)
+				.createChild(50, childID, 'revert.test.com', receiver.address, 'TEST_CHILD_CID')
 		).to.be.revertedWith('Creator: caller is not the creator')
 	})
 
 	it('reverts if insufficient balance', async () => {
 		await expect(
-			payloadAsset.connect(creator).createChild(50, childID, 'revert-insufficient.test.com', creator.address)
+			payloadAsset
+				.connect(creator)
+				.createChild(50, childID, 'revert-insufficient.test.com', creator.address, 'TEST_CHILD_CID')
 		).to.be.revertedWith('ERC1155: burn amount exceeds balance')
 	})
 
 	it('inherits correct uri', async () => {
 		// should have the same URI as original asset
 		const actual = await payloadAsset.uri(childID)
-		const expected = 'test.uri.com'
+		const expected = 'ipfs://TEST_CHILD_CID'
 		expect(expected).to.be.eq(actual)
 	})
 
 	it('create grandChild', async () => {
-		const tx = await payloadAsset.connect(creator).createChild(100, '0', ' test', creator.address)
+		const tx = await payloadAsset.connect(creator).createChild(100, '0', ' test', creator.address, 'TEST_CHILD_CID')
 		const newChildId = await tx.wait().then(txr => getAssetID(txr))
 		expect(newChildId).to.be.eq(2)
 
-		const gtx = await payloadAsset.connect(creator).createChild(100, newChildId, 'nameGrandChild', creator.address)
+		const gtx = await payloadAsset
+			.connect(creator)
+			.createChild(100, newChildId, 'nameGrandChild', creator.address, '`TEST_CHILD_CID`')
 		const grandChildId = await gtx.wait().then(txr => getAssetID(txr))
 		const actual = await payloadAsset.getParent(grandChildId)
 		expect(actual).to.be.eq(2)

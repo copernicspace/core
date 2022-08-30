@@ -35,13 +35,14 @@ const deploy = async (props: { paused: boolean; royalties: string }) => {
 	const payloadContractAddress = await payloadFactory
 		.connect(creator)
 		.create(
-			'test.uri.com',
+			'ipfs://',
 			'rootSpacePayloadName',
 			decimals,
 			totalSupply,
 			kycContract.address,
 			parseUnits(props.royalties, decimals),
-			props.paused
+			props.paused,
+			'TEST_ROOT_CID'
 		)
 		.then(tx => tx.wait())
 		.then(txr => getPayloadAddress(txr))

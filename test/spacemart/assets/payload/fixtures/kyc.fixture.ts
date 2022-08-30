@@ -25,7 +25,7 @@ export const kyc: Fixture<KYC> = async () => {
 	const creator = parentableFixture.creator
 	const assetID = await parentableFixture.payloadAsset
 		.connect(creator)
-		.createChild('1420', '0', 'childForKycTest', kycUserA.address)
+		.createChild('1420', '0', 'childForKycTest', kycUserA.address, 'TEST_CHILD_CID')
 		.then(tx => tx.wait())
 		.then(txr => getAssetID(txr))
 

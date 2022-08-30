@@ -44,7 +44,8 @@ contract PayloadFactory is AccessControl {
         uint256 totalSupply,
         address kycRegisterAddress,
         uint256 royalties,
-        bool locked
+        bool locked,
+        string memory cid
     ) public {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(FACTORY_CLIENT, _msgSender()),
@@ -54,7 +55,17 @@ contract PayloadFactory is AccessControl {
 
         KYC(clone).setupKyc(kycRegisterAddress);
 
-        PayloadAsset(clone).initialize(uri, name, decimals, totalSupply, _msgSender(), factoryOwner, royalties, locked);
+        PayloadAsset(clone).initialize(
+            uri,
+            name,
+            decimals,
+            totalSupply,
+            _msgSender(),
+            factoryOwner,
+            royalties,
+            locked,
+            cid
+        );
 
         deployed.push(clone);
 

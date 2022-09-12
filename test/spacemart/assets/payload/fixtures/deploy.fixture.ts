@@ -1,6 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Fixture } from 'ethereum-waffle'
 import { ethers, waffle } from 'hardhat'
+
 import { KycRegister, PayloadFactory } from '../../../../../typechain'
 import contract_names from '../../../../../constants/contract.names'
 
@@ -11,13 +12,11 @@ export interface Deploy {
 	kycContract: KycRegister
 }
 
-export const loadFixtureState0: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
-export const loadFixtureState1: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
-
 /**
  * This fixture deploys:
- * * payload asset contract
+ * * spacemart payload asset
  * * clone payload factory
+ * * KYC register
  *
  * for test suite @see `test/asset/deploy/deploy.test.ts`
  *

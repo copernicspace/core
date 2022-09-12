@@ -7,8 +7,8 @@ import { PayloadAsset, InstantOffer, KycRegister, ERC20Mock } from '../../../../
 import contractNames from '../../../../constants/contract.names'
 import { TX_RECEIPT_STATUS } from '../../../../constants/tx-receipt-status'
 import { getOfferSellID } from '../../../helpers/getOfferId.helper'
-import { deployInstantOfferWithFloatFeesAndRoyalties } from './fixtures/deployRoyaltiesOffer.fixture.'
 import { formatUnits } from 'ethers/lib/utils'
+import { deployInstantOfferWithFloatFeesAndRoyalties } from './fixtures/deployOffer.fixture'
 
 describe('[spacemart/offers/instant/float-royalties-offer.test] Instant offer with royalties', () => {
 	let deployer: SignerWithAddress
@@ -26,7 +26,7 @@ describe('[spacemart/offers/instant/float-royalties-offer.test] Instant offer wi
 	before('load userA and userB as signerWithAddress', async () => ([, , userA, userB] = await ethers.getSigners()))
 
 	before(
-		'load `fixtures/deployInstantOfferWithRoyalties`',
+		'load fixture',
 		async () =>
 			({ deployer, creator, instantOffer, payloadAsset, kycContract, totalSupply } = await waffle.loadFixture(
 				deployInstantOfferWithFloatFeesAndRoyalties
@@ -124,10 +124,10 @@ describe('[spacemart/offers/instant/float-royalties-offer.test] Instant offer wi
 		expect(await payloadAsset.balanceOf(userB.address, rootId)).to.be.eq(buyAmount)
 
 		// check royalties balances of platformOperator and assetCreator (should include firstDeal profit + royalties)
-		const platformFee = secondDealTotalPrice.mul(3255).div(100000)
+		const platformFee = secondDealTotalPrice.mul(3250).div(100000)
 		expect(await erc20Mock.balanceOf(await instantOffer.platformOperator())).to.be.eq(platformFee)
 
-		const royaltiesAmount = secondDealTotalPrice.mul(5725).div(100000)
+		const royaltiesAmount = secondDealTotalPrice.mul(5750).div(100000)
 		const balanceCreatorAfter = await erc20Mock.balanceOf(creator.address)
 		const expectedDiff = balanceCreatorAfter.sub(balanceCreatorBefore)
 

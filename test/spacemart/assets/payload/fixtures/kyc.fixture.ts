@@ -1,9 +1,8 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Fixture } from 'ethereum-waffle'
 import { BigNumber } from 'ethers'
-import { ethers } from 'hardhat'
+import { ethers, waffle } from 'hardhat'
 import { getAssetID } from '../../../../helpers/getAssetId.helper'
-import { loadFixtureState0 } from './deploy.fixture'
 import { parentable, Parentable } from './parentable.fixture'
 
 export interface KYC extends Parentable {
@@ -13,7 +12,8 @@ export interface KYC extends Parentable {
 }
 
 export const kyc: Fixture<KYC> = async () => {
-	const parentableFixture = await loadFixtureState0(parentable)
+	const fixtureLoader = waffle.createFixtureLoader()
+	const parentableFixture = await fixtureLoader(parentable)
 	const [, , , kycUserA, kycUserB]: SignerWithAddress[] = await ethers.getSigners()
 
 	// add both users to kyc list

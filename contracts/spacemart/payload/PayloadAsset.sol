@@ -92,6 +92,8 @@ contract PayloadAsset is
         _setParent(id, pid);
         _burn(_msgSender(), pid, amount);
         _mint(to, id, amount, '');
+
+        emit NewParent(id, pid, amount);
     }
 
     function burn(uint256 amount) external {

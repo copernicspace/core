@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: private
 pragma solidity ^0.8.14;
 
-import '@openzeppelin/contracts/access/AccessControl.sol';
-import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
+import '@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol';
 import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
+import '@openzeppelin/contracts/access/AccessControl.sol';
 
 import '../../common/abstract/ParentableWithName.sol';
 import '../../common/abstract/PausableAsset.sol';
@@ -13,7 +13,7 @@ import '../../common/abstract/KYC.sol';
 import '../../utils/GeneratorID.sol';
 
 contract PayloadAsset is
-    ERC1155,
+    ERC1155URIStorage,
     Initializable,
     AccessControl,
     PausableAsset,
@@ -34,14 +34,14 @@ contract PayloadAsset is
         address _creator,
         address _factoryOwner,
         uint256 _royalties,
-        bool _locked
+        bool _locked,
+        string memory cid
     ) external initializer {
-        _setURI(_uri);
-
         _setDecimals(_decimals);
-
         totalSupply = _totalSupply;
         uint256 rootID = 0;
+        _setBaseURI(_uri);
+        _setURI(rootID, cid);
         _setName(rootID, _name);
         // set parent id to itself, because it is root asset
         _setParent(rootID, rootID);
@@ -85,14 +85,15 @@ contract PayloadAsset is
         uint256 amount,
         uint256 pid,
         string memory name,
-        address to
+        address to,
+        string memory cid
     ) external onlyCreator {
         uint256 id = generateId();
         _setName(id, name);
         _setParent(id, pid);
         _burn(_msgSender(), pid, amount);
         _mint(to, id, amount, '');
-
+        _setURI(id, cid);
         emit NewParent(id, pid, amount);
     }
 

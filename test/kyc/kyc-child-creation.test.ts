@@ -16,6 +16,8 @@ describe.skip('[kyc/kyc-child-creation] Child creation & integration with KYC', 
 	let deployer: SignerWithAddress
 	let payloadAssetDecimals: BigNumber
 
+	const testCID = 'TEST_CID_KYC_CHILD_CREATION'
+
 	before(
 		'load fixtures/parentable',
 		async () =>
@@ -35,7 +37,7 @@ describe.skip('[kyc/kyc-child-creation] Child creation & integration with KYC', 
 		await expect(
 			payloadAsset
 				.connect(creator)
-				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address)
+				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address, testCID)
 		).to.not.be.reverted
 	})
 
@@ -52,7 +54,7 @@ describe.skip('[kyc/kyc-child-creation] Child creation & integration with KYC', 
 		await expect(
 			payloadAsset
 				.connect(creator)
-				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address)
+				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address, testCID)
 		).to.be.revertedWith('sender/seller is not on KYC list')
 
 		// re-add creator's KYC permissions
@@ -76,7 +78,8 @@ describe.skip('[kyc/kyc-child-creation] Child creation & integration with KYC', 
 				parseUnits('2000', payloadAssetDecimals),
 				kycContract.address,
 				0,
-				false
+				false,
+				'TEST_CID'
 			)
 			.then(tx => tx.wait())
 			.then(txr => getPayloadAddress(txr))
@@ -90,7 +93,7 @@ describe.skip('[kyc/kyc-child-creation] Child creation & integration with KYC', 
 		await expect(
 			payloadAssetA
 				.connect(creator)
-				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address)
+				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address, testCID)
 		).to.not.be.reverted
 	})
 })

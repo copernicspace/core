@@ -1,16 +1,16 @@
-import { waffle } from 'hardhat'
-import { expect } from 'chai'
-import { PayloadAsset, PayloadFactory, KycRegister } from '../../../../typechain'
-import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
-import { getAssetID } from '../../../helpers/getAssetId.helper'
 import { parseUnits } from '@ethersproject/units'
-import { parentable } from './fixtures/parentable.fixture'
-import contractNames from '../../../../constants/contract.names'
-import { getPayloadAddress } from '../../../helpers/payloadAddress'
+import { ethers, waffle } from 'hardhat'
+import { expect } from 'chai'
 
-describe('[spacemart/assets/payload/payload/kyc.test] `SpacePayload`: kyc test suite', () => {
+import { PayloadAsset, PayloadFactory, KycRegister } from '../../../../typechain'
+import { getPayloadAddress } from '../../../helpers/payloadAddress'
+import contractNames from '../../../../constants/contract.names'
+import { getAssetID } from '../../../helpers/getAssetId.helper'
+import { parentable } from './fixtures/parentable.fixture'
+
+describe('[spacemart/assets/payload/kyc.test] `SpacePayload`: kyc test suite', () => {
 	let userA, userB, userC, creator: SignerWithAddress
 	before('load userA as signerWithAddress', async () => ([, , , userA, userB, userC] = await ethers.getSigners()))
 
@@ -42,7 +42,9 @@ describe('[spacemart/assets/payload/payload/kyc.test] `SpacePayload`: kyc test s
 		await kycContract.connect(deployer).setKycStatus(creator.address, false)
 
 		await expect(
-			payloadAsset.connect(creator).createChild(amount, 0, 'childSpacePayloadName', creator.address)
+			payloadAsset
+				.connect(creator)
+				.createChild(amount, 0, 'childSpacePayloadName', creator.address, 'TEST_CHILD_CID')
 		).to.be.revertedWith('not on KYC list')
 	})
 
@@ -59,7 +61,7 @@ describe('[spacemart/assets/payload/payload/kyc.test] `SpacePayload`: kyc test s
 		// create child to receiver
 		const childID = await payloadAsset
 			.connect(creator)
-			.createChild(amount, 0, 'childSpacePayloadName', creator.address)
+			.createChild(amount, 0, 'childSpacePayloadName', creator.address, 'TEST_CHILD_CID')
 			.then(tx => tx.wait())
 			.then(txr => getAssetID(txr))
 
@@ -82,13 +84,14 @@ describe('[spacemart/assets/payload/payload/kyc.test] `SpacePayload`: kyc test s
 			payloadFactory
 				.connect(userA)
 				.create(
-					'userA.payload.com',
+					'ipfs://',
 					'userA test payload',
 					payloadAssetDecimals,
 					amount,
 					kycContract.address,
 					0,
-					false
+					false,
+					'TEST_ROOT_CID'
 				)
 		).to.be.revertedWith('not on KYC list')
 	})
@@ -105,13 +108,14 @@ describe('[spacemart/assets/payload/payload/kyc.test] `SpacePayload`: kyc test s
 		newPayloadContractAddress = await payloadFactory
 			.connect(creator)
 			.create(
-				'second.test.uri.com',
+				'ipfs://',
 				'Second rootSpacePayload',
 				payloadAssetDecimals,
 				amount,
 				kycContract.address,
 				royalties,
-				false
+				false,
+				'TEST_ROOT_CID_NEW'
 			)
 			.then(tx => tx.wait())
 			.then(txr => getPayloadAddress(txr))
@@ -123,8 +127,8 @@ describe('[spacemart/assets/payload/payload/kyc.test] `SpacePayload`: kyc test s
 
 	it('correctly created new contract', async () => {
 		// has correct URI
-		const actual_uri = await newPayloadContract.uri('2')
-		const expected_uri = 'second.test.uri.com'
+		const actual_uri = await newPayloadContract.uri(0)
+		const expected_uri = 'ipfs://TEST_ROOT_CID_NEW'
 		expect(expected_uri).to.be.eq(actual_uri)
 
 		// has correct name
@@ -154,7 +158,7 @@ describe('[spacemart/assets/payload/payload/kyc.test] `SpacePayload`: kyc test s
 		// create child to receiver (user B)
 		newChildID = await newPayloadContract
 			.connect(creator)
-			.createChild(newAmount, 0, 'new-new child', userB.address)
+			.createChild(newAmount, 0, 'new-new child', userB.address, 'TEST_CHILD_CID')
 			.then(tx => tx.wait())
 			.then(txr => getAssetID(txr))
 
@@ -177,7 +181,9 @@ describe('[spacemart/assets/payload/payload/kyc.test] `SpacePayload`: kyc test s
 		newAmount = parseUnits('500', payloadAssetDecimals)
 
 		// create child to receiver (user B)
-		const txr = newPayloadContract.connect(creator).createChild(newAmount, 0, 'new-new child', userC.address)
+		const txr = newPayloadContract
+			.connect(creator)
+			.createChild(newAmount, 0, 'new-new child', userC.address, 'TEST_CHILD_CID')
 
 		await expect(txr).to.be.revertedWith('receiver/buyer is not on KYC list')
 	})

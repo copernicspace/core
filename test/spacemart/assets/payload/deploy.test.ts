@@ -25,7 +25,16 @@ describe('[spacemart/assets/payload/payload/deploy.test] PayloadFactory for asse
 		await expect(
 			payloadFactory
 				.connect(user)
-				.create('test.uri.com', 'TestSpacePayloadName', 18, '3500', kycContract.address, 0, false)
+				.create(
+					'test.uri.com',
+					'TestSpacePayloadName',
+					18,
+					'3500',
+					kycContract.address,
+					0,
+					false,
+					'TEST_ROOT_CID'
+				)
 		).to.be.revertedWith('You are not allowed to create new SpaceAsset:Payload'))
 
 	it('reverts if addClient called from non manager', async () => {

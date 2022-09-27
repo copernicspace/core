@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Fixture } from 'ethereum-waffle'
-import { ethers, waffle } from 'hardhat'
+import { ethers } from 'hardhat'
 
 import { KycRegister, PayloadFactory } from '../../../../../typechain'
 import contract_names from '../../../../../constants/contract.names'
@@ -27,7 +27,7 @@ export const deployPayloadAsset: Fixture<Deploy> = async () => {
 	const [deployer, creator]: SignerWithAddress[] = await ethers.getSigners()
 	const payloadContractAddress = await ethers
 		.getContractFactory(contract_names.PAYLOAD_ASSET)
-		.then(factory => factory.connect(deployer).deploy(''))
+		.then(factory => factory.connect(deployer).deploy('ipfs://'))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract.address)
 

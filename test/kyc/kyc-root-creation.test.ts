@@ -42,7 +42,8 @@ describe.skip('[kyc/kyc-root-creation.test] Root creation & integration with KYC
 				parseUnits('2000', decimals),
 				kycContract.address,
 				0,
-				false
+				false,
+				'TEST_CID'
 			)
 			.then(tx => tx.wait())
 			.then(txr => getPayloadAddress(txr))
@@ -90,7 +91,8 @@ describe.skip('[kyc/kyc-root-creation.test] Root creation & integration with KYC
 				parseUnits('2000', decimals),
 				secondKYC.address,
 				0,
-				false
+				false,
+				'TEST_CID'
 			)
 			.then(tx => tx.wait())
 			.then(txr => getPayloadAddress(txr))
@@ -124,7 +126,8 @@ describe.skip('[kyc/kyc-root-creation.test] Root creation & integration with KYC
 					parseUnits('2000', decimals),
 					kycContract.address,
 					0,
-					false
+					false,
+					'TEST_CID'
 				)
 		).to.be.revertedWith('receiver/buyer is not on KYC list')
 
@@ -139,7 +142,8 @@ describe.skip('[kyc/kyc-root-creation.test] Root creation & integration with KYC
 					parseUnits('2000', decimals),
 					secondKYC.address,
 					0,
-					false
+					false,
+					'TEST_CID'
 				)
 		).to.be.revertedWith('receiver/buyer is not on KYC list')
 	})

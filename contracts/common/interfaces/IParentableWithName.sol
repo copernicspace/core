@@ -8,7 +8,8 @@ interface IParentableWithName {
         uint256 amount,
         uint256 pid,
         string memory name,
-        address to
+        address to,
+        string memory cid
     ) external;
 
     function getParent(uint256 id) external view returns (uint256 pid);

@@ -7,7 +7,7 @@ import { parseUnits } from '@ethersproject/units'
 import { createPayloadAsset } from './fixtures/create.fixture'
 import { KycRegister, PayloadAsset, PayloadFactory } from '../../../../typechain'
 
-describe('[spacemart/assets/payload/payload/create.test] `PayloadAsset`: create fixture test suite', () => {
+describe('[spacemart/assets/payload/create.test] `PayloadAsset`: create fixture test suite', () => {
 	let userA, userB, creator: SignerWithAddress
 
 	let payloadFactory: PayloadFactory
@@ -22,11 +22,7 @@ describe('[spacemart/assets/payload/payload/create.test] `PayloadAsset`: create 
 			({ payloadFactory, payloadAsset, creator, kycContract } = await waffle.loadFixture(createPayloadAsset))
 	)
 
-	it('has correct uri', async () => {
-		const actual = await payloadAsset.uri('1')
-		const expected = 'test.uri.com'
-		expect(expected).to.be.eq(actual)
-	})
+	it('has correct uri', async () => expect(await payloadAsset.uri('0')).to.be.eq('ipfs://TEST_ROOT_CID'))
 
 	it('has correct name', async () => {
 		const actual = await payloadAsset.getName(0)
@@ -56,7 +52,16 @@ describe('[spacemart/assets/payload/payload/create.test] `PayloadAsset`: create 
 		await expect(
 			payloadFactory
 				.connect(userA)
-				.create('test.revert.com', 'revert test asset', 18, 6000, kycContract.address, 0, false)
+				.create(
+					'test.revert.com',
+					'revert test asset',
+					18,
+					6000,
+					kycContract.address,
+					0,
+					false,
+					'TEST_ROOT_CID'
+				)
 		).to.be.revertedWith('You are not allowed to create new SpaceAsset:Payload')
 	})
 

@@ -40,8 +40,6 @@ contract PayloadAsset is
         _setDecimals(_decimals);
         totalSupply = _totalSupply;
         uint256 rootID = 0;
-        _setBaseURI(_uri);
-        _setURI(rootID, cid);
         _setName(rootID, _name);
         // set parent id to itself, because it is root asset
         _setParent(rootID, rootID);
@@ -51,6 +49,8 @@ contract PayloadAsset is
             _setRoyalties(_royalties);
         }
         _mint(_creator, rootID, totalSupply, '');
+        _setBaseURI(_uri);
+        _setURI(rootID, cid);
         _setPause(_locked);
         _setupRole(DEFAULT_ADMIN_ROLE, _factoryOwner);
     }

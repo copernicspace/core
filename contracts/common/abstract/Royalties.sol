@@ -7,4 +7,10 @@ abstract contract Royalties {
     function _setRoyalties(uint256 _royalties) internal {
         royalties = _royalties;
     }
+
+    mapping(address => uint256) public secondaryRoyalties;
+
+    function _setSRoyalties(address beneficiary, uint256 royalties) internal {
+        secondaryRoyalties[beneficiary] = royalties;
+    }
 }

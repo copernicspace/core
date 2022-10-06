@@ -83,6 +83,7 @@ contract PayloadAsset is
 
     function createChild(
         uint256 amount,
+        uint256 burnAmount,
         uint256 pid,
         string memory name,
         address to,
@@ -92,10 +93,10 @@ contract PayloadAsset is
         uint256 id = generateId();
         _setName(id, name);
         _setParent(id, pid);
-        _burn(_msgSender(), pid, amount);
+        _burn(_msgSender(), pid, burnAmount);
         _mint(to, id, amount, '');
         _setURI(id, cid);
-        secondaryRoyalties[to] = sroyalties;
+        _setSRoyalties(id, to, sroyalties);
         emit NewParent(id, pid, amount);
     }
 

@@ -37,7 +37,7 @@ describe.skip('[kyc/kyc-child-creation] Child creation & integration with KYC', 
 		await expect(
 			payloadAsset
 				.connect(creator)
-				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address, testCID)
+				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address, testCID, 0)
 		).to.not.be.reverted
 	})
 
@@ -54,7 +54,7 @@ describe.skip('[kyc/kyc-child-creation] Child creation & integration with KYC', 
 		await expect(
 			payloadAsset
 				.connect(creator)
-				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address, testCID)
+				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address, testCID, 0)
 		).to.be.revertedWith('sender/seller is not on KYC list')
 
 		// re-add creator's KYC permissions
@@ -93,7 +93,7 @@ describe.skip('[kyc/kyc-child-creation] Child creation & integration with KYC', 
 		await expect(
 			payloadAssetA
 				.connect(creator)
-				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address, testCID)
+				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address, testCID, 0)
 		).to.not.be.reverted
 	})
 })

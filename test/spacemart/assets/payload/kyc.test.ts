@@ -44,7 +44,7 @@ describe('[spacemart/assets/payload/kyc.test] `SpacePayload`: kyc test suite', (
 		await expect(
 			payloadAsset
 				.connect(creator)
-				.createChild(amount, 0, 'childSpacePayloadName', creator.address, 'TEST_CHILD_CID', 0)
+				.createChild(amount, amount, 0, 'childSpacePayloadName', creator.address, 'TEST_CHILD_CID', 0)
 		).to.be.revertedWith('not on KYC list')
 	})
 
@@ -61,7 +61,7 @@ describe('[spacemart/assets/payload/kyc.test] `SpacePayload`: kyc test suite', (
 		// create child to receiver
 		const childID = await payloadAsset
 			.connect(creator)
-			.createChild(amount, 0, 'childSpacePayloadName', creator.address, 'TEST_CHILD_CID', 0)
+			.createChild(amount, amount, 0, 'childSpacePayloadName', creator.address, 'TEST_CHILD_CID', 0)
 			.then(tx => tx.wait())
 			.then(txr => getAssetID(txr))
 
@@ -158,7 +158,7 @@ describe('[spacemart/assets/payload/kyc.test] `SpacePayload`: kyc test suite', (
 		// create child to receiver (user B)
 		newChildID = await newPayloadContract
 			.connect(creator)
-			.createChild(newAmount, 0, 'new-new child', userB.address, 'TEST_CHILD_CID', 0)
+			.createChild(newAmount, newAmount, 0, 'new-new child', userB.address, 'TEST_CHILD_CID', 0)
 			.then(tx => tx.wait())
 			.then(txr => getAssetID(txr))
 
@@ -183,7 +183,7 @@ describe('[spacemart/assets/payload/kyc.test] `SpacePayload`: kyc test suite', (
 		// create child to receiver (user B)
 		const txr = newPayloadContract
 			.connect(creator)
-			.createChild(newAmount, 0, 'new-new child', userC.address, 'TEST_CHILD_CID', 0)
+			.createChild(newAmount, newAmount, 0, 'new-new child', userC.address, 'TEST_CHILD_CID', 0)
 
 		await expect(txr).to.be.revertedWith('receiver/buyer is not on KYC list')
 	})

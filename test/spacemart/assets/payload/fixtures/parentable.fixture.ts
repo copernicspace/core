@@ -38,7 +38,7 @@ export const parentable: Fixture<Parentable> = async () => {
 	// create child to receiver
 	const childID = await payloadAsset
 		.connect(creator)
-		.createChild(amount, 0, 'childSpacePayloadName', receiver.address, 'TEST_CHILD_CID', 0)
+		.createChild(amount, amount, 0, 'childSpacePayloadName', receiver.address, 'TEST_CHILD_CID', 0)
 		.then(tx => tx.wait())
 		.then(txr => getAssetID(txr))
 

@@ -34,10 +34,10 @@ describe.skip('[kyc/kyc-child-creation] Child creation & integration with KYC', 
 	 */
 
 	it('allows creating new child asset if KYC permitted', async () => {
+		const amount = parseUnits('500', payloadAssetDecimals)
+
 		await expect(
-			payloadAsset
-				.connect(creator)
-				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address, testCID, 0)
+			payloadAsset.connect(creator).createChild(amount, amount, 0, 'child name', creator.address, testCID, 0)
 		).to.not.be.reverted
 	})
 
@@ -50,11 +50,10 @@ describe.skip('[kyc/kyc-child-creation] Child creation & integration with KYC', 
 	it('reverts child asset creation if not KYC permitted', async () => {
 		// take away creator's KYC permissions
 		await kycContract.connect(deployer).setKycStatus(creator.address, false)
+		const amount = parseUnits('500', payloadAssetDecimals)
 
 		await expect(
-			payloadAsset
-				.connect(creator)
-				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address, testCID, 0)
+			payloadAsset.connect(creator).createChild(amount, amount, 0, 'child name', creator.address, testCID, 0)
 		).to.be.revertedWith('sender/seller is not on KYC list')
 
 		// re-add creator's KYC permissions
@@ -90,10 +89,9 @@ describe.skip('[kyc/kyc-child-creation] Child creation & integration with KYC', 
 	})
 
 	it('allows creating new child asset [on new root] if KYC permitted', async () => {
+		const amount = parseUnits('500', payloadAssetDecimals)
 		await expect(
-			payloadAssetA
-				.connect(creator)
-				.createChild(parseUnits('500', payloadAssetDecimals), 0, 'child name', creator.address, testCID, 0)
+			payloadAssetA.connect(creator).createChild(amount, amount, 0, 'child name', creator.address, testCID, 0)
 		).to.not.be.reverted
 	})
 })

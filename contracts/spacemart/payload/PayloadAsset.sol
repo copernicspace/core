@@ -46,7 +46,7 @@ contract PayloadAsset is
         _setCreator(_creator);
 
         if (_royalties > 0) {
-            _setRoyalties(_royalties);
+            _setRootRoyalties(_royalties);
         }
         _mint(_creator, rootID, totalSupply, '');
         _setBaseURI(_uri);
@@ -96,7 +96,7 @@ contract PayloadAsset is
         _burn(_msgSender(), pid, burnAmount);
         _mint(to, id, amount, '');
         _setURI(id, cid);
-        _setSRoyalties(id, to, sroyalties);
+        _setSecondaryRoyalties(id, to, sroyalties);
         emit NewParent(id, pid, amount);
     }
 

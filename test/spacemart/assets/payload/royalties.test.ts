@@ -13,7 +13,7 @@ describe('[spacemart/assets/payload/royalties.test] SpacePayload asset with roya
 	)
 
 	it('has correct royalties percent', async () => {
-		const actual = await payloadAsset.royalties()
+		const actual = await payloadAsset.rootRoyalties()
 		const decimals = await payloadAsset.decimals()
 		const expected = parseUnits('5', decimals)
 		expect(expected).to.be.eq(actual)

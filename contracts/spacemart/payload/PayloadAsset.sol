@@ -46,7 +46,7 @@ contract PayloadAsset is
         _setCreator(_creator);
 
         if (_royalties > 0) {
-            _setRoyalties(_royalties);
+            _setRootRoyalties(_royalties);
         }
         _mint(_creator, rootID, totalSupply, '');
         _setBaseURI(_uri);
@@ -83,17 +83,20 @@ contract PayloadAsset is
 
     function createChild(
         uint256 amount,
+        uint256 burnAmount,
         uint256 pid,
         string memory name,
         address to,
-        string memory cid
+        string memory cid,
+        uint256 sroyalties
     ) external onlyCreator {
         uint256 id = generateId();
         _setName(id, name);
         _setParent(id, pid);
-        _burn(_msgSender(), pid, amount);
+        _burn(_msgSender(), pid, burnAmount);
         _mint(to, id, amount, '');
         _setURI(id, cid);
+        _setSecondaryRoyalties(id, to, sroyalties);
         emit NewParent(id, pid, amount);
     }
 

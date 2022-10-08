@@ -61,7 +61,7 @@ describe('[asset/payload/parentable.test] `PayloadAsset`: parentable fixture tes
 		await expect(
 			payloadAsset
 				.connect(receiver)
-				.createChild(50, childID, 'revert.test.com', receiver.address, 'TEST_CHILD_CID')
+				.createChild(50, 50, childID, 'revert.test.com', receiver.address, 'TEST_CHILD_CID', 0)
 		).to.be.revertedWith('Creator: caller is not the creator')
 	})
 
@@ -69,7 +69,7 @@ describe('[asset/payload/parentable.test] `PayloadAsset`: parentable fixture tes
 		await expect(
 			payloadAsset
 				.connect(creator)
-				.createChild(50, childID, 'revert-insufficient.test.com', creator.address, 'TEST_CHILD_CID')
+				.createChild(50, 50, childID, 'revert-insufficient.test.com', creator.address, 'TEST_CHILD_CID', 0)
 		).to.be.revertedWith('ERC1155: burn amount exceeds balance')
 	})
 
@@ -81,13 +81,15 @@ describe('[asset/payload/parentable.test] `PayloadAsset`: parentable fixture tes
 	})
 
 	it('create grandChild', async () => {
-		const tx = await payloadAsset.connect(creator).createChild(100, '0', ' test', creator.address, 'TEST_CHILD_CID')
+		const tx = await payloadAsset
+			.connect(creator)
+			.createChild(100, 100, '0', ' test', creator.address, 'TEST_CHILD_CID', 0)
 		const newChildId = await tx.wait().then(txr => getAssetID(txr))
 		expect(newChildId).to.be.eq(2)
 
 		const gtx = await payloadAsset
 			.connect(creator)
-			.createChild(100, newChildId, 'nameGrandChild', creator.address, '`TEST_CHILD_CID`')
+			.createChild(100, 100, newChildId, 'nameGrandChild', creator.address, '`TEST_CHILD_CID`', 0)
 		const grandChildId = await gtx.wait().then(txr => getAssetID(txr))
 		const actual = await payloadAsset.getParent(grandChildId)
 		expect(actual).to.be.eq(2)

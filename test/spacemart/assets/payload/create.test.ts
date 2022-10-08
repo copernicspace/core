@@ -43,7 +43,7 @@ describe('[spacemart/assets/payload/create.test] `PayloadAsset`: create fixture 
 	})
 
 	it('has correct royalties', async () => {
-		const actual = await payloadAsset.royalties()
+		const actual = await payloadAsset.rootRoyalties()
 		const expected = BigNumber.from(0)
 		expect(expected).to.be.eq(actual)
 	})

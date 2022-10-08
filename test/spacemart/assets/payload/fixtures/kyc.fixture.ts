@@ -1,6 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Fixture } from 'ethereum-waffle'
 import { BigNumber } from 'ethers'
+import { parseUnits } from 'ethers/lib/utils'
 import { ethers, waffle } from 'hardhat'
 import { getAssetID } from '../../../../helpers/getAssetId.helper'
 import { parentable, Parentable } from './parentable.fixture'
@@ -23,9 +24,11 @@ export const kyc: Fixture<KYC> = async () => {
 
 	// add payload balance to kycUserA
 	const creator = parentableFixture.creator
+	const amount = parseUnits('1420', 18)
+
 	const assetID = await parentableFixture.payloadAsset
 		.connect(creator)
-		.createChild('1420', '0', 'childForKycTest', kycUserA.address, 'TEST_CHILD_CID')
+		.createChild(amount, amount, '0', 'childForKycTest', kycUserA.address, 'TEST_CHILD_CID', 0)
 		.then(tx => tx.wait())
 		.then(txr => getAssetID(txr))
 

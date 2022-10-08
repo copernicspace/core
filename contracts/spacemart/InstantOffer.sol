@@ -107,28 +107,58 @@ contract InstantOffer {
         require(offer.amount >= amount, 'Not enough asset balance on sale');
         require(amount >= offer.minAmount, 'Can not buy less than min amount');
         address buyer = msg.sender;
-        IERC20 money = IERC20(offer.money);
         uint256 decimalAmount = amount / (10**decimals);
         uint256 amountPrice = decimalAmount * offer.price;
-        require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
-        address assetOwner = Creator(offer.asset).creator();
-        uint256 royalties = Royalties(offer.asset).royalties();
+        require(
+            IERC20(offer.money).allowance(buyer, address(this)) >= amountPrice,
+            'Insufficient balance via allowance to purchase'
+        );
+        address assetCreator = Creator(offer.asset).creator();
 
-        if (offer.seller == assetOwner || royalties == 0) {
-            //todo add operator fee!
-            money.transferFrom(buyer, offer.seller, amountPrice);
-        } else {
-            uint256 royaltiesAmount = amountPrice.take(royalties, decimals);
-            uint256 operatorFeeAmount = amountPrice.take(operatorFee, decimals);
-            uint256 totalPriceWithoutRoyaltiesAndFee = amountPrice - royaltiesAmount - operatorFeeAmount;
+        (uint256 rootRoyaltiesAmount, uint256 secondaryRoyaltiesAmount) = sendRoyalties(
+            offer,
+            amountPrice,
+            decimals,
+            assetCreator,
+            buyer
+        );
 
-            money.transferFrom(buyer, assetOwner, royaltiesAmount);
-            money.transferFrom(buyer, platformOperator, operatorFeeAmount);
-            money.transferFrom(buyer, offer.seller, totalPriceWithoutRoyaltiesAndFee);
-        }
+        uint256 operatorFeeAmount = amountPrice.take(operatorFee, decimals);
+        IERC20(offer.money).transferFrom(buyer, platformOperator, operatorFeeAmount);
+
+        uint256 totalPriceWithoutRoyaltiesAndFee = amountPrice -
+            rootRoyaltiesAmount -
+            secondaryRoyaltiesAmount -
+            operatorFeeAmount;
+
+        IERC20(offer.money).transferFrom(buyer, offer.seller, totalPriceWithoutRoyaltiesAndFee);
 
         offer.amount = offer.amount - amount;
         ERC1155(offer.asset).safeTransferFrom(offer.seller, buyer, offer.assetID, amount, '');
         emit Buy(buyer, sellID);
+    }
+
+    function sendRoyalties(
+        Offer memory offer,
+        uint256 amountPrice,
+        uint256 decimals,
+        address assetCreator,
+        address buyer
+    ) internal returns (uint256, uint256) {
+        Royalties royalties = Royalties(offer.asset);
+        uint256 rootRoyalties = royalties.rootRoyalties();
+        uint256 rootRoyaltiesAmount = amountPrice.take(rootRoyalties, decimals);
+        (address secondaryRoyaltiesTo, uint256 secondaryRoyaltiesValue) = royalties.secondaryRoyalties(offer.assetID);
+        uint256 secondaryRoyaltiesAmount = amountPrice.take(secondaryRoyaltiesValue, decimals);
+
+        if (offer.seller != assetCreator || rootRoyalties != 0) {
+            IERC20(offer.money).transferFrom(buyer, assetCreator, rootRoyaltiesAmount);
+        }
+
+        if (secondaryRoyaltiesAmount != 0) {
+            IERC20(offer.money).transferFrom(buyer, secondaryRoyaltiesTo, secondaryRoyaltiesAmount);
+        }
+
+        return (rootRoyaltiesAmount, secondaryRoyaltiesAmount);
     }
 }

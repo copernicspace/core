@@ -42,7 +42,15 @@ describe('[spacemart/assets/payload/payload/parentable-extended] extended parent
 		before('creates 105 cosmos child from creator to account A', async () => {
 			cosmosChildId = await payloadAsset
 				.connect(creator)
-				.createChild(cosmosChildAmount, rootID, 'CosmosChild', receiver.address, 'TEST_CHILD_CID')
+				.createChild(
+					cosmosChildAmount,
+					cosmosChildAmount,
+					rootID,
+					'CosmosChild',
+					receiver.address,
+					'TEST_CHILD_CID',
+					0
+				)
 				.then(tx => tx.wait())
 				.then(txr => getAssetID(txr))
 		})
@@ -73,7 +81,15 @@ describe('[spacemart/assets/payload/payload/parentable-extended] extended parent
 			async () =>
 				(starChildId = await payloadAsset
 					.connect(creator)
-					.createChild(starChildAmount, rootID, 'StarChild', anotherReceiver.address, 'TEST_CHILD_CID')
+					.createChild(
+						starChildAmount,
+						starChildAmount,
+						rootID,
+						'StarChild',
+						anotherReceiver.address,
+						'TEST_CHILD_CID',
+						0
+					)
 					.then(tx => tx.wait())
 					.then(txr => getAssetID(txr)))
 		)

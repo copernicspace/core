@@ -20,6 +20,7 @@ export interface DeployInstantOffer {
 	payloadAsset: PayloadAsset
 	kycContract: KycRegister
 	totalSupply: BigNumber
+	decimals: BigNumber
 }
 
 export const deployInstantOffer: Fixture<DeployInstantOffer> = async () => deploy(createPayloadAsset, '3')
@@ -33,12 +34,13 @@ export const deployInstantOfferWithFloatFeesAndRoyalties: Fixture<DeployInstantO
 const deploy = async (fixture: Fixture<Create>, operatorFee: string) => {
 	const loadFixture = waffle.createFixtureLoader()
 	const { deployer, creator, payloadAsset, kycContract, totalSupply } = await loadFixture(fixture)
-	const operatorFeeBN = parseUnits(operatorFee, await payloadAsset.decimals())
+	const decimals = await payloadAsset.decimals()
+	const operatorFeeBN = parseUnits(operatorFee, decimals)
 	const instantOffer = await ethers
 		.getContractFactory(contractNames.INSTANT_OFFER)
 		.then(factory => factory.connect(deployer).deploy(deployer.address, operatorFeeBN))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract as InstantOffer)
 
-	return { deployer, creator, instantOffer, payloadAsset, kycContract, totalSupply }
+	return { deployer, creator, instantOffer, payloadAsset, kycContract, totalSupply, decimals }
 }

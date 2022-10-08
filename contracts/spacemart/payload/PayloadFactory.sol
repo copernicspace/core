@@ -10,7 +10,6 @@ import './PayloadAsset.sol';
 
 contract PayloadFactory is AccessControl {
     address public logicAddress;
-    address public platformOperator;
 
     address private factoryOwner;
 
@@ -29,7 +28,6 @@ contract PayloadFactory is AccessControl {
         logicAddress = _logicAddress;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         factoryOwner = _msgSender();
-        platformOperator = _msgSender();
     }
 
     function setTemplateAddress(address _logicAddress) public {

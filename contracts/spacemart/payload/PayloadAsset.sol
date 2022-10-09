@@ -103,4 +103,9 @@ contract PayloadAsset is
     function burn(uint256 amount) external {
         _burn(_msgSender(), 0, amount);
     }
+
+    function setUri(uint256 id, string memory cid) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), 'You are not allowed to change URI');
+        _setURI(id, cid);
+    }
 }

@@ -190,14 +190,25 @@ contract EscrowListing {
         public
         view
         returns (
-            address,
-            uint256,
-            uint256,
-            address
+            address asset,
+            uint256 assetID,
+            address seller,
+            uint256 amount,
+            uint256 minAmount,
+            uint256 price,
+            address money
         )
     {
         Listing memory listing = _listings[id];
-        return (listing.seller, listing.assetID, listing.price, listing.money);
+        return (
+            listing.asset,
+            listing.assetID,
+            listing.seller,
+            listing.amount,
+            listing.minAmount,
+            listing.price,
+            listing.money
+        );
     }
 
     function pause(uint256 id) public notCanceled(id) {

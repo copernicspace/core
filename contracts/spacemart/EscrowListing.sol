@@ -33,28 +33,18 @@ contract EscrowListing {
     struct Request {
         uint256 listingID;
         address buyer;
+        uint256 amount;
+        uint256 childAmount;
         uint256 amountPrice;
         bool active;
+        string cid;
     }
     uint256 private _numRequests;
     mapping(uint256 => Request) private _requests;
 
     event Sell(uint256 indexed id);
-    event RequestBuy(
-        uint256 indexed id,
-        address indexed buyer,
-        uint256 amount,
-        uint256 burnAmount,
-        string cid,
-        uint256 sroyalties
-    );
-    event ApproveBuy(
-        uint256 indexed id,
-        uint256 amount,
-        uint256 burnAmount,
-        uint256 sellerFeeAmount,
-        uint256 platformFeeAmount
-    );
+    event RequestBuy(uint256 indexed id);
+    event ApproveBuy(uint256 indexed id, uint256 sellerFeeAmount, uint256 platformFeeAmount);
     event Refund(uint256 indexed id);
     event Pause(uint256 indexed id);
     event Unpause(uint256 indexed id);
@@ -113,7 +103,7 @@ contract EscrowListing {
     function requestBuy(
         uint256 id,
         uint256 amount,
-        uint256 burnAmount,
+        uint256 childAmount,
         string memory cid,
         uint256 sroyalties
     ) public notCanceled(id) {
@@ -138,15 +128,16 @@ contract EscrowListing {
         request.listingID = id;
         request.buyer = msg.sender;
         request.active = true;
+        request.amount = amount;
+        request.childAmount = childAmount;
         request.amountPrice = amountPrice;
+        request.cid = cid;
 
-        emit RequestBuy(id, msg.sender, amount, burnAmount, cid, sroyalties);
+        emit RequestBuy(id);
     }
 
     function approveBuy(
         uint256 id,
-        uint256 amount,
-        uint256 burnAmount,
         string memory name,
         address to,
         string memory cid,
@@ -158,9 +149,9 @@ contract EscrowListing {
 
         require(msg.sender == listing.seller, 'You are not allowed to confirm buy for selected listing');
         PayloadAsset asset = PayloadAsset(listing.asset);
-        asset.createChildEscrow(amount, burnAmount, listing.assetID, name, to, cid, sroyalties);
+        asset.createChildEscrow(request.amount, request.childAmount, listing.assetID, name, to, cid, sroyalties);
 
-        uint256 decimalAmount = amount / (10**Decimals(listing.asset).decimals());
+        uint256 decimalAmount = request.amount / (10**Decimals(listing.asset).decimals());
         uint256 amountPrice = decimalAmount * listing.price;
         uint256 decimals = Decimals(listing.asset).decimals();
 
@@ -170,7 +161,7 @@ contract EscrowListing {
         IERC20(listing.money).safeTransfer(operator, platformFeeAmount);
         IERC20(listing.money).safeTransfer(listing.seller, sellerFeeAmount);
 
-        emit ApproveBuy(id, amount, burnAmount, sellerFeeAmount, platformFeeAmount);
+        emit ApproveBuy(id, sellerFeeAmount, platformFeeAmount);
     }
 
     function refund(uint256 requestID) public {

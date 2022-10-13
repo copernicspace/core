@@ -85,14 +85,14 @@ contract PayloadAsset is
 
     function createChild(
         uint256 amount,
-        uint256 burnAmount,
+        uint256 childAmount,
         uint256 pid,
         string memory name,
         address to,
         string memory cid,
         uint256 sroyalties
     ) external onlyCreator {
-        _createChild(amount, burnAmount, pid, name, to, cid, sroyalties);
+        _createChild(amount, childAmount, pid, name, to, cid, sroyalties);
     }
 
     function setCreateChildAllowance(address target, bool allowance) public onlyCreator {
@@ -105,7 +105,7 @@ contract PayloadAsset is
 
     function createChildEscrow(
         uint256 amount,
-        uint256 burnAmount,
+        uint256 childAmount,
         uint256 pid,
         string memory name,
         address to,
@@ -113,12 +113,12 @@ contract PayloadAsset is
         uint256 sroyalties
     ) public {
         require(createChildAllowance[msg.sender], 'Caller is not allowed to create child');
-        _createChild(amount, burnAmount, pid, name, to, cid, sroyalties);
+        _createChild(amount, childAmount, pid, name, to, cid, sroyalties);
     }
 
     function _createChild(
         uint256 amount,
-        uint256 burnAmount,
+        uint256 childAmount,
         uint256 pid,
         string memory name,
         address to,
@@ -128,8 +128,8 @@ contract PayloadAsset is
         uint256 id = generateId();
         _setName(id, name);
         _setParent(id, pid);
-        _burn(_msgSender(), pid, burnAmount);
-        _mint(to, id, amount, '');
+        _burn(_msgSender(), pid, amount);
+        _mint(to, id, childAmount, '');
         _setURI(id, cid);
         _setSecondaryRoyalties(id, to, sroyalties);
         emit NewParent(id, pid, amount);

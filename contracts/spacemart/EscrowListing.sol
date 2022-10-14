@@ -133,7 +133,7 @@ contract EscrowListing {
         request.amountPrice = amountPrice;
         request.cid = cid;
 
-        emit RequestBuy(id);
+        emit RequestBuy(requestID);
     }
 
     function approveBuy(
@@ -208,6 +208,31 @@ contract EscrowListing {
             listing.minAmount,
             listing.price,
             listing.money
+        );
+    }
+
+    function getRequest(uint256 id)
+        public
+        view
+        returns (
+            uint256 listingID,
+            address buyer,
+            uint256 amount,
+            uint256 childAmount,
+            uint256 amountPrice,
+            bool active,
+            string memory cid
+        )
+    {
+        Request memory request = _requests[id];
+        return (
+            request.listingID,
+            request.buyer,
+            request.amount,
+            request.childAmount,
+            request.amountPrice,
+            request.active,
+            request.cid
         );
     }
 

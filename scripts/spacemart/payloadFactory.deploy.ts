@@ -5,7 +5,7 @@ import hre, { ethers } from 'hardhat'
 const network = hre.network.name
 
 async function main() {
-	const assetLogicTemplateAddress = '0x2c48e5F2Fe5f586eCaD9eA3B8375B4AF09EDc259'
+	const assetLogicTemplateAddress = 'set me;)'
 	console.log(`Using ${assetLogicTemplateAddress} as payload asset logic template`)
 	await ethers
 		.getContractFactory(ContractNames.PAYLOAD_FACTORY)

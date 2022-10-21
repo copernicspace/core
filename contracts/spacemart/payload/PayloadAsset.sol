@@ -39,9 +39,10 @@ contract PayloadAsset is
         bool _locked,
         string memory cid
     ) external initializer {
+        uint256 rootID = 0;
+        _mint(_creator, rootID, _totalSupply, '');
         _setDecimals(_decimals);
         totalSupply = _totalSupply;
-        uint256 rootID = 0;
         _setName(rootID, _name);
         // set parent id to itself, because it is root asset
         _setParent(rootID, rootID);
@@ -50,7 +51,6 @@ contract PayloadAsset is
         if (_royalties > 0) {
             _setRootRoyalties(_royalties);
         }
-        _mint(_creator, rootID, totalSupply, '');
         _setBaseURI(_uri);
         _setURI(rootID, cid);
         _setPause(_locked);

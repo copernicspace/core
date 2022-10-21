@@ -128,10 +128,10 @@ contract PayloadAsset is
         uint256 sroyalties
     ) internal {
         uint256 id = generateId();
-        _setName(id, name);
-        _setParent(id, pid);
         _burn(from, pid, amount);
         _mint(to, id, childAmount, '');
+        _setName(id, name);
+        _setParent(id, pid);
         _setURI(id, cid);
         _setSecondaryRoyalties(id, to, sroyalties);
         emit NewParent(id, pid, amount);

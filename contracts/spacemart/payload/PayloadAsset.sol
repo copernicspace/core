@@ -24,6 +24,8 @@ contract PayloadAsset is
     Decimals,
     KYC
 {
+    mapping(address => bool) private createChildAllowance;
+
     constructor(string memory uri) ERC1155(uri) {}
 
     function initialize(
@@ -83,18 +85,53 @@ contract PayloadAsset is
 
     function createChild(
         uint256 amount,
-        uint256 burnAmount,
+        uint256 childAmount,
         uint256 pid,
         string memory name,
         address to,
         string memory cid,
         uint256 sroyalties
     ) external onlyCreator {
+        _createChild(msg.sender, amount, childAmount, pid, name, to, cid, sroyalties);
+    }
+
+    function setCreateChildAllowance(address target, bool allowance) public onlyCreator {
+        createChildAllowance[target] = allowance;
+    }
+
+    function getCreateChildAllowance(address target) public view returns (bool) {
+        return createChildAllowance[target];
+    }
+
+    function createChildEscrow(
+        address from,
+        uint256 amount,
+        uint256 childAmount,
+        uint256 pid,
+        string memory name,
+        address to,
+        string memory cid,
+        uint256 sroyalties
+    ) public {
+        require(createChildAllowance[msg.sender], 'Caller is not allowed to create child');
+        _createChild(from, amount, childAmount, pid, name, to, cid, sroyalties);
+    }
+
+    function _createChild(
+        address from,
+        uint256 amount,
+        uint256 childAmount,
+        uint256 pid,
+        string memory name,
+        address to,
+        string memory cid,
+        uint256 sroyalties
+    ) internal {
         uint256 id = generateId();
         _setName(id, name);
         _setParent(id, pid);
-        _burn(_msgSender(), pid, burnAmount);
-        _mint(to, id, amount, '');
+        _burn(from, pid, amount);
+        _mint(to, id, childAmount, '');
         _setURI(id, cid);
         _setSecondaryRoyalties(id, to, sroyalties);
         emit NewParent(id, pid, amount);

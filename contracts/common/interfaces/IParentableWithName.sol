@@ -6,7 +6,7 @@ interface IParentableWithName {
 
     function createChild(
         uint256 amount,
-        uint256 burnAmount,
+        uint256 childAmount,
         uint256 pid,
         string memory name,
         address to,

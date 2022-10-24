@@ -35,9 +35,11 @@ contract EscrowListing {
         address buyer;
         uint256 amount;
         uint256 childAmount;
+        string childName;
         uint256 amountPrice;
         bool active;
         string cid;
+        uint256 sroyalties;
     }
     uint256 private _numRequests;
     mapping(uint256 => Request) private _requests;
@@ -104,6 +106,7 @@ contract EscrowListing {
         uint256 id,
         uint256 amount,
         uint256 childAmount,
+        string memory childName,
         string memory cid,
         uint256 sroyalties
     ) public notCanceled(id) {
@@ -114,8 +117,7 @@ contract EscrowListing {
         require(listing.amount >= amount, 'Not enough asset balance on sale');
         require(amount >= listing.minAmount, 'Can not buy less than min amount');
         address buyer = msg.sender;
-        uint256 decimalAmount = amount / (10**decimals);
-        uint256 amountPrice = decimalAmount * listing.price;
+        uint256 amountPrice = (amount * listing.price) / (10**decimals);
         require(
             IERC20(listing.money).allowance(buyer, address(this)) >= amountPrice,
             'Insufficient balance via allowance to purchase'
@@ -130,19 +132,15 @@ contract EscrowListing {
         request.active = true;
         request.amount = amount;
         request.childAmount = childAmount;
+        request.childName = childName;
         request.amountPrice = amountPrice;
         request.cid = cid;
+        request.sroyalties = sroyalties;
 
         emit RequestBuy(requestID);
     }
 
-    function approveBuy(
-        uint256 id,
-        string memory name,
-        address to,
-        string memory cid,
-        uint256 sroyalties
-    ) public {
+    function approveBuy(uint256 id, string memory name) public {
         Request memory request = _requests[id];
         require(request.active, 'Request is not active');
         Listing memory listing = _listings[request.listingID];
@@ -155,21 +153,20 @@ contract EscrowListing {
             request.childAmount,
             listing.assetID,
             name,
-            to,
-            cid,
-            sroyalties
+            request.buyer,
+            request.cid,
+            request.sroyalties
         );
 
-        uint256 decimalAmount = request.amount / (10**Decimals(listing.asset).decimals());
-        uint256 amountPrice = decimalAmount * listing.price;
         uint256 decimals = Decimals(listing.asset).decimals();
 
-        uint256 platformFeeAmount = amountPrice.take(platformFee, decimals);
-        uint256 sellerFeeAmount = amountPrice - platformFeeAmount;
+        uint256 platformFeeAmount = request.amountPrice.take(platformFee, decimals);
+        uint256 sellerFeeAmount = request.amountPrice - platformFeeAmount;
 
         IERC20(listing.money).safeTransfer(operator, platformFeeAmount);
         IERC20(listing.money).safeTransfer(listing.seller, sellerFeeAmount);
 
+        listing.amount -= request.amount;
         emit ApproveBuy(id, sellerFeeAmount, platformFeeAmount);
     }
 
@@ -178,7 +175,7 @@ contract EscrowListing {
         Listing memory listing = _listings[request.listingID];
 
         require(request.active, 'Request is not active');
-        require(msg.sender == request.buyer, 'You are not allowed to refund this!');
+        require(msg.sender == request.buyer || msg.sender == listing.seller, 'You are not allowed to refund this!');
 
         IERC20(listing.money).safeTransferFrom(address(this), request.buyer, request.amountPrice);
         request.active = false;
@@ -219,9 +216,11 @@ contract EscrowListing {
             address buyer,
             uint256 amount,
             uint256 childAmount,
+            string memory childName,
             uint256 amountPrice,
             bool active,
-            string memory cid
+            string memory cid,
+            uint256 sroyalties
         )
     {
         Request memory request = _requests[id];
@@ -230,9 +229,11 @@ contract EscrowListing {
             request.buyer,
             request.amount,
             request.childAmount,
+            request.childName,
             request.amountPrice,
             request.active,
-            request.cid
+            request.cid,
+            request.sroyalties
         );
     }
 

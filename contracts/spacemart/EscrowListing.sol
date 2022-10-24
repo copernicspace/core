@@ -113,13 +113,12 @@ contract EscrowListing {
     ) public notCanceled(id) {
         require(!_paused[id], 'Listing is paused');
         Listing memory listing = _listings[id];
-        uint256 decimals = Decimals(listing.asset).decimals();
 
         require(listing.amount >= amount, 'Not enough asset balance on sale');
         require(amount >= listing.minAmount, 'Can not buy less than min amount');
         ERC20 money = ERC20(listing.money);
         address buyer = msg.sender;
-        uint256 amountPrice = (amount * listing.price) / money.decimals();
+        uint256 amountPrice = (amount * listing.price);
         require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
 
         money.safeTransferFrom(msg.sender, address(this), amountPrice);

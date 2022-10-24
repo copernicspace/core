@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: private
 pragma solidity ^0.8.14;
 
+import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 
@@ -9,7 +10,7 @@ import '../common/abstract/Creator.sol';
 import '../utils/ERC20Percentage.sol';
 
 contract EscrowListing {
-    using SafeERC20 for IERC20;
+    using SafeERC20 for ERC20;
     using ERC20Percentage for uint256;
 
     address public operator;
@@ -116,14 +117,12 @@ contract EscrowListing {
 
         require(listing.amount >= amount, 'Not enough asset balance on sale');
         require(amount >= listing.minAmount, 'Can not buy less than min amount');
+        ERC20 money = ERC20(listing.money);
         address buyer = msg.sender;
-        uint256 amountPrice = (amount * listing.price) / (10**decimals);
-        require(
-            IERC20(listing.money).allowance(buyer, address(this)) >= amountPrice,
-            'Insufficient balance via allowance to purchase'
-        );
+        uint256 amountPrice = (amount * listing.price) / money.decimals();
+        require(money.allowance(buyer, address(this)) >= amountPrice, 'Insufficient balance via allowance to purchase');
 
-        IERC20(listing.money).safeTransferFrom(msg.sender, address(this), amountPrice);
+        money.safeTransferFrom(msg.sender, address(this), amountPrice);
         uint256 requestID = _numRequests++;
 
         Request storage request = _requests[requestID];
@@ -163,8 +162,8 @@ contract EscrowListing {
         uint256 platformFeeAmount = request.amountPrice.take(platformFee, decimals);
         uint256 sellerFeeAmount = request.amountPrice - platformFeeAmount;
 
-        IERC20(listing.money).safeTransfer(operator, platformFeeAmount);
-        IERC20(listing.money).safeTransfer(listing.seller, sellerFeeAmount);
+        ERC20(listing.money).safeTransfer(operator, platformFeeAmount);
+        ERC20(listing.money).safeTransfer(listing.seller, sellerFeeAmount);
 
         listing.amount -= request.amount;
         emit ApproveBuy(id, sellerFeeAmount, platformFeeAmount);
@@ -177,7 +176,7 @@ contract EscrowListing {
         require(request.active, 'Request is not active');
         require(msg.sender == request.buyer || msg.sender == listing.seller, 'You are not allowed to refund this!');
 
-        IERC20(listing.money).safeTransferFrom(address(this), request.buyer, request.amountPrice);
+        ERC20(listing.money).safeTransferFrom(address(this), request.buyer, request.amountPrice);
         request.active = false;
 
         emit Refund(requestID);

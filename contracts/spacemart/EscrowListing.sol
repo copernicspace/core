@@ -216,9 +216,11 @@ contract EscrowListing {
             address buyer,
             uint256 amount,
             uint256 childAmount,
+            string memory childName,
             uint256 amountPrice,
             bool active,
-            string memory cid
+            string memory cid,
+            uint256 sroyalties
         )
     {
         Request memory request = _requests[id];
@@ -227,9 +229,11 @@ contract EscrowListing {
             request.buyer,
             request.amount,
             request.childAmount,
+            request.childName,
             request.amountPrice,
             request.active,
-            request.cid
+            request.cid,
+            request.sroyalties
         );
     }
 

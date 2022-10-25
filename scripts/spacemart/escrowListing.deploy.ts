@@ -9,9 +9,11 @@ const network = hre.network.name
 async function main() {
 	const [deployer] = await ethers.getSigners()
 
+	// digital payload is 6!:)
+	const decimals = 'set me;)'
 	await ethers
 		.getContractFactory(contractNames.ESCROW_LISTING)
-		.then(factory => factory.deploy(deployer.address, parseUnits('3', 18)))
+		.then(factory => factory.deploy(deployer.address, parseUnits('3', decimals)))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract.deployTransaction.wait())
 		.then(txr => {

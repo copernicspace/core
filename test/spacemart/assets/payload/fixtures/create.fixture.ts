@@ -7,6 +7,7 @@ import { getPayloadAddress } from '../../../../helpers/payloadAddress'
 import contractNames from '../../../../../constants/contract.names'
 import { deployPayloadAsset, Deploy } from './deploy.fixture'
 import { PayloadAsset } from '../../../../../typechain'
+import { boolean } from 'hardhat/internal/core/params/argumentTypes'
 
 export interface Create extends Deploy {
 	payloadAsset: PayloadAsset
@@ -14,20 +15,24 @@ export interface Create extends Deploy {
 	decimals: number
 }
 
-export const createPayloadAsset: Fixture<Create> = async () => deploy({ paused: false, royalties: '0' })
+export const createPayloadAsset: Fixture<Create> = async () => deploy({ paused: false, royalties: '0', decimals: 18 })
 
-export const createPayloadAssetPaused: Fixture<Create> = async () => deploy({ paused: true, royalties: '0' })
+export const createPayloadAssetWithDecimalsEq6: Fixture<Create> = async () =>
+	deploy({ paused: false, royalties: '0', decimals: 6 })
 
-export const createPayloadAssetWithRoyalties: Fixture<Create> = async () => deploy({ paused: false, royalties: '5' })
+export const createPayloadAssetPaused: Fixture<Create> = async () =>
+	deploy({ paused: true, royalties: '0', decimals: 18 })
+
+export const createPayloadAssetWithRoyalties: Fixture<Create> = async () =>
+	deploy({ paused: false, royalties: '5', decimals: 18 })
 
 export const createPayloadAssetWithFloatRoyalties: Fixture<Create> = async () =>
-	deploy({ paused: false, royalties: '5.75' })
+	deploy({ paused: false, royalties: '5.75', decimals: 18 })
 
-const deploy = async (props: { paused: boolean; royalties: string }) => {
+const deploy = async (props: { paused: boolean; royalties: string; decimals: number }) => {
 	const fixtureLoader = waffle.createFixtureLoader()
 	const { deployer, creator, payloadFactory, kycContract } = await fixtureLoader(deployPayloadAsset)
-	const decimals = 18
-	const totalSupply = parseUnits('3500', decimals)
+	const totalSupply = parseUnits('3500', props.decimals)
 
 	await payloadFactory.connect(deployer).addClient(creator.address)
 	await kycContract.connect(deployer).setKycStatus(creator.address, true)
@@ -37,10 +42,10 @@ const deploy = async (props: { paused: boolean; royalties: string }) => {
 		.create(
 			'ipfs://',
 			'rootSpacePayloadName',
-			decimals,
+			props.decimals,
 			totalSupply,
 			kycContract.address,
-			parseUnits(props.royalties, decimals),
+			parseUnits(props.royalties, props.decimals),
 			props.paused,
 			'TEST_ROOT_CID'
 		)
@@ -51,5 +56,6 @@ const deploy = async (props: { paused: boolean; royalties: string }) => {
 		.getContractAt(contractNames.PAYLOAD_ASSET, payloadContractAddress)
 		.then(contract => contract as PayloadAsset)
 
+	const decimals = props.decimals
 	return { deployer, creator, payloadFactory, kycContract, payloadAsset, totalSupply, decimals }
 }

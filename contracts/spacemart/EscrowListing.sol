@@ -138,7 +138,7 @@ contract EscrowListing {
         emit RequestBuy(requestID);
     }
 
-    function approveBuy(uint256 id, string memory name) public {
+    function approveBuy(uint256 id) public {
         Request memory request = _requests[id];
         require(request.active, 'Request is not active');
         Listing storage listing = _listings[request.listingID];
@@ -150,7 +150,7 @@ contract EscrowListing {
             request.amount,
             request.childAmount,
             listing.assetID,
-            name,
+            request.childName,
             request.buyer,
             request.cid,
             request.sroyalties

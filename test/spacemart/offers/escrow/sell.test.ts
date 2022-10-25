@@ -83,7 +83,7 @@ describe('[spacemart/offers/escrow/sell]', () => {
 	it('should create new escrow sell', async () => {
 		listingID = await escrowListing
 			.connect(creator)
-			.sell(assetAddress, 0, parseUnits('100', decimals), 1, price, money.escaddress)
+			.sell(assetAddress, 0, parseUnits('100', decimals), 1, price, money.address)
 			.then(tx => tx.wait())
 			.then(txr => getOfferId(txr))
 	})

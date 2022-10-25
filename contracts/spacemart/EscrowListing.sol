@@ -141,7 +141,7 @@ contract EscrowListing {
     function approveBuy(uint256 id, string memory name) public {
         Request memory request = _requests[id];
         require(request.active, 'Request is not active');
-        Listing memory listing = _listings[request.listingID];
+        Listing storage listing = _listings[request.listingID];
 
         require(msg.sender == listing.seller, 'You are not allowed to confirm buy for selected listing');
         PayloadAsset asset = PayloadAsset(listing.asset);

@@ -32,7 +32,7 @@ const devs = {
 		buyer: '0x344aB3dF4a8d4bE67856e8E44359eBF4e7c68301'
 	},
 	pylyp: {
-		seller: '0xBc62A9BbCd85E45B085601e589d267ef587b4De4',
+		seller: '0xDa76D71FA9ac775053dE8739CE5491041e392428',
 		buyer: '0x305934Fe9173D1251E3687ecEb6073420C96CBfE'
 	},
 	jerzy: {

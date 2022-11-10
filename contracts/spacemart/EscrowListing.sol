@@ -175,7 +175,7 @@ contract EscrowListing {
         require(request.active, 'Request is not active');
         require(msg.sender == request.buyer || msg.sender == listing.seller, 'You are not allowed to refund this!');
 
-        ERC20(listing.money).safeTransferFrom(address(this), request.buyer, request.amountPrice);
+        ERC20(listing.money).safeTransfer(request.buyer, request.amountPrice);
         request.active = false;
 
         emit Refund(requestID);

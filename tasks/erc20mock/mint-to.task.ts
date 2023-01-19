@@ -22,10 +22,8 @@ export default task(TASK.NAME, TASK.DESC)
 	.addParam(TASK.PARAMS.TO, TASK.PARAMS.TO_DESC)
 	.addParam(TASK.PARAMS.AMOUNT, TASK.PARAMS.AMOUNT_DESC)
 	.addParam(TASK.PARAMS.ADDRESS, TASK.PARAMS.ADDRESS_DESC)
-	.setAction(
-		async ({ to, amount, address }, hre) =>
-			await hre.ethers
-				.getContractAt(TASK.CONTRACT_NAME, address)
-				.then(contract => contract)
-				.then(erc20Mock => erc20Mock.mintTo(to, parseUnits(amount, 18)))
-	)
+	.setAction(async ({ to, amount, address }, hre) => {
+		const contract = await hre.ethers.getContractAt(TASK.CONTRACT_NAME, address)
+		const decimals = await contract.decimals()
+		await contract.mintTo(to, parseUnits(amount, decimals))
+	})

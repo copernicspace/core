@@ -8,9 +8,9 @@ const network = hre.network.name
 async function main() {
 	const [deployer] = await ethers.getSigners()
 	const operator = deployer.address
-	// operator fee is integer, in  basis points, where 100% = 10000
-	const operatorFee = '300'
-	const assetAddress = '0x4eD399450502610D085E3ae45780bb3cBc620875'
+	// operator fee is integer, in  basis points, where 100% = 10000, 3% = 300
+	const operatorFee = 'SET ME'
+	const assetAddress = 'SET ME'
 
 	await ethers
 		.getContractFactory(contractNames.ASTROCHAIN_LISTING)

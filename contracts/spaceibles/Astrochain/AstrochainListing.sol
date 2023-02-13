@@ -1,15 +1,12 @@
-// SPDX-License-Identifier: private
 pragma solidity ^0.8.18;
 
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
 
-import './SpaceibleAsset.sol';
-import '../utils/ERC20Percentage.sol';
-import '../utils/GeneratorID.sol';
+import '../../utils/GeneratorID.sol';
+import './Astrochain.sol';
 
-contract SpaceibleOffer is GeneratorID {
+contract AstrochainListing is GeneratorID {
     using SafeERC20 for IERC20;
 
     struct Offer {
@@ -111,7 +108,7 @@ contract SpaceibleOffer is GeneratorID {
     function buy(uint256 id, uint256 amount) public notCanceled(id) {
         require(_paused[id] != true, 'Offer is paused');
         Offer storage offer = _offers[id];
-        SpaceibleAsset asset = SpaceibleAsset(assetAddress);
+        Astrochain asset = Astrochain(assetAddress);
         require(offer.amount >= amount, 'Not enough asset balance on sale');
         IERC20 money = IERC20(offer.money);
         uint256 amountPrice = amount * offer.price;
@@ -119,22 +116,18 @@ contract SpaceibleOffer is GeneratorID {
             money.allowance(msg.sender, address(this)) >= amountPrice,
             'Insufficient balance via allowance to purchase'
         );
-        uint256 royalties = asset.getRoyalties(offer.assetId);
-        address creator = asset.getCreator(offer.assetId);
 
-        uint256 royaltiesFeeAmount;
-        if (royalties == 0 || offer.seller == creator) {
-            royaltiesFeeAmount = 0;
-        } else {
-            royaltiesFeeAmount = (amountPrice * royalties) / 1e4;
-        }
+        address receiver;
+        uint256 royalties;
+        (receiver, royalties) = asset.royaltyInfo(0, offer.price);
+
         uint256 operatorFeeAmount = (amountPrice * operatorFee) / 1e4;
 
-        uint256 sellerFeeAmount = amountPrice - royaltiesFeeAmount - operatorFeeAmount;
+        uint256 sellerFeeAmount = amountPrice - royalties - operatorFeeAmount;
 
         // do not send 0 amount ERC20 transfer
-        if (royaltiesFeeAmount > 0) {
-            money.safeTransferFrom(msg.sender, creator, royaltiesFeeAmount);
+        if (royalties > 0) {
+            money.safeTransferFrom(msg.sender, receiver, royalties);
         }
         money.safeTransferFrom(msg.sender, operator, operatorFeeAmount);
         money.safeTransferFrom(msg.sender, offer.seller, sellerFeeAmount);
@@ -144,7 +137,7 @@ contract SpaceibleOffer is GeneratorID {
 
         asset.safeTransferFrom(offer.seller, msg.sender, offer.assetId, amount, '');
 
-        emit Buy(id, amount, sellerFeeAmount, royaltiesFeeAmount, operatorFeeAmount);
+        emit Buy(id, amount, sellerFeeAmount, royalties, operatorFeeAmount);
     }
 
     function getAvailableBalance(address user, uint256 assetId) public view returns (uint256 availableBalance) {

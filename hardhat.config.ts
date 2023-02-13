@@ -1,17 +1,19 @@
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
+import '@nomiclabs/hardhat-etherscan'
 import '@typechain/hardhat'
 import 'hardhat-tracer'
 import 'hardhat-gas-reporter'
 import 'hardhat-log-remover'
 import * as Mocha from 'mocha'
+
 import './tasks'
 
 import * as secret from './secret'
 
 const config = {
 	solidity: {
-		version: '0.8.14',
+		version: '0.8.18',
 		settings: {
 			optimizer: {
 				enabled: true,
@@ -35,6 +37,9 @@ const config = {
 				mnemonic: secret.MUMBAI_SEED
 			}
 		}
+	},
+	etherscan: {
+		apiKey: ''
 	},
 	typechain: {
 		outDir: 'typechain',

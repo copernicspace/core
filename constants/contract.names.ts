@@ -6,8 +6,15 @@ export default {
 	ESCROW_LISTING: 'EscrowListing',
 	ERC20_MOCK: 'ERC20Mock',
 
-	// Spaceibles
+	// # Spaceibles
+	// ## Original
 	SPACEIBLE_ASSET: 'SpaceibleAsset',
 	SPACEIBLE_OFFER: 'SpaceibleOffer',
-	ASTROCHAIN_LISTING: 'AstrochainListing'
+
+	// ## Astrochain
+	ASTROCHAIN_LISTING: 'AstrochainListing',
+
+	// ## Spacepassport
+	SPACEPASS_ASSET: 'SpacepassAsset',
+	SPACEPASS_LISTING: 'SpacepassListing'
 }

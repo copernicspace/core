@@ -1,5 +1,5 @@
 import ContractNames from '../../constants/contract.names'
-import { polygonScanLink } from '../../tasks/utils/polygonScanLink'
+import { polygonScanLink } from '../../utils/polygonScanLink'
 
 import hre, { ethers } from 'hardhat'
 

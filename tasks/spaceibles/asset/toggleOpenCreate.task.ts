@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config'
 
 import contractNames from '../../../constants/contract.names'
-import { polygonScanLink } from '../../utils/polygonScanLink'
+import { polygonScanLink } from '../../../utils/polygonScanLink'
 
 const TASK = {
 	NAME: 'spaceibles:toggleOpenCreate',

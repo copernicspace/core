@@ -1,5 +1,5 @@
 import { task } from 'hardhat/config'
-import contractNames from '../../constants/contract.names'
+import contractNames from '../constants/contract.names'
 
 const TASK = {
 	NAME: 'utils:bootstrap:devAccess',

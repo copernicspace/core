@@ -45,7 +45,7 @@ describe('[spacemart/assets/payload/kyc.test] `SpacePayload`: kyc test suite', (
 			payloadAsset
 				.connect(creator)
 				.createChild(amount, amount, 0, 'childSpacePayloadName', creator.address, 'TEST_CHILD_CID', 0)
-		).to.be.revertedWith('not on KYC list')
+		).to.be.revertedWith('sender/seller is not on KYC list')
 	})
 
 	it('correctly set creator KYC permissions in test above', async () => {
@@ -93,7 +93,7 @@ describe('[spacemart/assets/payload/kyc.test] `SpacePayload`: kyc test suite', (
 					false,
 					'TEST_ROOT_CID'
 				)
-		).to.be.revertedWith('not on KYC list')
+		).to.be.revertedWith('receiver/buyer is not on KYC list')
 	})
 
 	let newPayloadContractAddress: string

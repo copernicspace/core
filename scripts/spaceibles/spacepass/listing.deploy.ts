@@ -1,20 +1,31 @@
 import hre, { ethers } from 'hardhat'
 import contractNames from '../../../constants/contract.names'
-import { deployDetails } from '../../../utils/deployDetails'
+import { logDeployDetails, logPreDeployDetails } from '../../../utils/logDetails'
 
 async function main() {
+	const contractName = contractNames.SPACEPASS_LISTING
+	const networkName = hre.network.name
 	const [deployer] = await ethers.getSigners()
 	const operator = deployer.address
 	// operator fee is integer, in  basis points, where 100% = 10000
-	const operatorFee = 'SET ME'
-	const assetAddress = 'SET ME'
+	const operatorFee = 'set me'
+	const assetAddress = 'set me'
 
-	await ethers
-		.getContractFactory(contractNames.SPACEIBLE_OFFER)
+	logPreDeployDetails({
+		contractName: contractName,
+		network: networkName,
+		deployer: deployer.address,
+		operator: operator,
+		operatorFee: operatorFee
+	})
+
+	const txr = await ethers
+		.getContractFactory(contractName)
 		.then(factory => factory.deploy(operator, operatorFee, assetAddress))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract.deployTransaction.wait())
-		.then(txr => deployDetails(contractNames.SPACEPASS_ASSET, txr, hre.network.name))
+
+	logDeployDetails(txr, networkName)
 }
 
 main()

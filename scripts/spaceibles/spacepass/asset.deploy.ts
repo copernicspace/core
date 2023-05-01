@@ -1,6 +1,6 @@
 import hre, { ethers } from 'hardhat'
 import contractNames from '../../../constants/contract.names'
-import { deployDetails } from '../../../utils/deployDetails'
+import { logDeployDetails } from '../../../utils/logDetails'
 
 async function main() {
 	await ethers
@@ -8,7 +8,7 @@ async function main() {
 		.then(factory => factory.deploy('ipfs://'))
 		.then(contract => contract.deployed())
 		.then(deployedContract => deployedContract.deployTransaction.wait())
-		.then(txr => deployDetails(contractNames.SPACEPASS_ASSET, txr, hre.network.name))
+		.then(txr => logDeployDetails(contractNames.SPACEPASS_ASSET, txr, hre.network.name))
 }
 main()
 	.then(() => process.exit(0))

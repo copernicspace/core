@@ -6,5 +6,6 @@ export const logPreDeployDetails = args => logger.info('Start deploying new smar
 export const logDeployDetails = (txr, networkName) =>
 	logger.info('contract successfully deployed ', {
 		address: txr.contractAddress,
+		block: txr.blockNumber,
 		scanLink: polygonScanLink(txr.transactionHash, networkName)
 	})

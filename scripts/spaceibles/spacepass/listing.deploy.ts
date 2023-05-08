@@ -11,7 +11,7 @@ async function main() {
 
 	// operator fee is integer, in  basis points, where 100% = 10000
 	const operatorFee = '300'
-	const assetAddress = '0xf7D23939CC5dd3F73c54f0e9CDA925BDCD5a4183'
+	const assetAddress = 'set me'
 
 	logPreDeployDetails({
 		contractName: contractName,

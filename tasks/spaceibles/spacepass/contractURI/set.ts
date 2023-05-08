@@ -1,28 +1,27 @@
-import { task } from 'hardhat/config'
+import { task as hhTask } from 'hardhat/config'
 
 import contractNames from '../../../../constants/contract.names'
 import { polygonScanLink } from '../../../../utils/polygonScanLink'
 
-const TASK = {
-	NAME: 'spaceibles:spacepassport:contractURI:set',
-	DESC: 'set contract metadata',
-	CONTRACT_NAME: contractNames.SPACEPASS_ASSET,
-
-	PARAMS: {
-		ADDRESS: 'address',
-		ADDRESS_DESC: 'address of spacepass contract',
-		METADATA: 'metadata',
-		METADATA_DESC: 'reference to new metadata'
+const task = {
+	name: 'spaceibles:spacepassport:contractURI:set',
+	desc: 'set contract metadata',
+	contractName: contractNames.SPACEPASS_ASSET,
+	params: {
+		contract: 'contract',
+		contract_desc: 'address of spacepass contract',
+		metadata: 'metadata',
+		metadata_Desc: 'reference to new metadata'
 	}
 }
 
-export default task(TASK.NAME, TASK.DESC)
-	.addParam(TASK.PARAMS.ADDRESS, TASK.PARAMS.ADDRESS_DESC)
-	.addParam(TASK.PARAMS.METADATA, TASK.PARAMS.METADATA)
+export default hhTask(task.name, task.desc)
+	.addParam(task.params.contract, task.params.contract_desc)
+	.addParam(task.params.metadata, task.params.metadata)
 	.setAction(
-		async ({ address, metadata }, hre) =>
+		async ({ contract, metadata }, hre) =>
 			await hre.ethers
-				.getContractAt(TASK.CONTRACT_NAME, address)
+				.getContractAt(task.contractName, contract)
 				.then(contract => contract.setContractURI(metadata))
 				.then(tx => console.log(polygonScanLink(tx.hash, hre.network.name)))
 	)

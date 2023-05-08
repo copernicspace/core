@@ -6,8 +6,9 @@ import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 
 import '../../utils/GeneratorID.sol';
+import '../../common/abstract/KYC.sol';
 
-contract SpacepassAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownable {
+contract SpacepassAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownable, KYC {
     event Royalties(uint256 indexed id, uint256 indexed royalties);
     event PermanentURI(string _value, uint256 indexed _id);
 
@@ -18,14 +19,17 @@ contract SpacepassAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownabl
     mapping(uint256 => address) private _creators;
 
     bool public openCreate = false;
+    bool public openSale = false;
+
     bytes32 public constant CREATOR_ROLE = keccak256('CREATOR_ROLE');
     string private metadataCID;
 
-    constructor(string memory uri) ERC1155(uri) {
+    constructor(string memory uri, address kycAddress) ERC1155(uri) {
         name = 'Copernic Space Passports';
         symbol = 'CSP';
         _setBaseURI(uri);
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        setupKyc(kycAddress);
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, AccessControl) returns (bool) {
@@ -84,6 +88,10 @@ contract SpacepassAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownabl
         openCreate = !openCreate;
     }
 
+    function toggleOpenSale() external onlyAdmin {
+        openSale = !openSale;
+    }
+
     function burn(uint256 id, uint256 amount) external {
         _burn(msg.sender, id, amount);
     }
@@ -91,5 +99,26 @@ contract SpacepassAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownabl
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), 'Only admin can perform this action');
         _;
+    }
+
+    function _beforeTokenTransfer(
+        address operator,
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) internal virtual override(ERC1155) {
+        // if not open sale - check for sender/receiver to be on WL (KYC register)
+        if (!openSale) {
+            if (from != address(0)) {
+                require(kycRegister.getKycStatusInfo(from), 'from adress is not on WL');
+            }
+            if (to != address(0)) {
+                require(kycRegister.getKycStatusInfo(to), 'to address is not on WL');
+            }
+        }
+
+        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 }

@@ -3,12 +3,10 @@ import { expect } from 'chai'
 import { ERC20Mock, EscrowListing, KycRegister, PayloadAsset, PayloadFactory } from '../../../../typechain'
 import { deployEscrowListing } from './fixtures/deploy.fixture'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { BigNumber } from 'ethers'
 import { parseUnits } from 'ethers/lib/utils'
 import { getPayloadAddress } from '../../../helpers/payloadAddress'
-import contractNames from '../../../../constants/contract.names'
+import contractNames from '../../../../utils/constants/contract.names'
 import { getOfferId } from '../../../helpers/getOfferId.helper'
-import { getContractFactory } from '@nomiclabs/hardhat-ethers/types'
 
 describe('[spacemart/offers/escrow/sell]', () => {
 	let deployer: SignerWithAddress

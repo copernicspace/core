@@ -5,9 +5,9 @@ import { expect } from 'chai'
 
 import { KycRegister, PayloadAsset, PayloadFactory } from '../../typechain'
 import { parentable } from '../spacemart/assets/payload/fixtures/parentable.fixture'
-import contract_names from '../../constants/contract.names'
+import contract_names from '../../utils/constants/contract.names'
 import { getPayloadAddress } from '../helpers/payloadAddress'
-import contractNames from '../../constants/contract.names'
+import contractNames from '../../utils/constants/contract.names'
 
 describe.skip('[kyc/kyc-root-creation.test] Root creation & integration with KYC', () => {
 	let userA: SignerWithAddress

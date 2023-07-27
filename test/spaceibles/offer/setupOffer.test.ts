@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { parseUnits } from 'ethers/lib/utils'
 import { BigNumber } from 'ethers'
@@ -5,7 +6,7 @@ import { waffle } from 'hardhat'
 import { expect } from 'chai'
 
 import { ERC20Mock, SpaceibleAsset, SpaceibleOffer } from '../../../typechain'
-import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
+import { TX_RECEIPT_STATUS } from '../../../utils/constants/tx-receipt-status'
 import { setupSpaceibleOffer } from './fixtures/setupOffer.fixture'
 
 const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()

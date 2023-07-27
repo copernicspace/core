@@ -1,10 +1,10 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { expect } from 'chai'
-import { BigNumber, BigNumberish } from 'ethers'
+import { BigNumberish } from 'ethers'
 import { parseUnits } from 'ethers/lib/utils'
 import { ethers, waffle } from 'hardhat'
-import contractNames from '../../../../constants/contract.names'
-import { TX_RECEIPT_STATUS } from '../../../../constants/tx-receipt-status'
+import contractNames from '../../../../utils/constants/contract.names'
+import { TX_RECEIPT_STATUS } from '../../../../utils/constants/tx-receipt-status'
 import { InstantOffer, KycRegister, ERC20Mock, PayloadAsset } from '../../../../typechain'
 import { getOfferSellID } from '../../../helpers/getOfferId.helper'
 import { deployInstantOffer } from './fixtures/deployOffer.fixture'
@@ -15,7 +15,6 @@ describe('[spacemart/offers/instant/min-buy-amount.test.ts] InstantOffer: min bu
 	let instantOffer: InstantOffer
 	let payloadAsset: PayloadAsset
 	let kycContract: KycRegister
-	let totalSupply: BigNumber
 
 	const rootId = 0
 
@@ -26,7 +25,7 @@ describe('[spacemart/offers/instant/min-buy-amount.test.ts] InstantOffer: min bu
 	before(
 		'load `fixtures/deployInstantOffer`',
 		async () =>
-			({ deployer, creator, instantOffer, payloadAsset, kycContract, totalSupply } = await waffle.loadFixture(
+			({ deployer, creator, instantOffer, payloadAsset, kycContract } = await waffle.loadFixture(
 				deployInstantOffer
 			))
 	)

@@ -1,7 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Fixture } from 'ethereum-waffle'
 import { ethers } from 'hardhat'
-import contractNames from '../../../../constants/contract.names'
+import contractNames from '../../../../utils/constants/contract.names'
 import { SpaceibleAsset } from '../../../../typechain'
 
 export interface Deploy {

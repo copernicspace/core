@@ -5,7 +5,7 @@ import { expect } from 'chai'
 import { ERC20Mock, SpaceibleAsset, SpaceibleOffer } from '../../../typechain'
 import { setupSpaceibleOffer } from './fixtures/setupOffer.fixture'
 import { getOfferId } from '../../helpers/getOfferId.helper'
-import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
+import { TX_RECEIPT_STATUS } from '../../../utils/constants/tx-receipt-status'
 import { BigNumber } from 'ethers'
 
 const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
@@ -16,7 +16,6 @@ describe('[spaceibles/offer/availableBalance] test suite for offer available bal
 	let spaceibleOffer: SpaceibleOffer
 	let seller: SignerWithAddress
 	let money: ERC20Mock
-	let secondOfferId
 	let firstEditedOfferId
 	let secondEditedOfferId
 	before(

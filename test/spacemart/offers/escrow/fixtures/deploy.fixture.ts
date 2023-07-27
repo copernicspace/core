@@ -4,7 +4,7 @@ import { Fixture } from 'ethereum-waffle'
 import { ethers, waffle } from 'hardhat'
 
 import { EscrowListing, KycRegister, PayloadFactory } from '../../../../../typechain'
-import contractNames from '../../../../../constants/contract.names'
+import contractNames from '../../../../../utils/constants/contract.names'
 import { Deploy, deployPayloadAsset } from '../../../assets/payload/fixtures/deploy.fixture'
 
 export interface DeployEscrowListing {

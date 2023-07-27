@@ -25,6 +25,5 @@ cache
 # typechain
 typechain
 
-secret_local.ts
-
 out
+secret.json

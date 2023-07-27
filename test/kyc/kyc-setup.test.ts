@@ -3,8 +3,8 @@ import { PayloadAsset, KycRegister } from '../../typechain'
 import { ethers, waffle } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { parentable } from '../spacemart/assets/payload/fixtures/parentable.fixture'
-import contractNames from '../../constants/contract.names'
-import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
+import contractNames from '../../utils/constants/contract.names'
+import { TX_RECEIPT_STATUS } from '../../utils/constants/tx-receipt-status'
 
 describe.skip('[kyc/kyc-setup]: KYC instantiation during root creation', () => {
 	let payloadAsset: PayloadAsset

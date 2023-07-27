@@ -5,7 +5,7 @@ import { ethers, waffle } from 'hardhat'
 import { BigNumber } from 'ethers'
 
 import { InstantOffer, KycRegister, PayloadAsset } from '../../../../../typechain'
-import contractNames from '../../../../../constants/contract.names'
+import contractNames from '../../../../../utils/constants/contract.names'
 import {
 	Create,
 	createPayloadAsset,

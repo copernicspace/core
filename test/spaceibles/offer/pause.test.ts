@@ -5,7 +5,7 @@ import { expect } from 'chai'
 
 import { ERC20Mock, SpaceibleAsset, SpaceibleOffer } from '../../../typechain'
 import { deploySpaceibleOffer } from './fixtures/deploy.fixture'
-import contractNames from '../../../constants/contract.names'
+import contractNames from '../../../utils/constants/contract.names'
 import { getAssetID } from '../../helpers/getAssetId.helper'
 import { getOfferId } from '../../helpers/getOfferId.helper'
 

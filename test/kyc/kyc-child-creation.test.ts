@@ -5,7 +5,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { parseUnits } from '@ethersproject/units'
 import { parentable } from '../spacemart/assets/payload/fixtures/parentable.fixture'
-import contractNames from '../../constants/contract.names'
+import contractNames from '../../utils/constants/contract.names'
 import { getPayloadAddress } from '../helpers/payloadAddress'
 
 describe.skip('[kyc/kyc-child-creation] Child creation & integration with KYC', () => {

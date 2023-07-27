@@ -11,7 +11,6 @@ describe('[spacemart/assets/payload/payload/parentable-extended] extended parent
 	let payloadAsset: PayloadAsset
 	let creator: SignerWithAddress
 	let kycContract: KycRegister
-	let kycContract2: KycRegister
 
 	let deployer: SignerWithAddress
 	const rootID = 0

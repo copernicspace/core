@@ -8,5 +8,8 @@
     "downlevelIteration": true,
   },
   "include": ["./tasks/**/*, ./scripts/**/*", "./test/**/*", "./typechain/**/*", "**/*.ts"],
-  "files": ["./hardhat.config.ts"]
+  "files": ["./hardhat.config.ts"],
+  "paths": {
+    "@/*": ["./*"]
+  }
 }

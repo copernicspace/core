@@ -9,6 +9,7 @@ import { setupSpaceibleOffer } from './fixtures/setupOffer.fixture'
 const loadFixture: ReturnType<typeof waffle.createFixtureLoader> = waffle.createFixtureLoader()
 
 describe('[spaceibles/offer/cancel] `SpaceibleOffer::cancel` test suite', () => {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let offer: any
 	let spaceibleOffer: SpaceibleOffer
 	let seller: SignerWithAddress

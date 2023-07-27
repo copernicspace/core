@@ -1,11 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { parseUnits } from 'ethers/lib/utils'
 import { Fixture } from 'ethereum-waffle'
 import { ethers, waffle } from 'hardhat'
 
-import { SpaceibleAsset } from '../../../../typechain/SpaceibleAsset'
-import { SpaceibleOffer, ERC20Mock } from '../../../../typechain'
-import contractNames from '../../../../constants/contract.names'
+import { SpaceibleOffer, ERC20Mock, SpaceibleAsset } from '../../../../typechain'
+import contractNames from '../../../../utils/constants/contract.names'
 import { getAssetID } from '../../../helpers/getAssetId.helper'
 import { getOfferId } from '../../../helpers/getOfferId.helper'
 import { deploySpaceibleOffer } from './deploy.fixture'

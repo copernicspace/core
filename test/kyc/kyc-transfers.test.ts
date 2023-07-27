@@ -6,7 +6,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { parseUnits } from 'ethers/lib/utils'
 import { kyc } from '../spacemart/assets/payload/fixtures/kyc.fixture'
 import { BigNumber } from '@ethersproject/bignumber'
-import { TX_RECEIPT_STATUS } from '../../constants/tx-receipt-status'
+import { TX_RECEIPT_STATUS } from '../../utils/constants/tx-receipt-status'
 
 /**
  * Test suite for checking KycRegister permission change process

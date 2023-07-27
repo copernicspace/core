@@ -1,7 +1,6 @@
 import { task as hhTask } from 'hardhat/config'
-
 import contractNames from '../../../../constants/contract.names'
-import { polygonScanLink } from '../../../../utils/polygonScanLink'
+import { polygonScanLink } from '../../../../polygonScanLink'
 
 const task = {
 	name: 'spaceibles:spacepassport:contractURI:set',

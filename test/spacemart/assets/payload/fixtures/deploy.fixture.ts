@@ -3,7 +3,7 @@ import { Fixture } from 'ethereum-waffle'
 import { ethers } from 'hardhat'
 
 import { KycRegister, PayloadFactory } from '../../../../../typechain'
-import contract_names from '../../../../../constants/contract.names'
+import contract_names from '../../../../../utils/constants/contract.names'
 
 export interface Deploy {
 	deployer: SignerWithAddress

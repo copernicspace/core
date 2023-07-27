@@ -30,8 +30,9 @@
 //         kymContract = await KymContract.new(assetContract.address, { from: startAdmin });
 //
 //         // await receipt data
-//         txr1 = await assetContract.createRoot(true, { from: owner1 });   // create token 1 and assign to account: owner1
-//         txr2 = await assetContract.createRoot(true, { from: owner2 });   // create token 2 and assign to account: owner2
+// create token 1 and assign to account: owner1
+// txr1 = await assetContract.createRoot(true, { from: owner1 });
+// txr2 = await assetContract.createRoot(true, { from: owner2 }) // create token 2 and assign to account: owner2
 //
 //         // extract id of asset
 //         id1 = getAssetId(txr1);
@@ -135,7 +136,7 @@
 //         const end1status = await kymContract.getKymStatusInfo(id1);
 //         const end2status = await kymContract.getKymStatusInfo(id2);
 //
-//         expect(start1status).not.to.be.equal(end1status);   // asset with id1 had its kym status changed
+//         expect(start1status).not.to.be.equal(end1status);   //asset with id1 had its kym status changed
 //         expect(start2status).to.be.equal(end2status);       // asset with id2 did not receive kym status updates
 //
 //         expect(end1status).to.be.equal(true);
@@ -156,14 +157,15 @@
 //
 //     it('disallows non-operators from setting kym status', async () => {
 //         // expecting a revert message to be as following
-//         await expectRevert(kymContract.setKymStatus(id1, false, { from: user }), "unauthorized -- only for operators & admin");
+// const revertMessage = 'unauthorized -- only for operators & admin'
+// await expectRevert(kymContract.setKymStatus(id1, false, { from: user }), revertMessage)
 //     });
 //
 //     it('disallows non-admins from setting operator access status', async () => {
 //         // testing for user
-//         await expectRevert(kymContract.setOperatorStatus(user, false, { from: user }), "unauthorized -- only for admin");
+// await expectRevert(kymContract.setOperatorStatus(user, false, { from: user }), 'unauthorized -- only for admin')
 //         // testing for operator
-//         await expectRevert(kymContract.setOperatorStatus(user, false, { from: operator }), "unauthorized -- only for admin");
+// await expectRevert(kymContract.setOperatorStatus(user, false, { from: operator }), 'unauthorized -- only for admin')
 //     });
 //
 // });

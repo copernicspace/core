@@ -5,15 +5,11 @@ import { expect } from 'chai'
 import { deploySpaceibleAsset } from './fixtures/deploy.fixture'
 import { SpaceibleAsset } from '../../../typechain'
 
-let deployer: SignerWithAddress
 let user: SignerWithAddress
 let spaceibleAsset: SpaceibleAsset
 
 describe('[spaceibles/asset/metadataCID]', () => {
-	before(
-		'load fixture/deploy',
-		async () => ({ deployer, spaceibleAsset } = await waffle.loadFixture(deploySpaceibleAsset))
-	)
+	before('load fixture/deploy', async () => ({ spaceibleAsset } = await waffle.loadFixture(deploySpaceibleAsset)))
 
 	before('load user signer', async () => ([, user] = await ethers.getSigners()))
 

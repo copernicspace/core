@@ -4,10 +4,9 @@ import { BigNumber, BigNumberish } from 'ethers'
 import { expect } from 'chai'
 import { parseUnits } from '@ethersproject/units'
 import { PayloadAsset, InstantOffer, KycRegister, ERC20Mock } from '../../../../typechain'
-import contractNames from '../../../../constants/contract.names'
-import { TX_RECEIPT_STATUS } from '../../../../constants/tx-receipt-status'
+import contractNames from '../../../../utils/constants/contract.names'
+import { TX_RECEIPT_STATUS } from '../../../../utils/constants/tx-receipt-status'
 import { getOfferSellID } from '../../../helpers/getOfferId.helper'
-import { formatUnits } from 'ethers/lib/utils'
 import { deployInstantOfferWithFloatFeesAndRoyalties } from './fixtures/deployOffer.fixture'
 
 describe('[spacemart/offers/instant/float-royalties-offer.test] Instant offer with royalties', () => {

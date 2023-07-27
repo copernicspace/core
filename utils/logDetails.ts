@@ -1,11 +1,11 @@
 import logger from './logger'
 import { polygonScanLink } from './polygonScanLink'
 
-export const logPreDeployDetails = args => logger.info('Start deploying new smart contract', args)
+export const logStart = args => logger.info('Start deploying new smart contract', args)
 
-export const logDeployDetails = (txr, networkName) =>
+export const logDeploy = (txr, networkName) =>
 	logger.info('contract successfully deployed ', {
-		address: txr.contractAddress,
+		address: txr.contractAddress || txr.creates,
 		block: txr.blockNumber,
-		scanLink: polygonScanLink(txr.transactionHash, networkName)
+		scanLink: polygonScanLink(txr.transactionHash || txr.hash, networkName)
 	})

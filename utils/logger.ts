@@ -6,74 +6,66 @@ enum LogLevel {
 }
 
 class Logger {
+	private static instance: Logger
 	private lastTimestamp: number | null = null
 
-	private timestamp(): string {
-		const now = Date.now()
-		let diff = ''
-
-		if (this.lastTimestamp) {
-			const timeDifference = (now - this.lastTimestamp) / 1000
-			diff = ` (+${timeDifference.toFixed(2)}s)`
+	public static getInstance(): Logger {
+		if (!Logger.instance) {
+			Logger.instance = new Logger()
 		}
-
-		this.lastTimestamp = now
-
-		return new Date(now).toISOString() + diff
+		return Logger.instance
 	}
 
-	private log(level: LogLevel, message: string, args?: object): void {
-		let color: string
-		let logFunction: (msg: string) => void
-
+	private getColor(level: LogLevel): string {
 		switch (level) {
 			case LogLevel.DEBUG:
-				color = '\x1b[32m' // Green
-				logFunction = console.debug
-				break
+				return '\x1b[32m' // Green
 			case LogLevel.INFO:
-				color = '\x1b[34m' // Blue
-				logFunction = console.log
-				break
+				return '\x1b[34m' // Blue
 			case LogLevel.WARNING:
-				color = '\x1b[33m' // Yellow
-				logFunction = console.warn
-				break
+				return '\x1b[33m' // Yellow
 			case LogLevel.ERROR:
-				color = '\x1b[31m' // Red
-				logFunction = console.error
-				break
+				return '\x1b[31m' // Red
 			default:
-				color = '\x1b[37m' // White
-				logFunction = console.log
+				return '\x1b[0m' // Reset color
 		}
-
-		const resetColor = '\x1b[0m'
-		const coloredLevel = `${color}${level.padEnd(7)}${resetColor}` // Padding the level string
-		let logMessage = `[${this.timestamp()}] ${coloredLevel}: ${message}`
-
-		if (args) {
-			logMessage += '\n' + JSON.stringify(args, null, 2)
-		}
-
-		logFunction(logMessage)
 	}
 
-	public debug(message: string, args?: object): void {
+	private getTimestamp(): string {
+		const now = Date.now()
+		const timeDiff = this.lastTimestamp ? `+${((now - this.lastTimestamp) / 1000).toFixed(2)}s` : '+0.00s'
+		this.lastTimestamp = now
+		return `${new Date(now).toISOString()} (${timeDiff})`
+	}
+
+	private log(level: LogLevel, message: string, args?: never): void {
+		const color = this.getColor(level)
+		const resetColor = '\x1b[0m'
+		const timestamp = this.getTimestamp()
+		const argString = args
+			? '\n' +
+			  Object.entries(args)
+					.map(([k, v]) => `${k}: ${v}`)
+					.join('\n')
+			: ''
+		console.log(`${color}${level}${resetColor} [${timestamp}]: ${message}${argString}`)
+	}
+
+	public debug(message: string, args?: never): void {
 		this.log(LogLevel.DEBUG, message, args)
 	}
 
-	public info(message: string, args?: object): void {
+	public info(message: string, args?: never): void {
 		this.log(LogLevel.INFO, message, args)
 	}
 
-	public warning(message: string, args?: object): void {
+	public warning(message: string, args?: never): void {
 		this.log(LogLevel.WARNING, message, args)
 	}
 
-	public error(message: string, args?: object): void {
+	public error(message: string, args?: never): void {
 		this.log(LogLevel.ERROR, message, args)
 	}
 }
 
-export default new Logger()
+export default Logger.getInstance()

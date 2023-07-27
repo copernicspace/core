@@ -6,7 +6,7 @@ import { expect } from 'chai'
 
 import { PayloadAsset, PayloadFactory, KycRegister } from '../../../../typechain'
 import { getPayloadAddress } from '../../../helpers/payloadAddress'
-import contractNames from '../../../../constants/contract.names'
+import contractNames from '../../../../utils/constants/contract.names'
 import { getAssetID } from '../../../helpers/getAssetId.helper'
 import { parentable } from './fixtures/parentable.fixture'
 

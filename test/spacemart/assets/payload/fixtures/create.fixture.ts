@@ -4,10 +4,9 @@ import { Fixture } from 'ethereum-waffle'
 import { ethers, waffle } from 'hardhat'
 
 import { getPayloadAddress } from '../../../../helpers/payloadAddress'
-import contractNames from '../../../../../constants/contract.names'
+import contractNames from '../../../../../utils/constants/contract.names'
 import { deployPayloadAsset, Deploy } from './deploy.fixture'
 import { PayloadAsset } from '../../../../../typechain'
-import { boolean } from 'hardhat/internal/core/params/argumentTypes'
 
 export interface Create extends Deploy {
 	payloadAsset: PayloadAsset

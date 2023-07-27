@@ -1,7 +1,7 @@
 import { waffle } from 'hardhat'
 import { expect } from 'chai'
 
-import { TX_RECEIPT_STATUS } from '../../../constants/tx-receipt-status'
+import { TX_RECEIPT_STATUS } from '../../../utils/constants/tx-receipt-status'
 import { deploySpaceibleAsset } from './fixtures/deploy.fixture'
 import { SpaceibleAsset } from '../../../typechain'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'

@@ -1,22 +1,16 @@
 import hre, { ethers } from 'hardhat'
 import contractNames from '../../constants/contract.names'
-import { polygonScanLink } from '../../utils/polygonScanLink'
+import { polygonScanLink } from '../../polygonScanLink'
 
 const network = hre.network.name
 
 async function main() {
-	const [deployer] = await ethers.getSigners()
-	const operator = deployer.address
-	// operator fee is integer, in  basis points, where 100% = 10000
-	const operatorFee = 'SET ME'
-	const assetAddress = 'SET ME'
-
 	await ethers
-		.getContractFactory(contractNames.SPACEIBLE_OFFER)
-		.then(factory => factory.deploy(operator, operatorFee, assetAddress))
+		.getContractFactory(contractNames.SPACEIBLE_ASSET)
+		.then(factory => factory.deploy('ipfs://'))
 		.then(contract => contract.deployed())
 		.then(deployedContract => {
-			console.log('`SpaceibleOffer` contract deployed')
+			console.log('`SpaceibleAsset` contract deployed')
 			console.log(`Address: ${deployedContract.address}`)
 			return deployedContract.deployTransaction.wait()
 		})

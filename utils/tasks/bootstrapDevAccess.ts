@@ -106,7 +106,7 @@ export default task(TASK.NAME, TASK.DESC)
 				console.log(`\t  setting KYC status for ${address}`)
 				const isKyc = await kycContract.getKycStatusInfo(address)
 				if (isKyc) {
-					console.log(`\t : ❎  already is on KYC list`)
+					console.log('\t : ❎  already is on KYC list')
 				} else {
 					await kycContract
 						.setKycStatus(address, true)
@@ -124,7 +124,7 @@ export default task(TASK.NAME, TASK.DESC)
 				const role = await factoryContract.FACTORY_CLIENT()
 				const isClient = await factoryContract.hasRole(role, address)
 				if (isClient) {
-					console.log(`\t : ❎  already has factory client role`)
+					console.log('\t : ❎  already has factory client role')
 				} else {
 					await factoryContract
 						.addClient(address)

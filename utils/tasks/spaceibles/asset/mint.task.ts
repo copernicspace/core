@@ -1,6 +1,5 @@
 import { task } from 'hardhat/config'
-
-import { polygonScanLink } from '../../../utils/polygonScanLink'
+import { polygonScanLink } from '../../../polygonScanLink'
 
 const TASK = {
 	NAME: 'spaceibles:mint',

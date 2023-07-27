@@ -20,7 +20,7 @@ describe('[spacemart/assets/payload/setURI] test suite for `setUri` function', (
 	before('load userA', async () => ([, , user] = await ethers.getSigners()))
 
 	before('add user to KYC', async () => {
-		const tx = await kycContract.connect(deployer).setKycStatus(user.address, true)
+		await kycContract.connect(deployer).setKycStatus(user.address, true)
 	})
 
 	it('should revert on non-creator `setURI`', async () =>

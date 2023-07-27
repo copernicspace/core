@@ -4,3 +4,4 @@ export * from './contractURI/get'
 export * from './wl/set'
 
 export * from './mint'
+export * from './toggleOpenSale'

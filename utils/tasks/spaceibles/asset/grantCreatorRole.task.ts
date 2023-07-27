@@ -1,7 +1,6 @@
 import { task } from 'hardhat/config'
-
+import { polygonScanLink } from '../../../polygonScanLink'
 import contractNames from '../../../constants/contract.names'
-import { polygonScanLink } from '../../../utils/polygonScanLink'
 
 export const GRANT_CREATOR_ROLE = {
 	NAME: 'spaceibles:grantCreatorRole',

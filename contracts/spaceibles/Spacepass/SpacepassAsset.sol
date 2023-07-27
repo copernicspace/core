@@ -52,7 +52,11 @@ contract SpacepassAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownabl
         _setURI(id, cid);
         _setRoyalties(id, royalties);
         _setCreator(id, msg.sender);
-        emit PermanentURI(cid, id);
+    }
+
+    function setURI(uint256 id, string memory cid) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(CREATOR_ROLE, msg.sender), 'You are not allowed to set URI');
+        _setURI(id, cid);
     }
 
     function _setRoyalties(uint256 id, uint256 royalties) internal {

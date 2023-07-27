@@ -1,6 +1,6 @@
 import { waffle } from 'hardhat'
 import { expect } from 'chai'
-import { TX_RECEIPT_STATUS } from '../../../../constants/tx-receipt-status'
+import { TX_RECEIPT_STATUS } from '../../../../utils/constants/tx-receipt-status'
 import { InstantOffer } from '../../../../typechain'
 import { deployInstantOffer } from './fixtures/deployOffer.fixture'
 

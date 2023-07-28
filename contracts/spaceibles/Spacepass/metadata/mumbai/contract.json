@@ -2,6 +2,6 @@
 	"name": "Copernic Space Passports",
 	"description": "Copernic Space is the door to access Space ... and our passport is your key. The Copernic Space Passport gives you on-platform utilities, financial benefits, and access to IRL Space opportunities.",
 	"image": "ipfs://bafybeibxdgwwhoyajblbhkmc4zechnxnuo4af3gwd2ex3fzsz7537x2hhi/CSP_LOGO.png",
-	"external_link": "https://app.copernicspace.com/spaceibles?collection=spacepassport",
+	"external_link": "https://stage.copernicspace.com/spaceibles?collection=spacepassport",
 	"seller_fee_basis_points": 300
 }

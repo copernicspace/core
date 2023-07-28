@@ -10,8 +10,7 @@ import '../../common/abstract/KYC.sol';
 
 contract SpacepassAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownable, KYC {
     event Royalties(uint256 indexed id, uint256 indexed royalties);
-    event PermanentURI(string _value, uint256 indexed _id);
-
+    
     string public name;
     string public symbol;
 

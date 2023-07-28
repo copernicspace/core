@@ -1,31 +1,7 @@
 {
-	"name": "SpacepassAsset",
-	"description": "This contract is based on open zeppelin implementation of ERC1155 extended with royalties functionality and metadata compatibility with major NFT platforms.",
-	"image": "ipfs://bafybeiffsfi5jm7fjvvueom4h2agc5gzvyiu6xwegr2j2bgo75ezzbsmjy",
+	"name": "Copernic Space Passports",
+	"description": "Copernic Space is the door to access Space ... and our passport is your key. The Copernic Space Passport gives you on-platform utilities, financial benefits, and access to IRL Space opportunities.",
+	"image": "ipfs://bafybeibxdgwwhoyajblbhkmc4zechnxnuo4af3gwd2ex3fzsz7537x2hhi/CSP_LOGO.png",
 	"external_link": "https://app.copernicspace.com/spaceibles?collection=spacepassport",
-	"seller_fee_basis_points": 300,
-	"fee_recipient": "0x85157c987b4ED2C9aF98D4748539469eEAD38C54",
-	"attributes": [
-		{
-			"trait_type": "Contract Type",
-			"value": "ERC1155"
-		}
-	],
-	"properties": {
-		"contract_address": "0x72Ce11BeB21E45Cf160AE10e527F053D2419A79e"
-	},
-	"tags": ["space", "economy", "business", "art"],
-	"creator": {
-		"name": "Copernic Space",
-		"description": "Copernic Space is a decentralized marketplace for the space economy that leverages blockchain technology to enable access to space assets and related data. The platform connects providers and buyers of space-related products and services, making it easier for them to exchange and monetize space assets such as satellite data, space debris, and even payloads headed for the moon.",
-		"image": "ipfs://bafkreifoksewzdqsc2u5vyzxtbo2fbpxbsdiecftxupvdzbjye6pn2kv7m",
-		"external_link": "https://copernicspace.com"
-	},
-	"collection": {
-		"name": "Copernic Space Passports",
-		"description": "Copernic Space is the door to access Space ... and our passport is your key. The Copernic Space Passport gives you on-platform utilities, financial benefits, and access to IRL Space opportunities",
-		"external_link": "ipfs://bafybeiffsfi5jm7fjvvueom4h2agc5gzvyiu6xwegr2j2bgo75ezzbsmjy",
-		"large_image": "ipfs://bafybeiffsfi5jm7fjvvueom4h2agc5gzvyiu6xwegr2j2bgo75ezzbsmjy",
-		"banner_image": "ipfs://bafybeiffsfi5jm7fjvvueom4h2agc5gzvyiu6xwegr2j2bgo75ezzbsmjy"
-	}
+	"seller_fee_basis_points": 300
 }

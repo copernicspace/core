@@ -1,6 +1,6 @@
-import { ethers } from 'hardhat'
 import ContractNames from '../constants/contract.names'
-import { polygonScanLink } from '../utils/polygonScanLink'
+import { polygonScanLink } from '../polygonScanLink'
+import { ethers } from 'hardhat'
 
 const network = 'SET ME' // polygon / mumbai
 const name = 'SET ME'

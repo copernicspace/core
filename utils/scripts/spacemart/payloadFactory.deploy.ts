@@ -1,5 +1,6 @@
-import { polygonScanLink } from '../../utils/polygonScanLink'
 import ContractNames from '../../constants/contract.names'
+import { polygonScanLink } from '../../polygonScanLink'
+
 import hre, { ethers } from 'hardhat'
 
 const network = hre.network.name

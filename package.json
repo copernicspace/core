@@ -1,6 +1,6 @@
 {
 	"name": "copernicspace-core",
-	"version": "0.1-stage",
+	"version": "0.1",
 	"description": "contracts and ts lib for copernic space",
 	"private": true,
 	"scripts": {

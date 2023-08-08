@@ -24,7 +24,7 @@ contract SpacepassAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownabl
     string private metadataCID;
 
     constructor(string memory uri, address kycAddress) ERC1155(uri) {
-        name = 'Copernic Space Passports';
+        name = 'Copernic Space Passport';
         symbol = 'CSP';
         _setBaseURI(uri);
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -112,6 +112,7 @@ contract SpacepassAsset is ERC1155URIStorage, GeneratorID, AccessControl, Ownabl
         uint256[] memory amounts,
         bytes memory data
     ) internal virtual override(ERC1155) {
+        if (hasRole(DEFAULT_ADMIN_ROLE, operator)) return;
         // if not open sale - check for sender/receiver to be on WL (KYC register)
         if (!openSale) {
             if (from != address(0)) {

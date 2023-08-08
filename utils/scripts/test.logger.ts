@@ -1,5 +1,5 @@
-import { logDeploy, logStart } from '../logDetails'
-import logger from '../logger'
+import { logDeploy, logStart } from '../log/logDetails'
+import logger from '../log/logger'
 
 const main = async () => {
 	logger.debug('test debug msg', { var: 1 })

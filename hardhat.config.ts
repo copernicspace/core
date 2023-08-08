@@ -1,6 +1,6 @@
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
-import '@nomiclabs/hardhat-etherscan'
+// import '@nomiclabs/hardhat-etherscan'
 import '@typechain/hardhat'
 import 'hardhat-tracer'
 import 'hardhat-gas-reporter'
@@ -8,6 +8,7 @@ import 'hardhat-log-remover'
 import * as Mocha from 'mocha'
 import * as fs from 'fs'
 import './utils/tasks'
+import '@nomicfoundation/hardhat-verify'
 
 const loadSecret = () => {
 	const secretPath = './secret.json'
@@ -15,12 +16,10 @@ const loadSecret = () => {
 	if (fs.existsSync(secretPath)) {
 		return JSON.parse(fs.readFileSync(secretPath, 'utf8'))
 	} else {
-		// console.warn(
-		// 'WARNING: secret.json not found. If you are trying to deploy - it will FAIL! See README for more details.'
-		// )
 		return {
 			POLYGON_ALCHEMY_API: '',
 			POLYGON_SEED: '',
+			POLYGON_SCAN_API_KEY: '',
 			MUMBAI_ALCHEMY_API: '',
 			MUMBAI_SEED: ''
 		}
@@ -46,7 +45,8 @@ const config = {
 			url: `https://polygon-mainnet.g.alchemy.com/v2/${secret?.POLYGON_ALCHEMY_API}`,
 			accounts: {
 				mnemonic: secret?.POLYGON_SEED
-			}
+			},
+			gasPrice: 100000000000
 		},
 		mumbai: {
 			url: `https://polygon-mumbai.g.alchemy.com/v2/${secret?.MUMBAI_ALCHEMY_API}`,
@@ -56,11 +56,13 @@ const config = {
 		},
 		local: {
 			url: 'http://127.0.0.1:8545',
-			accounts: ['0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80']
+			accounts: {
+				mnemonic: secret?.LOCAL_SEED
+			}
 		}
 	},
 	etherscan: {
-		apiKey: ''
+		apiKey: secret?.POLYGON_SCAN_API_KEY
 	},
 	typechain: {
 		outDir: 'typechain',

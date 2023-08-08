@@ -19,9 +19,9 @@ class Logger {
 	private getColor(level: LogLevel): string {
 		switch (level) {
 			case LogLevel.DEBUG:
-				return '\x1b[32m' // Green
-			case LogLevel.INFO:
 				return '\x1b[34m' // Blue
+			case LogLevel.INFO:
+				return '\x1b[32m' // Green
 			case LogLevel.WARNING:
 				return '\x1b[33m' // Yellow
 			case LogLevel.ERROR:
@@ -43,10 +43,10 @@ class Logger {
 		const resetColor = '\x1b[0m'
 		const timestamp = this.getTimestamp()
 		const argString = args
-			? '\n' +
+			? '\n\t' +
 			  Object.entries(args)
-					.map(([k, v]) => `${k}: ${v}`)
-					.join('\n')
+					.map(([k, v]) => `${k}: ${JSON.stringify(v, null, 2)}`)
+					.join('\n\t')
 			: ''
 		console.log(`${color}${level}${resetColor} [${timestamp}]: ${message}${argString}`)
 	}

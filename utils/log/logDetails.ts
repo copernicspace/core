@@ -1,5 +1,5 @@
 import logger from './logger'
-import { polygonScanLink } from './polygonScanLink'
+import { polygonScanLink } from '../polygonScanLink'
 
 export const logStart = args => logger.info('Start deploying new smart contract', args)
 

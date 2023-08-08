@@ -2,7 +2,7 @@ import { parseUnits } from 'ethers/lib/utils'
 import hre, { ethers } from 'hardhat'
 
 import contractNames from '../../constants/contract.names'
-import { polygonScanLink } from '../../utils/polygonScanLink'
+import { polygonScanLink } from '../../polygonScanLink'
 
 const network = hre.network.name
 

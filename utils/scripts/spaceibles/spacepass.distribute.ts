@@ -42,10 +42,13 @@ class TransactionBuilder {
 async function main() {
 	const name = contractNames.SPACEIBLE_ASSET
 	const [deployer] = await ethers.getSigners()
-	const address = '0xF22fC4e1c0d13ab4943C9F087F0E96afC014546B'
+	const addressPolygon = '0xF22fC4e1c0d13ab4943C9F087F0E96afC014546B'
+	const addressMumbai = '0xff633F36452b3304F8EE7462F208537C7C1f7F10'
+	const address = hre.network.name === 'mumbai' ? addressMumbai : addressPolygon
 	const contract = await ethers.getContractAt(name, address, deployer)
 
-	const csvData = fs.readFileSync('utils/scripts/data/csp-batch-1.csv', 'utf8')
+	const csvIn = 'utils/scripts/data/csp-batch-2.csv'
+	const csvData = fs.readFileSync(csvIn, 'utf8')
 
 	const records = Papa.parse(csvData, {
 		header: true,
@@ -64,9 +67,8 @@ async function main() {
 		})
 	}
 
-	// await Promise.all(txs.map(tx => tx.wait()))
 	const updatedCsvData = Papa.unparse(records.data)
-	fs.writeFileSync('utils/scripts/data/csp-batch-1-sent.csv', updatedCsvData)
+	fs.writeFileSync(csvIn, updatedCsvData)
 }
 
 main()

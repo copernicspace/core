@@ -47,7 +47,7 @@ async function main() {
 	const address = hre.network.name === 'mumbai' ? addressMumbai : addressPolygon
 	const contract = await ethers.getContractAt(name, address, deployer)
 
-	const csvIn = 'utils/scripts/data/csp-batch-2.csv'
+	const csvIn = 'utils/scripts/data/csp-batch-4.csv'
 	const csvData = fs.readFileSync(csvIn, 'utf8')
 
 	const records = Papa.parse(csvData, {

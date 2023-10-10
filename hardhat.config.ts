@@ -46,7 +46,7 @@ const config = {
 			accounts: {
 				mnemonic: secret?.POLYGON_SEED
 			},
-			gasPrice: 100000000000
+			gasPrice: 200000000000
 		},
 		mumbai: {
 			url: `https://polygon-mumbai.g.alchemy.com/v2/${secret?.MUMBAI_ALCHEMY_API}`,

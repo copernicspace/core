@@ -47,8 +47,7 @@ async function main() {
 	const address = hre.network.name === 'mumbai' ? addressMumbai : addressPolygon
 	const contract = await ethers.getContractAt(name, address, deployer)
 
-
-	const csvIn = 'utils/scripts/data/csp-batch-5.csv'
+	const csvIn = 'utils/scripts/data/csp-batch-6.csv'
 
 	const csvData = fs.readFileSync(csvIn, 'utf8')
 
@@ -57,16 +56,12 @@ async function main() {
 		skip_empty_lines: true
 	})
 
-	const txs = []
 	for (const record of records.data) {
 		const from = deployer.address
 		const to = record.address
 		const { ids, amounts } = TransactionBuilder.buildFromPassport(record.passport)
 		const data = '0x'
-		await contract.safeBatchTransferFrom(from, to, ids, amounts, data).then(tx => {
-			record.hash = tx.hash
-			txs.push(tx)
-		})
+		await contract.safeBatchTransferFrom(from, to, ids, amounts, data).then(tx => (record.hash = tx.hash))
 	}
 
 	const updatedCsvData = Papa.unparse(records.data)

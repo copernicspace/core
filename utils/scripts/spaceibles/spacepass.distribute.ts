@@ -1,7 +1,8 @@
 import hre, { ethers } from 'hardhat'
-import contractNames from '../../constants/contract.names'
 import fs from 'fs'
 import Papa from 'papaparse'
+
+import contractNames from '../../constants/contract.names'
 
 class TransactionBuilder {
 	private static tokenTypes = {
@@ -39,15 +40,19 @@ class TransactionBuilder {
 	}
 }
 
+const addresses = {
+	polygon: '0xF22fC4e1c0d13ab4943C9F087F0E96afC014546B',
+	mumbai: '0xff633F36452b3304F8EE7462F208537C7C1f7F10'
+} as const
+
 async function main() {
 	const name = contractNames.SPACEIBLE_ASSET
 	const [deployer] = await ethers.getSigners()
-	const addressPolygon = '0xF22fC4e1c0d13ab4943C9F087F0E96afC014546B'
-	const addressMumbai = '0xff633F36452b3304F8EE7462F208537C7C1f7F10'
-	const address = hre.network.name === 'mumbai' ? addressMumbai : addressPolygon
+	const address = addresses[hre.network.name]
+
 	const contract = await ethers.getContractAt(name, address, deployer)
 
-	const csvIn = 'utils/scripts/data/csp-batch-13.csv'
+	const csvIn = 'utils/scripts/data/csp-batch-15.csv'
 
 	const csvData = fs.readFileSync(csvIn, 'utf8')
 
